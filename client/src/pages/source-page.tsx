@@ -1,0 +1,363 @@
+import { useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LLMChat } from "@/components/chat/llm-chat";
+import { PerformanceChart } from "@/components/charts/performance-chart";
+import { DataTable } from "@/components/data/data-table";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Database, 
+  FolderSync, 
+  Stethoscope, 
+  FileText, 
+  Download,
+  TrendingUp,
+  Activity,
+  Clock,
+  Server
+} from "lucide-react";
+import type { Source, Transaction, KnowledgeLink, PerformanceMetric } from "@shared/schema";
+
+const sourceIcons = {
+  STC: Database,
+  CPT: Server,
+  SLC: Activity,
+  TMC: TrendingUp,
+  CAS: Server,
+  NVL: Activity,
+};
+
+const sourceColors = {
+  STC: "bg-blue-500",
+  CPT: "bg-purple-500", 
+  SLC: "bg-orange-500",
+  TMC: "bg-green-500",
+  CAS: "bg-red-500",
+  NVL: "bg-yellow-500",
+};
+
+export default function SourcePage() {
+  const { code } = useParams<{ code: string }>();
+  const { toast } = useToast();
+
+  const { data: source, isLoading: sourceLoading } = useQuery<Source & { stats: any }>({
+    queryKey: ["/api/sources", code],
+    enabled: !!code,
+  });
+
+  const { data: transactions = [] } = useQuery<Transaction[]>({
+    queryKey: ["/api/transactions", code],
+    queryFn: async () => {
+      const response = await fetch(`/api/transactions?sourceCode=${code}&limit=20`);
+      return response.json();
+    },
+    enabled: !!code,
+  });
+
+  const { data: knowledgeLinks = [] } = useQuery<KnowledgeLink[]>({
+    queryKey: ["/api/knowledge-links", code],
+    queryFn: async () => {
+      const response = await fetch(`/api/knowledge-links?sourceCode=${code}`);
+      return response.json();
+    },
+    enabled: !!code,
+  });
+
+  const { data: metrics = [] } = useQuery<PerformanceMetric[]>({
+    queryKey: ["/api/sources", code, "metrics"],
+    queryFn: async () => {
+      const response = await fetch(`/api/sources/${code}/metrics?limit=50`);
+      return response.json();
+    },
+    enabled: !!code,
+  });
+
+  const handleRefresh = async () => {
+    if (!code) return;
+    
+    try {
+      const response = await fetch(`/api/sources/${code}/refresh`, {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Source Refreshed",
+          description: `${code} data has been refreshed successfully.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Refresh Failed",
+        description: "Failed to refresh source data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExport = () => {
+    // Generate CSV export of transactions
+    const csv = [
+      ['Transaction ID', 'Type', 'Status', 'Timestamp', 'Duration'].join(','),
+      ...transactions.map(t => [
+        t.transactionId,
+        t.type,
+        t.status,
+        new Date(t.createdAt).toISOString(),
+        t.duration || ''
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${code}-transactions.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleQuickAction = (action: string) => {
+    toast({
+      title: `${action} triggered`,
+      description: `Running ${action} for ${code}...`,
+    });
+  };
+
+  if (sourceLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-32 bg-muted rounded-lg"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="h-96 bg-muted rounded-lg"></div>
+            <div className="h-64 bg-muted rounded-lg"></div>
+          </div>
+          <div className="space-y-6">
+            <div className="h-64 bg-muted rounded-lg"></div>
+            <div className="h-48 bg-muted rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!source) {
+    return (
+      <div className="text-center py-12">
+        <Database className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Source Not Found</h1>
+        <p className="text-muted-foreground">The requested source could not be found.</p>
+      </div>
+    );
+  }
+
+  const IconComponent = sourceIcons[code as keyof typeof sourceIcons] || Database;
+  const colorClass = sourceColors[code as keyof typeof sourceColors] || "bg-blue-500";
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center space-x-4 mb-6">
+        <div className={`w-12 h-12 ${colorClass} rounded-lg flex items-center justify-center`}>
+          <IconComponent className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-github-gray-dark dark:text-foreground">
+            {source.code} - {source.name}
+          </h1>
+          <p className="text-github-gray-medium dark:text-muted-foreground">
+            {source.description}
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button onClick={handleRefresh} variant="outline">
+            <FolderSync className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+          <Button onClick={handleExport} variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Status & Metadata */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className={`w-3 h-3 rounded-full ${
+                source.status === 'active' ? 'bg-green-400' :
+                source.status === 'syncing' ? 'bg-yellow-400' : 'bg-red-400'
+              }`} />
+              <Badge variant={source.status === 'active' ? 'default' : 'secondary'}>
+                {source.status}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Uptime: {source.uptime}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-medium">Version {source.version}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Last Update: {source.updatedAt ? new Date(source.updatedAt).toLocaleDateString() : 'N/A'}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-medium">
+              {source.recordCount.toLocaleString()} Records
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">+5.2% this week</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-medium">{source.avgResponseTime}ms avg</p>
+            <p className="text-xs text-muted-foreground mt-1">Response time</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Data Visualization */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Performance Chart */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Performance Metrics</CardTitle>
+                <Select defaultValue="7days">
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7days">Last 7 days</SelectItem>
+                    <SelectItem value="30days">Last 30 days</SelectItem>
+                    <SelectItem value="90days">Last 90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <PerformanceChart sourceCode={code} metrics={metrics} />
+            </CardContent>
+          </Card>
+
+          {/* Transactions Table */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Recent Transactions</CardTitle>
+                <Button variant="link" size="sm" onClick={handleExport}>
+                  Export CSV
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <DataTable data={transactions} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* LLM Chat Interface */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Activity className="w-5 h-5 text-github-purple" />
+                <span>Data Analysis Chat</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LLMChat sourceCode={code} />
+            </CardContent>
+          </Card>
+
+          {/* Knowledge Base Links */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Knowledge Base</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {knowledgeLinks.map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <i className={`${link.icon} text-github-blue`} />
+                      <div>
+                        <p className="font-medium text-sm">{link.title}</p>
+                        <p className="text-xs text-muted-foreground">{link.description}</p>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('refresh')}
+                >
+                  <FolderSync className="w-4 h-4 mr-2" />
+                  Refresh Data
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('diagnostic')}
+                >
+                  <Stethoscope className="w-4 h-4 mr-2" />
+                  Run Diagnostic
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('logs')}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  View Logs
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={handleExport}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Report
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

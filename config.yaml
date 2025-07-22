@@ -1,0 +1,115 @@
+# Integration Dashboard Configuration
+app:
+  name: "Integration Dashboard"
+  version: "2.4.1"
+  environment: "development"
+  port: 5000
+
+# OpenAI Configuration
+openai:
+  api_key: "${OPENAI_API_KEY}"
+  model: "gpt-4o"
+  max_tokens: 1000
+  temperature: 0.7
+  features:
+    chat_analysis: true
+    data_insights: true
+    performance_recommendations: true
+
+# Azure OpenAI Configuration (for future migration)
+azure_openai:
+  enabled: false
+  endpoint: "${AZURE_OPENAI_ENDPOINT}"
+  api_key: "${AZURE_OPENAI_API_KEY}"
+  deployment_name: "${AZURE_OPENAI_DEPLOYMENT}"
+  api_version: "2024-02-01"
+
+# JanusGraph Configuration
+janusgraph:
+  enabled: true
+  connection:
+    url: "ws://localhost:8182/gremlin"
+    timeout: 30000
+    ping_interval: 30000
+    max_retries: 3
+  database:
+    name: "janusgraph"
+    traversal_source: "g"
+  features:
+    health_check: true
+    schema_introspection: true
+    performance_monitoring: true
+
+# Sources of Truth Configuration
+sources:
+  stc:
+    name: "System Truth Cache"
+    description: "Primary data repository and caching layer"
+    type: "janusgraph"
+    connection_string: "ws://localhost:8182/gremlin"
+    health_check_interval: 60
+  cpt:
+    name: "Configuration Processing Tool"
+    description: "Configuration management and processing system"
+    type: "rest_api"
+    endpoint: "http://localhost:3001/api/config"
+    health_check_interval: 60
+  slc:
+    name: "Service Layer Coordinator"
+    description: "Service orchestration and coordination layer"
+    type: "rest_api"
+    endpoint: "http://localhost:3002/api/services"
+    health_check_interval: 60
+  tmc:
+    name: "Transaction Management Center"
+    description: "Transaction monitoring and management interface"
+    type: "janusgraph"
+    connection_string: "ws://localhost:8182/gremlin"
+    health_check_interval: 60
+  cas:
+    name: "Central Authentication Service"
+    description: "Authentication and authorization management system"
+    type: "rest_api"
+    endpoint: "http://localhost:3003/api/auth"
+    health_check_interval: 60
+  nvl:
+    name: "Network Validation Layer"
+    description: "Network validation and monitoring interface"
+    type: "rest_api"
+    endpoint: "http://localhost:3004/api/network"
+    health_check_interval: 60
+
+# Database Configuration
+database:
+  type: "postgresql"
+  url: "${DATABASE_URL}"
+  pool:
+    min: 2
+    max: 10
+  migrations:
+    auto_run: true
+
+# WebSocket Configuration
+websocket:
+  path: "/ws"
+  ping_interval: 30000
+  reconnect_attempts: 5
+  reconnect_delay_base: 1000
+
+# Logging Configuration
+logging:
+  level: "info"
+  format: "json"
+  outputs:
+    - "console"
+  request_logging: true
+  performance_logging: true
+
+# Security Configuration
+security:
+  cors:
+    enabled: true
+    origins: ["*"]
+  rate_limiting:
+    enabled: false
+    requests_per_minute: 100
