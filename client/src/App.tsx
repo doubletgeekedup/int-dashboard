@@ -31,7 +31,7 @@ function AppLayout() {
   return (
     <div className="flex min-h-screen bg-github-gray-light dark:bg-background">
       <Sidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto lg:ml-0">
         <Header />
         <div className="p-6">
           <Router />

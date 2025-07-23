@@ -10,10 +10,15 @@ import {
   FolderSync, 
   Wifi,
   WifiOff,
-  Activity
+  Activity,
+  Menu
 } from "lucide-react";
 
-export function Header() {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+export function Header({ onToggleSidebar }: HeaderProps = {}) {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
@@ -48,6 +53,16 @@ export function Header() {
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden"
+            onClick={onToggleSidebar}
+          >
+            <Menu className="w-4 h-4" />
+          </Button>
+          
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold text-github-gray-dark dark:text-foreground">
               Integration Dashboard
@@ -55,7 +70,7 @@ export function Header() {
             
             {/* Connection Status */}
             <div className="flex items-center space-x-2 text-sm">
-              {healthStatus?.connected ? (
+              {(healthStatus as any)?.connected ? (
                 <>
                   <div className="w-2 h-2 bg-green-400 rounded-full pulse-dot" />
                   <Badge variant="outline" className="text-green-600 border-green-600">
