@@ -1,0 +1,157 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🚀 Launch Development Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/index.ts",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "runtimeExecutable": "tsx",
+      "runtimeArgs": ["--inspect"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "restart": true,
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ]
+    },
+    {
+      "name": "🔍 Debug Current File",
+      "type": "node",
+      "request": "launch",
+      "program": "${file}",
+      "runtimeExecutable": "tsx",
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "🔌 Attach to Running Server",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "${workspaceFolder}",
+      "sourceMaps": true
+    },
+    {
+      "name": "🐛 Debug Server with Breakpoints",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/index.ts",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "*"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "runtimeExecutable": "tsx",
+      "runtimeArgs": ["--inspect-brk"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "stopOnEntry": true,
+      "sourceMaps": true
+    },
+    {
+      "name": "🧪 Debug Database Operations",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/index.ts",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG_DB": "true"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "runtimeExecutable": "tsx",
+      "runtimeArgs": ["--inspect"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🤖 Debug OpenAI Integration",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/services/openai.ts",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG_AI": "true"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "runtimeExecutable": "tsx",
+      "runtimeArgs": ["--inspect"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "📊 Debug JanusGraph Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/services/janusgraph.ts",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG_GRAPH": "true"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "runtimeExecutable": "tsx",
+      "runtimeArgs": ["--inspect"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🔧 Debug Production Build",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/dist/server.js",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "preLaunchTask": "Build Project"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🚀 Full Stack Debug",
+      "configurations": [
+        "🚀 Launch Development Server"
+      ],
+      "presentation": {
+        "hidden": false,
+        "group": "development",
+        "order": 1
+      }
+    }
+  ]
+}
