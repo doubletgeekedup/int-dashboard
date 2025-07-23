@@ -1,0 +1,406 @@
+# Integration Dashboard
+
+A comprehensive enterprise integration monitoring system that provides real-time insights into multiple Sources of Truth (STC, CPT, SLC, TMC, CAS, NVL) with AI-powered analysis and graph database integration.
+
+## Features
+
+- **Real-time Monitoring**: Live dashboard with performance metrics and health status
+- **AI-Powered Analysis**: OpenAI GPT-4o integration for intelligent data insights
+- **Graph Database**: JanusGraph integration for complex relationship mapping
+- **Transaction Tracking**: Real-time transaction monitoring and logging
+- **Bulletin System**: Centralized announcements and update management
+- **Knowledge Base**: Integrated documentation and troubleshooting resources
+- **WebSocket Support**: Live updates without page refresh
+
+## Quick Start
+
+### Prerequisites
+
+- **Node.js 20+** - [Download here](https://nodejs.org/)
+- **PostgreSQL 15+** - [Download here](https://www.postgresql.org/downloads/)
+- **Git** - [Download here](https://git-scm.com/)
+
+### Clone and Setup
+
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd integration-dashboard
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your configuration (see Environment Setup below)
+
+# Generate database schema
+npm run db:generate
+
+# Run database migrations
+npm run db:migrate
+
+# Start development server
+npm run dev
+```
+
+The application will be available at `http://localhost:5000`
+
+## Environment Setup
+
+Create a `.env` file in the root directory:
+
+```env
+# Database Configuration
+DATABASE_URL=postgresql://username:password@localhost:5432/integration_dashboard
+
+# OpenAI Configuration (required for AI features)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Development Settings
+NODE_ENV=development
+PORT=5000
+HOST=0.0.0.0
+
+# Session Security (change in production)
+SESSION_SECRET=your_secure_session_secret_minimum_32_characters
+
+# Optional: JanusGraph Configuration
+JANUSGRAPH_HOST=localhost
+JANUSGRAPH_PORT=8182
+JANUSGRAPH_PATH=/gremlin
+JANUSGRAPH_PROTOCOL=ws
+```
+
+## Database Setup
+
+### PostgreSQL Setup
+```bash
+# Create database and user
+sudo -u postgres psql
+
+# In PostgreSQL console:
+CREATE DATABASE integration_dashboard;
+CREATE USER dashboard_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE integration_dashboard TO dashboard_user;
+\q
+```
+
+Update your `.env` file with the correct `DATABASE_URL`.
+
+## IDE Setup Guides
+
+Choose your preferred development environment:
+
+### 🔵 VS Code (Recommended)
+**Best for:** TypeScript/React development with excellent debugging support
+
+```bash
+# Install recommended extensions automatically
+code .
+# VS Code will prompt to install recommended extensions
+```
+
+📖 **[Complete VS Code Setup Guide](SETUP_GUIDE_VSCODE.md)**
+- Pre-configured debugging with 8 specialized debug modes
+- Integrated database management with SQLTools
+- Thunder Client for API testing
+- Advanced TypeScript IntelliSense
+
+### 🟠 IntelliJ IDEA
+**Best for:** Enterprise development with powerful refactoring tools
+
+```bash
+# Open project in IntelliJ
+idea .
+# Or File → Open → Select project directory
+```
+
+📖 **[Complete IntelliJ Setup Guide](SETUP_GUIDE_INTELLIJ.md)**
+- Professional debugging with advanced breakpoint management
+- Built-in database tools and SQL console
+- Integrated REST client
+- Advanced code analysis and refactoring
+
+### 🟣 Eclipse
+**Best for:** Java developers familiar with Eclipse ecosystem
+
+```bash
+# Import project in Eclipse
+# File → Import → General → Existing Projects into Workspace
+```
+
+📖 **[Complete Eclipse Setup Guide](SETUP_GUIDE_ECLIPSE.md)**
+- Wild Web Developer plugin for modern JavaScript/TypeScript
+- Integrated terminal and Git support
+- Database development perspective
+- Comprehensive debugging tools
+
+## Development Commands
+
+### General Commands
+```bash
+# Start development server (all IDEs)
+npm run dev
+
+# Build for production
+npm run build
+
+# Type checking
+npm run type-check
+
+# Linting and formatting
+npm run lint
+npm run format
+
+# Database operations
+npm run db:generate    # Generate new migrations
+npm run db:migrate     # Apply migrations
+```
+
+### IDE-Specific Commands
+
+#### VS Code Commands (Ctrl+Shift+P)
+```
+Tasks: Run Task → Start Development Server
+TypeScript: Restart TS Server
+SQLTools: Add New Connection
+Thunder Client: New Request
+```
+
+#### IntelliJ IDEA Commands
+```bash
+# Run configuration: "Development Server"
+# Database: View → Tool Windows → Database
+# REST Client: Tools → HTTP Client
+# Debug: Run → Debug 'Development Server'
+```
+
+#### Eclipse Commands
+```bash
+# Run As → Node.js Application
+# Window → Show View → Database
+# Run → Debug As → Node.js Application
+# Terminal: Window → Show View → Terminal
+```
+
+## Debugging
+
+Each IDE has specialized debugging configurations:
+
+### VS Code Debugging (F5)
+- 🚀 **Launch Development Server**: Full-stack debugging
+- 🔍 **Debug Current File**: Test individual TypeScript files
+- 🧪 **Debug Database Operations**: Database-focused debugging
+- 🤖 **Debug OpenAI Integration**: AI feature debugging
+
+📖 **[Complete Debugging Guide](DEBUG_GUIDE.md)**
+
+### IntelliJ/Eclipse Debugging
+- Set breakpoints in TypeScript files
+- Use "Debug" run configuration
+- Inspect variables and call stack
+- Step through code execution
+
+## Project Structure
+
+```
+integration-dashboard/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/    # UI components
+│   │   ├── pages/         # Application pages
+│   │   ├── hooks/         # Custom React hooks
+│   │   ├── lib/           # Utilities and configurations
+│   │   └── App.tsx        # Main React component
+│   └── index.html         # HTML template
+├── server/                # Express.js backend
+│   ├── services/          # Business logic services
+│   ├── index.ts           # Server entry point
+│   ├── routes.ts          # API route definitions
+│   ├── storage.ts         # Database interface
+│   └── config.ts          # Configuration management
+├── shared/                # Shared TypeScript schemas
+│   └── schema.ts          # Database schemas and types
+├── .vscode/               # VS Code configuration
+│   ├── launch.json        # Debug configurations
+│   ├── settings.json      # Workspace settings
+│   └── tasks.json         # Task definitions
+├── config.yaml           # Application configuration
+├── package.json           # Dependencies and scripts
+├── tsconfig.json          # TypeScript configuration
+├── vite.config.ts         # Vite build configuration
+├── tailwind.config.ts     # Tailwind CSS configuration
+└── drizzle.config.ts      # Database migration configuration
+```
+
+## API Endpoints
+
+The backend provides these REST endpoints:
+
+```
+GET    /api/sources           # List all integration sources
+GET    /api/sources/:code     # Get specific source details
+GET    /api/dashboard/stats   # Dashboard statistics
+GET    /api/transactions      # Transaction history
+GET    /api/chat/messages     # Chat history
+POST   /api/chat/messages     # Send chat message
+GET    /api/bulletins         # System bulletins
+POST   /api/bulletins         # Create bulletin
+GET    /api/janusgraph/health # Graph database health
+```
+
+## Technology Stack
+
+### Frontend
+- **React 18** with TypeScript
+- **Wouter** for client-side routing
+- **TanStack Query** for server state management
+- **Radix UI** component library
+- **Tailwind CSS** for styling
+- **Recharts** for data visualization
+
+### Backend
+- **Node.js** with Express.js
+- **TypeScript** with ES modules
+- **Drizzle ORM** for database operations
+- **PostgreSQL** with Neon serverless
+- **WebSocket** for real-time updates
+
+### External Services
+- **OpenAI GPT-4o** for AI analysis
+- **JanusGraph** for graph database operations
+
+## Common Issues & Solutions
+
+### Port Already in Use
+```bash
+# Kill process using port 5000
+npx kill-port 5000
+
+# Or use different port
+PORT=3001 npm run dev
+```
+
+### Database Connection Issues
+```bash
+# Check PostgreSQL status
+sudo systemctl status postgresql
+
+# Restart PostgreSQL
+sudo systemctl restart postgresql
+
+# Verify connection
+psql -h localhost -U dashboard_user -d integration_dashboard
+```
+
+### TypeScript Compilation Errors
+```bash
+# Clear TypeScript cache
+rm -rf node_modules/.cache
+
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
+
+# Check for errors
+npm run type-check
+```
+
+### Node.js Version Issues
+```bash
+# Check Node.js version
+node --version
+
+# Use Node Version Manager (recommended)
+nvm install 20
+nvm use 20
+```
+
+## Testing
+
+### API Testing
+Use the built-in API testing tools in your IDE:
+
+#### VS Code: Thunder Client
+1. Install Thunder Client extension
+2. Create new request collection
+3. Test endpoints: `GET http://localhost:5000/api/sources`
+
+#### IntelliJ: HTTP Client
+1. Tools → HTTP Client → Create Request
+2. Create `.http` files in project
+3. Execute requests directly in IDE
+
+#### Eclipse: REST Client
+1. Install REST Client plugin
+2. Use built-in HTTP request editor
+3. Test API endpoints interactively
+
+### Manual Testing
+```bash
+# Test API endpoints
+curl http://localhost:5000/api/sources
+curl http://localhost:5000/api/dashboard/stats
+
+# Test WebSocket connection
+wscat -c ws://localhost:5000/ws
+```
+
+## Deployment
+
+For production deployment, see the **[Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)** which includes:
+
+- Replit reference removal for confidentiality
+- Docker configuration
+- Security hardening
+- Environment variable management
+- Build and deployment scripts
+
+### Quick Production Build
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Development Workflow
+
+### Starting Development
+1. Choose your IDE setup guide above
+2. Follow the IDE-specific configuration
+3. Use `npm run dev` to start development server
+4. Open browser to `http://localhost:5000`
+
+### Making Changes
+1. Frontend changes: Edit files in `client/src/`
+2. Backend changes: Edit files in `server/`
+3. Database changes: Update `shared/schema.ts` and run `npm run db:generate`
+4. Hot reloading automatically updates the browser
+
+### Debugging Issues
+1. Use IDE-specific debugging configurations
+2. Check browser console for frontend errors
+3. Check terminal output for backend errors
+4. Use database tools in your IDE for data inspection
+
+## Contributing
+
+1. Follow the IDE setup guide for your preferred environment
+2. Use the debugging configurations for thorough testing
+3. Run `npm run type-check` and `npm run lint` before committing
+4. Test all API endpoints using your IDE's REST client
+
+## Support
+
+- **VS Code Users**: See [VS Code Setup Guide](SETUP_GUIDE_VSCODE.md)
+- **IntelliJ Users**: See [IntelliJ Setup Guide](SETUP_GUIDE_INTELLIJ.md)  
+- **Eclipse Users**: See [Eclipse Setup Guide](SETUP_GUIDE_ECLIPSE.md)
+- **Debugging**: See [Debug Guide](DEBUG_GUIDE.md)
+- **Production**: See [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)
+
+## License
+
+PROPRIETARY - Internal Use Only
