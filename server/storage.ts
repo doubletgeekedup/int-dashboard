@@ -389,4 +389,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Export the MemStorage class for use by storage factory
+// The actual storage instance is created by storage-factory.ts

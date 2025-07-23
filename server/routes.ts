@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./storage";
+import { getStorage, getStorageInfo } from "./storage-factory";
 import { openAIService } from "./services/openai";
 import { janusGraphService } from "./services/janusgraph";
 import { configManager } from "./config";
@@ -13,6 +13,9 @@ import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+
+  // Initialize storage
+  const storage = getStorage();
 
   // Initialize JanusGraph connection
   janusGraphService.connect().catch(console.error);
@@ -314,6 +317,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid knowledge link data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create knowledge link" });
+    }
+  });
+
+  // Health API Routes
+  app.get("/api/health", async (req, res) => {
+    try {
+      const isHealthy = await janusGraphService.performHealthCheck();
+      const schemaInfo = await janusGraphService.getSchemaInfo();
+      
+      const storageInfo = getStorageInfo();
+      let status = 'healthy';
+      
+      if (storageInfo.status === 'fallback') {
+        status = 'degraded';
+      }
+      
+      if (!schemaInfo.connected) {
+        status = 'degraded';
+      }
+
+      res.json({
+        status,
+        timestamp: new Date().toISOString(),
+        storage: storageInfo,
+        janusgraph: {
+          connected: schemaInfo.connected,
+          healthy: isHealthy
+        },
+        uptime: process.uptime()
+      });
+    } catch (error) {
+      console.error('Health check error:', error);
+      res.status(500).json({ error: "Failed to check system health" });
     }
   });
 

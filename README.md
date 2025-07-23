@@ -17,10 +17,28 @@ A comprehensive enterprise integration monitoring system that provides real-time
 ### Prerequisites
 
 - **Node.js 20+** - [Download here](https://nodejs.org/)
-- **PostgreSQL 15+** - [Download here](https://www.postgresql.org/downloads/)
 - **Git** - [Download here](https://git-scm.com/)
+- **PostgreSQL 15+** - [Optional] [Download here](https://www.postgresql.org/downloads/)
 
-### Clone and Setup
+### Option 1: No Database Required (Recommended for Development)
+
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd integration-dashboard
+
+# Install dependencies
+npm install
+
+# Start development server (no setup required!)
+npm run dev
+```
+
+The application will be available at `http://localhost:5000` with in-memory storage and sample data.
+
+📖 **[Complete No-Database Setup Guide](NO_DATABASE_SETUP.md)**
+
+### Option 2: With PostgreSQL Database
 
 ```bash
 # Clone the repository
@@ -32,49 +50,57 @@ npm install
 
 # Create environment file
 cp .env.example .env
-# Edit .env with your configuration (see Environment Setup below)
+# Edit .env with your database configuration
 
 # Generate database schema
-npm run db:generate
+npx drizzle-kit generate
 
 # Run database migrations
-npm run db:migrate
+npx drizzle-kit migrate
 
 # Start development server
 npm run dev
 ```
 
-The application will be available at `http://localhost:5000`
-
 ## Environment Setup
 
-Create a `.env` file in the root directory:
+### No Database Setup (Default)
+No environment file required! The application works out of the box.
+
+### Optional Environment Variables
+Create a `.env` file for additional features:
 
 ```env
-# Database Configuration
+# Database Configuration (optional - will use in-memory storage if not provided)
 DATABASE_URL=postgresql://username:password@localhost:5432/integration_dashboard
 
-# OpenAI Configuration (required for AI features)
+# AI Features (optional but recommended)
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Development Settings
+# Development Settings (optional)
 NODE_ENV=development
 PORT=5000
 HOST=0.0.0.0
 
-# Session Security (change in production)
+# Session Security (optional - defaults provided)
 SESSION_SECRET=your_secure_session_secret_minimum_32_characters
 
-# Optional: JanusGraph Configuration
+# JanusGraph Configuration (optional - simulated by default)
 JANUSGRAPH_HOST=localhost
 JANUSGRAPH_PORT=8182
 JANUSGRAPH_PATH=/gremlin
 JANUSGRAPH_PROTOCOL=ws
 ```
 
-## Database Setup
+## Storage Options
 
-### PostgreSQL Setup
+### In-Memory Storage (Default)
+- ✅ No setup required
+- ✅ Pre-loaded with sample data
+- ✅ Full functionality 
+- ⚠️ Data lost on restart
+
+### PostgreSQL Database (Optional)
 ```bash
 # Create database and user
 sudo -u postgres psql
@@ -86,7 +112,9 @@ GRANT ALL PRIVILEGES ON DATABASE integration_dashboard TO dashboard_user;
 \q
 ```
 
-Update your `.env` file with the correct `DATABASE_URL`.
+Then add `DATABASE_URL` to your `.env` file.
+
+📖 **[No-Database Setup Guide](NO_DATABASE_SETUP.md)** - Complete instructions for running without PostgreSQL
 
 ## IDE Setup Guides
 
