@@ -1,7 +1,14 @@
 # Production Deployment Guide - Removing Replit Dependencies
 
 ## Overview
-This guide provides detailed instructions for making your Integration Dashboard production-ready by removing all Replit-specific references, dependencies, and configurations. Follow these steps to deploy the application in any cloud environment while maintaining confidentiality.
+This guide provides detailed instructions for making your Integration Dashboard production-ready by removing all development-specific references, dependencies, and configurations. Follow these steps to deploy the application in any cloud environment while maintaining security and confidentiality.
+
+## Current Features Summary
+- **External Work Items Integration**: Real-time transaction monitoring via external API endpoints
+- **Custom Brand Theme**: Professional appearance with configurable brand colors
+- **JanusGraph Support**: Advanced graph database integration for relationship analysis
+- **AI-Powered Analysis**: OpenAI GPT-4o integration for intelligent insights
+- **Multi-storage Options**: PostgreSQL, JanusGraph, or in-memory storage
 
 ## Critical Files to Remove or Modify
 
@@ -25,20 +32,35 @@ rm config.yaml
 ```
 **Alternative:** Keep but rename to `app.config.yaml` and remove any Replit references.
 
-### 2. Package.json Modifications
+### 2. Environment Configuration
 
-#### A. Remove Replit-Specific Dependencies
-Remove these dependencies from `package.json`:
+#### A. Production Environment Variables
+Create a secure `.env` file for production:
 
-```json
-// REMOVE THESE LINES FROM devDependencies:
-{
-  "devDependencies": {
-    "@replit/vite-plugin-cartographer": "^0.2.7",        // REMOVE
-    "@replit/vite-plugin-runtime-error-modal": "^0.0.3"  // REMOVE
-  }
-}
+```env
+# Application Configuration
+NODE_ENV=production
+PORT=5000
+HOST=0.0.0.0
+
+# External Work Items Service (Required)
+EXTERNAL_LISTITEMS_URL=https://your-production-api.com
+EXTERNAL_API_KEY=your_secure_production_api_key
+
+# AI Features (Required for LLM chat)
+OPENAI_API_KEY=your_openai_production_key
+
+# Database Configuration (Choose one)
+DATABASE_URL=postgresql://user:pass@your-db-host:5432/production_db
+# OR
+JANUSGRAPH_GRAPHQL_URL=http://your-janusgraph-host:8182/graphql
+
+# Security
+SESSION_SECRET=your_secure_64_character_session_secret_for_production
 ```
+
+#### B. Package.json Modifications (If Needed)
+Remove development-specific dependencies from `package.json`:
 
 #### B. Updated package.json (Clean Version)
 ```json

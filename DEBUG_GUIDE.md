@@ -1,7 +1,10 @@
-# VS Code Debugging Guide - Integration Dashboard
+# Debug Guide for Integration Dashboard
 
-## Overview
-This guide explains how to use the debugging configurations in `.vscode/launch.json` for your Integration Dashboard project.
+This guide helps you troubleshoot common issues and understand the debugging process for the Integration Dashboard application, including external work items integration and custom brand theme features.
+
+## VS Code Debugging
+
+This section explains how to use the debugging configurations in `.vscode/launch.json` for your Integration Dashboard project.
 
 ## Available Debug Configurations
 
@@ -72,6 +75,46 @@ This guide explains how to use the debugging configurations in `.vscode/launch.j
 1. Select "🤖 Debug OpenAI Integration"
 2. Set breakpoints in OpenAI service code
 3. Press F5
+
+## External Work Items Debugging
+
+### Common Issues with External Integration
+
+1. **"External service unavailable" errors**
+   ```bash
+   # Check if endpoint is accessible
+   curl -X GET "https://your-external-api.com/listitems/10"
+   
+   # Check with authentication
+   curl -H "Authorization: Bearer YOUR_API_KEY" \
+        "https://your-external-api.com/listitems/10"
+   ```
+
+2. **Authentication failures**
+   - Verify `EXTERNAL_API_KEY` is correctly set
+   - Check the authentication method expected by your service
+   - Monitor server logs for detailed error messages
+
+3. **No transactions displayed**
+   - Verify external API returns data in expected format
+   - Check `qName` field contains correct source prefixes (STC_, CPT_, etc.)
+   - Use browser dev tools to inspect network requests
+
+### Debug External Integration
+
+Enable debug logging in your `.env` file:
+```env
+DEBUG=true
+EXTERNAL_LISTITEMS_URL=https://your-external-api.com
+EXTERNAL_API_KEY=your_api_key_here
+```
+
+Check server console for detailed logs:
+```
+Fetching work items from: https://your-external-api.com/listitems/100
+External API returned 200: OK
+Found 25 work items for STC source
+```
 
 ### 📊 Debug JanusGraph Service
 **Best for:** Debugging graph database operations

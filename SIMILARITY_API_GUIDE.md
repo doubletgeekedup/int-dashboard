@@ -4,7 +4,13 @@ This guide documents the advanced similarity detection and relationship analysis
 
 ## Overview
 
-The Integration Dashboard now supports sophisticated graph-based analysis using JanusGraph's GraphQL interface to find related data based on attribute similarity, clustering, and relationship mapping.
+The Integration Dashboard supports sophisticated graph-based analysis using JanusGraph's GraphQL interface to find related data based on attribute similarity, clustering, and relationship mapping. Additionally, it integrates with external work item endpoints to provide real-time transaction analysis.
+
+## Prerequisites
+
+- JanusGraph server running with GraphQL endpoint
+- External work items service configured (EXTERNAL_LISTITEMS_URL)
+- Valid API credentials for external services
 
 ## API Endpoints
 

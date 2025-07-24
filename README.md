@@ -7,7 +7,9 @@ A comprehensive enterprise integration monitoring system that provides real-time
 - **Real-time Monitoring**: Live dashboard with performance metrics and health status
 - **AI-Powered Analysis**: OpenAI GPT-4o integration for intelligent data insights
 - **Graph Database**: JanusGraph integration for complex relationship mapping
-- **Transaction Tracking**: Real-time transaction monitoring and logging
+- **External Work Items**: Integration with external transaction endpoints for real-time work item tracking
+- **Transaction Tracking**: Real-time transaction monitoring with detailed modal views
+- **Custom Brand Theme**: Professional theme with configurable brand colors
 - **Bulletin System**: Centralized announcements and update management
 - **Knowledge Base**: Integrated documentation and troubleshooting resources
 - **WebSocket Support**: Live updates without page refresh
@@ -36,7 +38,8 @@ npm run dev
 
 The application will be available at `http://localhost:5000` with in-memory storage and sample data.
 
-📖 **[Complete No-Database Setup Guide](NO_DATABASE_SETUP.md)**
+📖 **[Complete No-Database Setup Guide](NO_DATABASE_SETUP.md)**  
+🔗 **[External Work Items Integration](EXTERNAL_INTEGRATION_GUIDE.md)**
 
 ### Option 2: With PostgreSQL Database
 
@@ -73,6 +76,16 @@ Create a `.env` file for additional features:
 ```env
 # Database Configuration (optional - will use in-memory storage if not provided)
 DATABASE_URL=postgresql://username:password@localhost:5432/integration_dashboard
+
+# External Work Items Service (required for real transaction data)
+EXTERNAL_LISTITEMS_URL=https://your-external-api.com
+EXTERNAL_API_KEY=your_external_api_key_here
+
+# AI Features (required for LLM chat functionality)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# JanusGraph Configuration (optional - for graph database features)
+JANUSGRAPH_GRAPHQL_URL=http://localhost:8182/graphql
 
 # AI Features (optional but recommended)
 OPENAI_API_KEY=your_openai_api_key_here

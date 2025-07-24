@@ -1,19 +1,43 @@
-# Quick Setup - Missing Database Scripts
+# Quick Setup Guide
 
-## Issue
-The current package.json is missing the database scripts (`db:generate`, `db:migrate`) that are referenced in the documentation.
+## Instant Setup (No Configuration Required)
 
-## Immediate Solution
+The fastest way to get started - works out of the box with sample data:
 
-Since the package.json cannot be directly modified, you can run the database commands directly:
+```bash
+# Clone and start
+git clone <your-repository-url>
+cd integration-dashboard
+npm install
+npm run dev
+```
+
+Open `http://localhost:5000` - you're ready to go!
+
+## External Work Items Integration
+
+To connect to your external work items service, add environment variables:
 
 ### 1. Create Environment File
 ```bash
 # Copy the example environment file
 cp .env.example .env
 
-# Edit the .env file with your actual database credentials
+# Edit the .env file with your actual configurations
 nano .env  # or use your preferred editor
+```
+
+Add your external service configuration:
+```env
+# Required for real transaction data
+EXTERNAL_LISTITEMS_URL=https://your-external-api.com
+EXTERNAL_API_KEY=your_external_api_key_here
+
+# Required for AI chat features  
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional database configuration
+DATABASE_URL=postgresql://username:password@localhost:5432/integration_dashboard
 ```
 
 ### 2. Run Database Commands Directly

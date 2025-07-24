@@ -1,6 +1,8 @@
-# Running Integration Dashboard Without PostgreSQL
+# No Database Setup Guide
 
 ## Overview
+This guide shows you how to run the Integration Dashboard without any database setup. Perfect for development, testing, or when you want to get started quickly. The application includes external work items integration and custom brand theme features that work out of the box.
+
 The Integration Dashboard can run entirely without a PostgreSQL database using in-memory storage. This is perfect for:
 - Development and testing
 - Demonstrations and prototypes  
@@ -25,6 +27,10 @@ PORT=5000
 
 # Optional: Add OpenAI API key for AI features  
 # OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional: External work items service
+# EXTERNAL_LISTITEMS_URL=https://your-external-api.com  
+# EXTERNAL_API_KEY=your_external_api_key_here
 
 # Optional: JanusGraph configuration (simulated)
 JANUSGRAPH_HOST=localhost
