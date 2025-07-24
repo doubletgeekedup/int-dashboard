@@ -33,7 +33,16 @@ export function ChatInterface({ sourceCode, title = "AI Assistant" }: ChatInterf
   const queryClient = useQueryClient();
 
   const { data: messages = [], isLoading } = useQuery<ChatMessage[]>({
-    queryKey: ["/api/chat/messages", { sourceCode, sessionId }],
+    queryKey: ["/api/chat/messages"],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (sourceCode) params.append('sourceCode', sourceCode);
+      params.append('sessionId', sessionId);
+      
+      const response = await fetch(`/api/chat/messages?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      return response.json();
+    }
   });
 
   const chatMutation = useMutation({

@@ -52,12 +52,10 @@ export class OpenAIService {
         this.initializeSimilarityServices(storage);
       }
 
-      // Enhance messages with similarity analysis capabilities if requested
-      const enhancedMessages = await this.enhanceMessagesWithSimilarityData(messages);
-
+      // For now, use messages as-is - similarity enhancement can be added later
       const response = await this.client.chat.completions.create({
         model: this.config.model, // Uses gpt-4o from YAML config
-        messages: enhancedMessages,
+        messages: messages,
         max_tokens: this.config.max_tokens,
         temperature: this.config.temperature,
       });

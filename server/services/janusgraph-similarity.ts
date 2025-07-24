@@ -296,13 +296,16 @@ export class JanusGraphSimilarityService {
           if (cNode.node && Array.isArray(cNode.node)) {
             for (const node of cNode.node) {
               if (node.id !== nodeId && node.nodeKey !== nodeId) {
+                // Calculate basic similarity based on node properties
+                const similarity = this.calculateBasicSimilarity(nodeId, node);
+                
                 similarNodes.push({
-                  nodeId: node.id || node.nodeKey,
-                  similarity: 0.5, // Basic fallback similarity
+                  nodeId: node.id || node.nodeKey || `node_${Math.random().toString(36).substr(2, 9)}`,
+                  similarity,
                   relationshipCount: 1,
                   sharedConnections: 0,
                   nodeProperties: node,
-                  impactLevel: 'MEDIUM'
+                  impactLevel: this.calculateImpactLevel(1, 0)
                 });
               }
             }
@@ -311,7 +314,37 @@ export class JanusGraphSimilarityService {
       }
     }
 
-    return similarNodes.slice(0, 10);
+    // Sort by similarity and return top 10
+    return similarNodes
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 10);
+  }
+
+  /**
+   * Calculate basic similarity for local fallback
+   */
+  private calculateBasicSimilarity(targetNodeId: string, candidateNode: any): number {
+    let similarity = 0.3; // Base similarity for existing nodes
+    
+    // Check if node IDs have similar patterns
+    if (targetNodeId.includes('@id@') && candidateNode.id?.includes('@id@')) {
+      const targetPrefix = targetNodeId.split('@id@')[0];
+      const candidatePrefix = candidateNode.id?.split('@id@')[0];
+      if (targetPrefix === candidatePrefix) {
+        similarity += 0.4; // Same prefix pattern
+      }
+    }
+    
+    // Check for property matches
+    if (candidateNode.type && targetNodeId.includes(candidateNode.type)) {
+      similarity += 0.2;
+    }
+    
+    if (candidateNode.functionName && targetNodeId.toLowerCase().includes(candidateNode.functionName.toLowerCase())) {
+      similarity += 0.1;
+    }
+    
+    return Math.min(similarity, 1.0);
   }
 
   /**
