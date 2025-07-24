@@ -12,6 +12,7 @@ import {
   Network,
   Megaphone,
   Book,
+  GitBranch,
   Menu,
   X
 } from "lucide-react";
@@ -79,6 +80,11 @@ const resources = [
     name: "Knowledge Base",
     href: "/knowledge-base",
     icon: Book,
+  },
+  {
+    name: "Gremlin Visualizer",
+    href: "/gremlin-visualizer",
+    icon: GitBranch,
   },
 ];
 

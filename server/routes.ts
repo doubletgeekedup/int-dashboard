@@ -840,5 +840,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gremlin visualizer endpoint
+  app.get("/api/gremlin/visualize/:sourceCode/:nodeId", async (req, res) => {
+    try {
+      const { sourceCode, nodeId } = req.params;
+      
+      console.log(`Visualizing node ${nodeId} in source ${sourceCode}`);
+      
+      // Simulate Gremlin query to get node and its connections
+      const graphData = await simulateGremlinTraversal(sourceCode, nodeId);
+      
+      if (!graphData) {
+        return res.status(404).json({ 
+          error: "Node not found",
+          message: `Node ${nodeId} not found in source ${sourceCode}`
+        });
+      }
+      
+      res.json(graphData);
+      
+    } catch (error) {
+      console.error("Error in Gremlin visualization:", error);
+      res.status(500).json({ 
+        error: "Visualization failed",
+        message: "Failed to retrieve graph data"
+      });
+    }
+  });
+
   return httpServer;
+}
+
+// Simulate Gremlin traversal for visualization
+async function simulateGremlinTraversal(sourceCode: string, nodeId: string) {
+  // Generate realistic graph data based on source and node ID
+  const centerNode = {
+    id: nodeId,
+    label: `${sourceCode}_${nodeId}`,
+    properties: {
+      name: `Node_${nodeId}`,
+      type: getNodeTypeBySource(sourceCode),
+      created: Date.now() - 86400000,
+      status: "active"
+    },
+    type: getNodeTypeBySource(sourceCode),
+    sourceCode
+  };
+
+  // Generate connected nodes (level up - parents)
+  const upNodes = Array.from({ length: Math.floor(Math.random() * 4) + 1 }, (_, i) => ({
+    id: `${nodeId}_parent_${i + 1}`,
+    label: `${sourceCode}_parent_${i + 1}`,
+    properties: {
+      name: `Parent_${i + 1}`,
+      type: getParentNodeType(sourceCode),
+      created: Date.now() - 172800000,
+      status: "active"
+    },
+    type: getParentNodeType(sourceCode),
+    sourceCode
+  }));
+
+  // Generate connected nodes (level down - children)
+  const downNodes = Array.from({ length: Math.floor(Math.random() * 5) + 2 }, (_, i) => ({
+    id: `${nodeId}_child_${i + 1}`,
+    label: `${sourceCode}_child_${i + 1}`,
+    properties: {
+      name: `Child_${i + 1}`,
+      type: getChildNodeType(sourceCode),
+      created: Date.now() - 43200000,
+      status: "active"
+    },
+    type: getChildNodeType(sourceCode),
+    sourceCode
+  }));
+
+  // Generate edges
+  const edges = [
+    ...upNodes.map(node => ({
+      id: `edge_${node.id}_to_${nodeId}`,
+      source: node.id,
+      target: nodeId,
+      label: "parent_of",
+      properties: { weight: 1.0 }
+    })),
+    ...downNodes.map(node => ({
+      id: `edge_${nodeId}_to_${node.id}`,
+      source: nodeId,
+      target: node.id,
+      label: "child_of",
+      properties: { weight: 1.0 }
+    }))
+  ];
+
+  return {
+    nodes: [centerNode, ...upNodes, ...downNodes],
+    edges,
+    centerNode,
+    levels: {
+      up: upNodes,
+      down: downNodes
+    }
+  };
+}
+
+function getNodeTypeBySource(sourceCode: string): string {
+  const types = {
+    STC: "cache_entry",
+    CPT: "config_file",
+    SLC: "service_endpoint",
+    TMC: "transaction",
+    CAS: "auth_token",
+    NVL: "network_rule"
+  };
+  return types[sourceCode as keyof typeof types] || "unknown";
+}
+
+function getParentNodeType(sourceCode: string): string {
+  const types = {
+    STC: "cache_pool",
+    CPT: "config_template",
+    SLC: "service_cluster",
+    TMC: "transaction_batch",
+    CAS: "auth_policy",
+    NVL: "network_zone"
+  };
+  return types[sourceCode as keyof typeof types] || "parent";
+}
+
+function getChildNodeType(sourceCode: string): string {
+  const types = {
+    STC: "cache_item",
+    CPT: "config_value",
+    SLC: "service_instance",
+    TMC: "transaction_step",
+    CAS: "permission",
+    NVL: "network_check"
+  };
+  return types[sourceCode as keyof typeof types] || "child";
 }
