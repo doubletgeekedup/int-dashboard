@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sources API Routes
+  // Division Teams (Sources) API Routes
   app.get("/api/sources", async (req, res) => {
     try {
       const sources = await storage.getSources();
@@ -284,8 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...(process.env.EXTERNAL_API_KEY && {
             'Authorization': `Bearer ${process.env.EXTERNAL_API_KEY}`
           })
-        },
-        timeout: 10000 // 10 second timeout
+        }
       });
 
       if (!response.ok) {
@@ -330,6 +329,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching transaction details:", error);
       res.status(500).json({ error: "Failed to fetch transaction details" });
+    }
+  });
+
+  // Teams within Division Teams API Routes
+  app.get("/api/teams", async (req, res) => {
+    try {
+      const { divisionCode } = req.query;
+      const teams = await storage.getTeams(divisionCode as string);
+      res.json(teams);
+    } catch (error) {
+      console.error("Error fetching teams:", error);
+      res.status(500).json({ error: "Failed to fetch teams" });
+    }
+  });
+
+  app.get("/api/teams/:divisionCode/:teamCode", async (req, res) => {
+    try {
+      const { divisionCode, teamCode } = req.params;
+      const team = await storage.getTeam(divisionCode, teamCode);
+      if (!team) {
+        return res.status(404).json({ error: "Team not found" });
+      }
+      res.json(team);
+    } catch (error) {
+      console.error("Error fetching team:", error);
+      res.status(500).json({ error: "Failed to fetch team" });
     }
   });
 

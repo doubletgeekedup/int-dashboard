@@ -12,6 +12,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 24, 2025 - Team ID Integration**
+- Connected external work items `tid` field to team IDs within division teams
+- Updated transaction modals to show team assignment mapping
+- Added teams API endpoints for division team hierarchy access
+- Enhanced storage to manage teams within each division team
+- Team codes now correspond to transaction IDs from external work items
+
 **July 24, 2025 - Division Teams Architecture**
 - Implemented hierarchical Division Teams → Teams → Data Nodes structure
 - Updated schema to support teams within division teams concept

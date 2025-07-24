@@ -54,6 +54,7 @@ export class MemStorage implements IStorage {
   private transactions: Map<number, Transaction> = new Map();
   private knowledgeLinks: Map<number, KnowledgeLink> = new Map();
   private performanceMetrics: Map<number, PerformanceMetric> = new Map();
+  private teams: Map<number, Team> = new Map();
   
   private currentSourceId = 1;
   private currentBulletinId = 1;
@@ -61,6 +62,7 @@ export class MemStorage implements IStorage {
   private currentTransactionId = 1;
   private currentKnowledgeLinkId = 1;
   private currentMetricId = 1;
+  private currentTeamId = 1;
 
   constructor() {
     this.initializeDefaultData();
@@ -163,6 +165,26 @@ export class MemStorage implements IStorage {
 
     defaultSources.forEach(source => this.createSource(source));
 
+    // Initialize default teams for each division
+    const defaultTeams: InsertTeam[] = [
+      // STC Teams
+      { divisionCode: "STC", teamCode: "cache_mgmt", name: "Cache Management Team", description: "Manages cache entries, policies, and metrics", teamType: "cache_management", dataNodeTypes: ["cache_entries", "cache_policies", "cache_metrics"], nodeCount: 150 },
+      { divisionCode: "STC", teamCode: "sys_records", name: "System Records Team", description: "Manages system logs, audit trails, and performance data", teamType: "record_management", dataNodeTypes: ["system_logs", "audit_trails", "performance_data"], nodeCount: 320 },
+      { divisionCode: "STC", teamCode: "data_repos", name: "Data Repository Team", description: "Manages data stores, backup systems, and archival data", teamType: "repository_management", dataNodeTypes: ["data_stores", "backup_systems", "archival_data"], nodeCount: 89 },
+      
+      // CPT Teams  
+      { divisionCode: "CPT", teamCode: "config_files", name: "Configuration Files Team", description: "Manages configuration templates and deployment configs", teamType: "file_management", dataNodeTypes: ["config_templates", "environment_configs", "deployment_configs"], nodeCount: 67 },
+      { divisionCode: "CPT", teamCode: "settings_mgmt", name: "Settings Management Team", description: "Manages user settings, system settings, and feature flags", teamType: "settings_management", dataNodeTypes: ["user_settings", "system_settings", "feature_flags"], nodeCount: 234 },
+      { divisionCode: "CPT", teamCode: "policy_mgmt", name: "Policy Management Team", description: "Manages access policies, security policies, and compliance rules", teamType: "policy_management", dataNodeTypes: ["access_policies", "security_policies", "compliance_rules"], nodeCount: 145 },
+      
+      // TMC Teams
+      { divisionCode: "TMC", teamCode: "tx_processing", name: "Transaction Processing Team", description: "Handles transaction processing and workflow management", teamType: "transaction_processing", dataNodeTypes: ["active_transactions", "workflow_states", "processing_queue"], nodeCount: 1250 },
+      { divisionCode: "TMC", teamCode: "work_items", name: "Work Items Team", description: "Manages work items, task assignments, and completion tracking", teamType: "work_item_management", dataNodeTypes: ["work_items", "task_assignments", "completion_status"], nodeCount: 890 },
+      { divisionCode: "TMC", teamCode: "audit_logs", name: "Audit Logs Team", description: "Maintains audit trails, compliance logs, and transaction history", teamType: "audit_management", dataNodeTypes: ["audit_trails", "compliance_logs", "transaction_history"], nodeCount: 567 }
+    ];
+
+    defaultTeams.forEach(team => this.createTeam(team));
+
     // Initialize default knowledge links
     const defaultKnowledgeLinks: InsertKnowledgeLink[] = [
       {
@@ -227,6 +249,41 @@ export class MemStorage implements IStorage {
     const updatedSource = { ...source, ...updates, updatedAt: new Date() };
     this.sources.set(source.id, updatedSource);
     return updatedSource;
+  }
+
+  // Teams
+  async getTeams(divisionCode?: string): Promise<Team[]> {
+    const allTeams = Array.from(this.teams.values());
+    if (divisionCode) {
+      return allTeams.filter(team => team.divisionCode === divisionCode);
+    }
+    return allTeams;
+  }
+
+  async getTeam(divisionCode: string, teamCode: string): Promise<Team | undefined> {
+    return Array.from(this.teams.values()).find(
+      team => team.divisionCode === divisionCode && team.teamCode === teamCode
+    );
+  }
+
+  async createTeam(insertTeam: InsertTeam): Promise<Team> {
+    const team: Team = {
+      id: this.currentTeamId++,
+      ...insertTeam,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.teams.set(team.id, team);
+    return team;
+  }
+
+  async updateTeam(divisionCode: string, teamCode: string, updates: Partial<InsertTeam>): Promise<Team | undefined> {
+    const team = await this.getTeam(divisionCode, teamCode);
+    if (!team) return undefined;
+
+    const updatedTeam = { ...team, ...updates, updatedAt: new Date() };
+    this.teams.set(team.id, updatedTeam);
+    return updatedTeam;
   }
 
   // Bulletins

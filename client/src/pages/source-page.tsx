@@ -324,8 +324,27 @@ export default function SourcePage() {
                                   </DialogHeader>
                                   <div className="space-y-4">
                                     <div>
-                                      <label className="text-sm font-medium text-muted-foreground">Transaction ID (TID)</label>
+                                      <label className="text-sm font-medium text-muted-foreground">Team ID (TID)</label>
                                       <p className="font-mono text-sm mt-1">{item.csWorkItemDetails.tid}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-muted-foreground">Team Assignment</label>
+                                      <p className="text-sm mt-1">
+                                        {(() => {
+                                          const teamMapping = {
+                                            'cache_mgmt': 'Cache Management Team (STC)',
+                                            'sys_records': 'System Records Team (STC)',
+                                            'data_repos': 'Data Repository Team (STC)',
+                                            'config_files': 'Configuration Files Team (CPT)',
+                                            'settings_mgmt': 'Settings Management Team (CPT)',
+                                            'policy_mgmt': 'Policy Management Team (CPT)',
+                                            'tx_processing': 'Transaction Processing Team (TMC)',
+                                            'work_items': 'Work Items Team (TMC)',
+                                            'audit_logs': 'Audit Logs Team (TMC)'
+                                          };
+                                          return teamMapping[item.csWorkItemDetails.tid as keyof typeof teamMapping] || `Team ${item.csWorkItemDetails.tid}`;
+                                        })()}
+                                      </p>
                                     </div>
                                     <div>
                                       <label className="text-sm font-medium text-muted-foreground">Process Details</label>

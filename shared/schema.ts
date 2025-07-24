@@ -30,7 +30,7 @@ export const sources = pgTable("sources", {
 export const teams = pgTable("teams", {
   id: serial("id").primaryKey(),
   divisionCode: text("division_code").notNull(), // references sources.code
-  teamCode: text("team_code").notNull(),
+  teamCode: text("team_code").notNull(), // this corresponds to the 'tid' field from external work items
   name: text("name").notNull(),
   description: text("description").notNull(),
   teamType: text("team_type").notNull(), // cache_management, config_processing, auth_services, etc.
