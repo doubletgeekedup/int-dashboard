@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, Search, GitBranch, Eye, ArrowDown, ArrowUp, ArrowRight } from "lucide-react";
+import { Loader2, Search, GitBranch, Eye, ArrowDown, ArrowUp, ArrowRight, MousePointer } from "lucide-react";
 
 interface GraphNode {
   id: string;
@@ -48,6 +48,7 @@ export default function GremlinVisualizer() {
   const [selectedSource, setSelectedSource] = useState<string>("");
   const [nodeId, setNodeId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<{ sourceCode: string; nodeId: string } | null>(null);
+  const [explorationHistory, setExplorationHistory] = useState<Array<{ sourceCode: string; nodeId: string; label: string }>>([]);
 
   const { data: graphData, isLoading, error } = useQuery<GraphData>({
     queryKey: ['/api/gremlin/visualize', searchQuery?.sourceCode, searchQuery?.nodeId],
@@ -63,6 +64,41 @@ export default function GremlinVisualizer() {
     if (e.key === 'Enter') {
       handleSearch();
     }
+  };
+
+  const handleNodeExplore = (node: GraphNode) => {
+    // Add current search to history
+    if (searchQuery) {
+      const currentEntry = {
+        sourceCode: searchQuery.sourceCode,
+        nodeId: searchQuery.nodeId,
+        label: graphData?.centerNode.label || searchQuery.nodeId
+      };
+      
+      setExplorationHistory(prev => {
+        // Avoid duplicates
+        const exists = prev.some(entry => 
+          entry.sourceCode === currentEntry.sourceCode && 
+          entry.nodeId === currentEntry.nodeId
+        );
+        return exists ? prev : [...prev, currentEntry];
+      });
+    }
+
+    // Set new search query to the clicked node
+    setSelectedSource(node.sourceCode);
+    setNodeId(node.id);
+    setSearchQuery({ sourceCode: node.sourceCode, nodeId: node.id });
+  };
+
+  const handleHistoryNavigation = (historyItem: { sourceCode: string; nodeId: string; label: string }) => {
+    setSelectedSource(historyItem.sourceCode);
+    setNodeId(historyItem.nodeId);
+    setSearchQuery({ sourceCode: historyItem.sourceCode, nodeId: historyItem.nodeId });
+  };
+
+  const clearHistory = () => {
+    setExplorationHistory([]);
   };
 
   const NodePropertiesDialog = ({ node }: { node: GraphNode }) => (
@@ -120,16 +156,28 @@ export default function GremlinVisualizer() {
 
   const renderNode = (node: GraphNode, level: 'up' | 'center' | 'down') => {
     const levelColors = {
-      up: 'border-blue-200 bg-blue-50',
+      up: 'border-blue-200 bg-blue-50 hover:bg-blue-100',
       center: 'border-amber-300 bg-amber-50 ring-2 ring-amber-200',
-      down: 'border-green-200 bg-green-50'
+      down: 'border-green-200 bg-green-50 hover:bg-green-100'
     };
+
+    const isClickable = level !== 'center';
 
     return (
       <div
         key={node.id}
-        className={`p-4 rounded-lg border-2 ${levelColors[level]} min-w-[200px] max-w-[300px] relative`}
+        className={`p-4 rounded-lg border-2 ${levelColors[level]} min-w-[200px] max-w-[300px] relative transition-all duration-200 ${
+          isClickable ? 'cursor-pointer hover:shadow-md hover:scale-105' : ''
+        }`}
+        onClick={isClickable ? () => handleNodeExplore(node) : undefined}
+        title={isClickable ? `Click to explore ${node.label}` : undefined}
       >
+        {isClickable && (
+          <div className="absolute top-2 right-2 opacity-50 hover:opacity-100">
+            <MousePointer className="w-3 h-3 text-gray-500" />
+          </div>
+        )}
+        
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="outline" className="text-xs">
             {node.type}
@@ -159,6 +207,15 @@ export default function GremlinVisualizer() {
                 <NodePropertiesDialog node={node} />
               </div>
             )}
+          </div>
+        )}
+        
+        {isClickable && (
+          <div className="mt-3 pt-2 border-t border-gray-200">
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              <MousePointer className="w-3 h-3" />
+              Click to explore
+            </p>
           </div>
         )}
       </div>
@@ -212,6 +269,49 @@ export default function GremlinVisualizer() {
         </CardContent>
       </Card>
 
+      {/* Exploration History */}
+      {explorationHistory.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <GitBranch className="h-4 w-4" />
+                Exploration History
+              </CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={clearHistory}
+                className="text-xs"
+              >
+                Clear History
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {explorationHistory.map((item, index) => (
+                <Button
+                  key={`${item.sourceCode}-${item.nodeId}-${index}`}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleHistoryNavigation(item)}
+                  className="text-xs flex items-center gap-1 hover:bg-gray-100"
+                >
+                  <Badge variant="secondary" className="text-xs mr-1">
+                    {item.sourceCode}
+                  </Badge>
+                  {item.label}
+                </Button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Click any previous node to navigate back to its graph view
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {error && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -228,6 +328,11 @@ export default function GremlinVisualizer() {
               <p className="text-sm text-muted-foreground">
                 Showing connections for node <span className="font-mono">{graphData.centerNode.id}</span> in {selectedSource}
               </p>
+              <div className="mt-2 p-2 bg-blue-50 rounded-lg">
+                <p className="text-xs text-blue-700">
+                  💡 <strong>One-click exploration:</strong> Click on any parent or child node to explore its connections deeper
+                </p>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
