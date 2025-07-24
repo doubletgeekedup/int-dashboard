@@ -22,7 +22,7 @@ Preferred communication style: Simple, everyday language.
 - Updated server/index.ts to use configManager.getAppConfig().environment instead of NODE_ENV
 - Removed NODE_ENV from start-dev.js, .vscode/launch.json debugging configurations
 - Enhanced app.environment in config.yaml to support "${NODE_ENV:-development}" with fallback
-- Added external services configuration section for LISTITEMS and JANUSGRAPH_SCHEMA endpoints
+- Added external services configuration section for LISTITEMS and JANUSGRAPH_SCHEMA endpoints (URLs only, no API keys)
 - Added AI chat configuration control through config.yaml instead of environment variables
 - Updated database configuration to use config.yaml with environment variable interpolation
 - Enhanced port configuration to support both config.yaml and environment variable with proper fallback
@@ -30,6 +30,9 @@ Preferred communication style: Simple, everyday language.
 - All server services now consistently use ConfigManager for environment-agnostic configuration
 - Updated console logging to reference config.yaml instead of environment variables for clarity
 - Note: package.json scripts still use NODE_ENV (can't be modified) but application ignores it in favor of config.yaml
+- Simplified external services to use URL-only configuration (no API keys) as string values
+- Updated external service fetch operations to remove all authentication headers
+- Created comprehensive WINDOWS_SETUP.md guide with Windows-specific NODE_ENV troubleshooting
 
 **July 24, 2025 - Government-Level Knowledge Retention System**
 - Implemented secure knowledge retention system for confidential environments where external LLM data persistence is prohibited

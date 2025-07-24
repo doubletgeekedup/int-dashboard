@@ -284,9 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: {
           'Content-Type': 'application/json',
           // Add any required authentication headers here
-          ...(externalConfig.listitems.api_key && {
-            'Authorization': `Bearer ${externalConfig.listitems.api_key}`
-          })
+          // No API key needed - URLs only
         }
       });
 

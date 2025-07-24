@@ -279,7 +279,7 @@ export class SimilarityService {
 
       const response = await fetch(schemaUrl, {
         headers: {
-          'Authorization': `Bearer ${externalConfig.janusgraph_schema.api_key || ''}`,
+          // No API key needed - URLs only
           'Content-Type': 'application/json'
         }
       });

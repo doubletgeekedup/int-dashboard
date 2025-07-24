@@ -79,12 +79,10 @@ interface WebSocketConfig {
 
 interface ExternalConfig {
   listitems: {
-    url?: string;
-    api_key?: string;
+    url: string;
   };
   janusgraph_schema: {
-    url?: string;
-    api_key?: string;
+    url: string;
   };
 }
 

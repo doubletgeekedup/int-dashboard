@@ -130,11 +130,9 @@ database:
 # External Services Configuration
 external:
   listitems:
-    url: "${EXTERNAL_LISTITEMS_URL}"
-    api_key: "${EXTERNAL_API_KEY}"
+    url: "https://api.example.com/listitems"
   janusgraph_schema:
-    url: "${JANUSGRAPH_SCHEMA_URL}"
-    api_key: "${JANUSGRAPH_API_KEY}"
+    url: "https://janusgraph.example.com/schema"
 
 # AI Chat Configuration
 ai:
