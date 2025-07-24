@@ -21,6 +21,7 @@ Preferred communication style: Simple, everyday language.
 - Added proper TypeScript interfaces for AI status responses
 - Removed Quick AI Assistant box from dashboard as requested
 - Renamed "AI Assistant" to "My Assistant" throughout the system
+- Updated "Data Analysis Chat" to "My Assistant" on source pages for consistency
 - Updated status indicators: "AI Assistant Active" (green) when enabled, "Direct Mode" (yellow) when disabled
 - Fixed OpenAI service integration and chat interface functionality
 - Implemented comprehensive dual-mode chat system with environment control

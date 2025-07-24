@@ -401,7 +401,7 @@ export default function SourcePage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Activity className="w-5 h-5 text-github-purple" />
-                <span>Data Analysis Chat</span>
+                <span>My Assistant</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
