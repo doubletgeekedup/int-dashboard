@@ -182,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const externalEndpoint = externalConfig.listitems.url;
       
       if (!externalEndpoint) {
-        console.warn("EXTERNAL_LISTITEMS_URL not configured, using mock data");
+        console.warn("External listitems URL not configured in config.yaml, using mock data");
         
         // Fallback mock data when external endpoint is not available
         const mockWorkItems = [
@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fetch from external endpoint
-      const externalUrl = `${externalEndpoint}/listitems/${count}`;
+      const externalUrl = `${externalEndpoint}/${count}`;
       console.log(`Fetching work items from: ${externalUrl}`);
       
       const response = await fetch(externalUrl, {
