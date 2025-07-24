@@ -5,6 +5,7 @@ import { getStorage, getStorageInfo } from "./storage-factory";
 import { openAIService } from "./services/openai";
 import { janusGraphService } from "./services/janusgraph";
 import { configManager } from "./config";
+import { SimilarityService } from "./services/similarity-service";
 import { 
   insertBulletinSchema, insertChatMessageSchema, 
   insertTransactionSchema, insertKnowledgeLinkSchema 
@@ -14,8 +15,9 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
-  // Initialize storage
+  // Initialize storage and similarity service
   const storage = getStorage();
+  const similarityService = new SimilarityService(storage);
 
   // Initialize JanusGraph connection
   janusGraphService.connect().catch(console.error);
@@ -685,6 +687,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ diagnostics, timestamp: new Date() });
     } catch (error) {
       res.status(500).json({ error: "Failed to run system diagnostics" });
+    }
+  });
+
+  // Similarity Analysis and Impact Assessment API Routes
+  app.post("/api/similarity/analyze", async (req, res) => {
+    try {
+      const { nodeData, threshold = 0.7 } = req.body;
+      
+      if (!nodeData) {
+        return res.status(400).json({ error: "Node data is required" });
+      }
+
+      const similarNodes = await similarityService.findSimilarNodes(nodeData, threshold);
+      res.json({
+        similarNodes,
+        totalFound: similarNodes.length,
+        threshold
+      });
+    } catch (error) {
+      console.error("Error in similarity analysis:", error);
+      res.status(500).json({ error: "Failed to perform similarity analysis" });
+    }
+  });
+
+  app.get("/api/impact-assessment/:nodeId", async (req, res) => {
+    try {
+      const { nodeId } = req.params;
+      
+      if (!nodeId) {
+        return res.status(400).json({ error: "Node ID is required" });
+      }
+
+      const impactAssessment = await similarityService.performImpactAssessment(nodeId);
+      res.json(impactAssessment);
+    } catch (error) {
+      console.error("Error in impact assessment:", error);
+      
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ error: error.message });
+      }
+      
+      res.status(500).json({ error: "Failed to perform impact assessment" });
+    }
+  });
+
+  app.get("/api/nodes/search", async (req, res) => {
+    try {
+      const { query, type, sourceCode } = req.query;
+      
+      const allThreads = await storage.getThreads();
+      const foundNodes: any[] = [];
+
+      for (const thread of allThreads) {
+        // Skip if sourceCode filter specified and doesn't match
+        if (sourceCode && !thread.tqName.startsWith(sourceCode as string)) {
+          continue;
+        }
+
+        const componentNodes = Array.isArray(thread.componentNode) ? thread.componentNode : [];
+        
+        for (const cNode of componentNodes) {
+          if (cNode.node && Array.isArray(cNode.node)) {
+            for (const node of cNode.node) {
+              let matches = true;
+              
+              // Apply filters
+              if (type && node.type !== type) matches = false;
+              if (query && !JSON.stringify(node).toLowerCase().includes((query as string).toLowerCase())) {
+                matches = false;
+              }
+              
+              if (matches) {
+                foundNodes.push({
+                  ...node,
+                  threadId: thread.threadId,
+                  sourceCode: thread.tqName.split('_')[0],
+                  tqName: thread.tqName
+                });
+              }
+            }
+          }
+        }
+      }
+
+      res.json({
+        nodes: foundNodes,
+        totalFound: foundNodes.length,
+        filters: { query, type, sourceCode }
+      });
+    } catch (error) {
+      console.error("Error searching nodes:", error);
+      res.status(500).json({ error: "Failed to search nodes" });
     }
   });
 
