@@ -25,16 +25,16 @@ export const sources = pgTable("sources", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Teams within Division Teams
-// Each team is a cluster of data nodes grouped by type
-export const teams = pgTable("teams", {
+// Threads within Sources of Truth
+// Each thread is a cluster of related data nodes
+export const threads = pgTable("threads", {
   id: serial("id").primaryKey(),
-  divisionCode: text("division_code").notNull(), // references sources.code
-  teamCode: text("team_code").notNull(), // this corresponds to the 'tid' field from external work items
+  sourceCode: text("source_code").notNull(), // references sources.code
+  threadId: text("thread_id").notNull(), // this corresponds to the 'tid' field from external work items
   name: text("name").notNull(),
   description: text("description").notNull(),
-  teamType: text("team_type").notNull(), // cache_management, config_processing, auth_services, etc.
-  dataNodeTypes: text("data_node_types").array(), // types of data nodes this team clusters
+  threadType: text("thread_type").notNull(), // cache_management, config_processing, auth_services, etc.
+  dataNodeTypes: text("data_node_types").array(), // types of data nodes this thread clusters
   nodeCount: integer("node_count").default(0),
   status: text("status").notNull().default("active"),
   lastActivity: timestamp("last_activity").defaultNow(),
@@ -136,9 +136,18 @@ export const insertPerformanceMetricSchema = createInsertSchema(performanceMetri
   timestamp: true,
 });
 
+export const insertThreadSchema = createInsertSchema(threads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type Source = typeof sources.$inferSelect;
 export type InsertSource = z.infer<typeof insertSourceSchema>;
+
+export type Thread = typeof threads.$inferSelect;
+export type InsertThread = z.infer<typeof insertThreadSchema>;
 
 export type Bulletin = typeof bulletins.$inferSelect;
 export type InsertBulletin = z.infer<typeof insertBulletinSchema>;

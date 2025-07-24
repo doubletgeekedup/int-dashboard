@@ -324,25 +324,25 @@ export default function SourcePage() {
                                   </DialogHeader>
                                   <div className="space-y-4">
                                     <div>
-                                      <label className="text-sm font-medium text-muted-foreground">Team ID (TID)</label>
+                                      <label className="text-sm font-medium text-muted-foreground">Thread ID (TID)</label>
                                       <p className="font-mono text-sm mt-1">{item.csWorkItemDetails.tid}</p>
                                     </div>
                                     <div>
-                                      <label className="text-sm font-medium text-muted-foreground">Team Assignment</label>
+                                      <label className="text-sm font-medium text-muted-foreground">Thread Assignment</label>
                                       <p className="text-sm mt-1">
                                         {(() => {
-                                          const teamMapping = {
-                                            'cache_mgmt': 'Cache Management Team (STC)',
-                                            'sys_records': 'System Records Team (STC)',
-                                            'data_repos': 'Data Repository Team (STC)',
-                                            'config_files': 'Configuration Files Team (CPT)',
-                                            'settings_mgmt': 'Settings Management Team (CPT)',
-                                            'policy_mgmt': 'Policy Management Team (CPT)',
-                                            'tx_processing': 'Transaction Processing Team (TMC)',
-                                            'work_items': 'Work Items Team (TMC)',
-                                            'audit_logs': 'Audit Logs Team (TMC)'
+                                          const threadMapping = {
+                                            'cache_mgmt': 'Cache Management Thread (STC)',
+                                            'sys_records': 'System Records Thread (STC)',
+                                            'data_repos': 'Data Repository Thread (STC)',
+                                            'config_files': 'Configuration Files Thread (CPT)',
+                                            'settings_mgmt': 'Settings Management Thread (CPT)',
+                                            'policy_mgmt': 'Policy Management Thread (CPT)',
+                                            'tx_processing': 'Transaction Processing Thread (TMC)',
+                                            'work_items': 'Work Items Thread (TMC)',
+                                            'audit_logs': 'Audit Logs Thread (TMC)'
                                           };
-                                          return teamMapping[item.csWorkItemDetails.tid as keyof typeof teamMapping] || `Team ${item.csWorkItemDetails.tid}`;
+                                          return threadMapping[item.csWorkItemDetails.tid as keyof typeof threadMapping] || `Thread ${item.csWorkItemDetails.tid}`;
                                         })()}
                                       </p>
                                     </div>

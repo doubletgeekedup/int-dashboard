@@ -12,12 +12,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 24, 2025 - Team ID Integration**
-- Connected external work items `tid` field to team IDs within division teams
-- Updated transaction modals to show team assignment mapping
-- Added teams API endpoints for division team hierarchy access
-- Enhanced storage to manage teams within each division team
-- Team codes now correspond to transaction IDs from external work items
+**July 24, 2025 - Threads Architecture**  
+- Clarified that Teams = Threads (clusters of related data nodes)
+- Updated all terminology from "teams" to "threads" throughout system
+- Each Source of Truth contains multiple threads that cluster related data nodes
+- Thread IDs (tid) from external work items now map to specific threads
+- Updated API endpoints from /api/teams to /api/threads
+- Enhanced transaction modals to show thread assignment mapping
 
 **July 24, 2025 - Division Teams Architecture**
 - Implemented hierarchical Division Teams → Teams → Data Nodes structure
@@ -90,14 +91,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Key Components
 
-### Division Teams Management
-The system monitors six main division teams, each containing multiple teams that cluster data nodes by type:
-- **STC (System Truth Cache)**: Division team managing system operations through cache management, system records, and data repository teams
-- **CPT (Configuration Processing Tool)**: Division team managing configuration operations through file management, settings, and policy teams
-- **SLC (Service Layer Coordinator)**: Division team managing service operations through orchestration, endpoint, and coordination teams
-- **TMC (Transaction Management Center)**: Division team managing transaction operations through processing, monitoring, and audit teams
-- **CAS (Central Authentication Service)**: Division team managing authentication operations through credential, permission, and token teams
-- **NVL (Network Validation Layer)**: Division team managing network operations through validation, connectivity, and monitoring teams
+### Sources of Truth Management
+The system monitors six main Sources of Truth, each containing multiple threads that cluster related data nodes:
+- **STC (System Truth Cache)**: Source managing system operations through cache management, system records, and data repository threads
+- **CPT (Configuration Processing Tool)**: Source managing configuration operations through file management, settings, and policy threads
+- **SLC (Service Layer Coordinator)**: Source managing service operations through orchestration, endpoint, and coordination threads
+- **TMC (Transaction Management Center)**: Source managing transaction operations through processing, monitoring, and audit threads
+- **CAS (Central Authentication Service)**: Source managing authentication operations through credential, permission, and token threads
+- **NVL (Network Validation Layer)**: Source managing network operations through validation, connectivity, and monitoring threads
 
 ### Core Features
 1. **Dashboard**: Real-time metrics, performance charts, system health overview

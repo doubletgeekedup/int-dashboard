@@ -332,29 +332,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Teams within Division Teams API Routes
-  app.get("/api/teams", async (req, res) => {
+  // Threads within Sources of Truth API Routes
+  app.get("/api/threads", async (req, res) => {
     try {
-      const { divisionCode } = req.query;
-      const teams = await storage.getTeams(divisionCode as string);
-      res.json(teams);
+      const { sourceCode } = req.query;
+      const threads = await storage.getThreads(sourceCode as string);
+      res.json(threads);
     } catch (error) {
-      console.error("Error fetching teams:", error);
-      res.status(500).json({ error: "Failed to fetch teams" });
+      console.error("Error fetching threads:", error);
+      res.status(500).json({ error: "Failed to fetch threads" });
     }
   });
 
-  app.get("/api/teams/:divisionCode/:teamCode", async (req, res) => {
+  app.get("/api/threads/:sourceCode/:threadId", async (req, res) => {
     try {
-      const { divisionCode, teamCode } = req.params;
-      const team = await storage.getTeam(divisionCode, teamCode);
-      if (!team) {
-        return res.status(404).json({ error: "Team not found" });
+      const { sourceCode, threadId } = req.params;
+      const thread = await storage.getThread(sourceCode, threadId);
+      if (!thread) {
+        return res.status(404).json({ error: "Thread not found" });
       }
-      res.json(team);
+      res.json(thread);
     } catch (error) {
-      console.error("Error fetching team:", error);
-      res.status(500).json({ error: "Failed to fetch team" });
+      console.error("Error fetching thread:", error);
+      res.status(500).json({ error: "Failed to fetch thread" });
     }
   });
 

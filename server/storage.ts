@@ -1,23 +1,23 @@
 import { 
-  sources, teams, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics,
-  type Source, type InsertSource, type Team, type InsertTeam, type Bulletin, type InsertBulletin,
+  sources, threads, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics,
+  type Source, type InsertSource, type Thread, type InsertThread, type Bulletin, type InsertBulletin,
   type ChatMessage, type InsertChatMessage, type Transaction, type InsertTransaction,
   type KnowledgeLink, type InsertKnowledgeLink, type PerformanceMetric, type InsertPerformanceMetric,
   type DashboardStats, type SourceStats
 } from "@shared/schema";
 
 export interface IStorage {
-  // Division Teams (Sources)
+  // Sources of Truth
   getSources(): Promise<Source[]>;
   getSource(code: string): Promise<Source | undefined>;
   createSource(source: InsertSource): Promise<Source>;
   updateSource(code: string, updates: Partial<InsertSource>): Promise<Source | undefined>;
   
-  // Teams within Division Teams
-  getTeams(divisionCode?: string): Promise<Team[]>;
-  getTeam(divisionCode: string, teamCode: string): Promise<Team | undefined>;
-  createTeam(team: InsertTeam): Promise<Team>;
-  updateTeam(divisionCode: string, teamCode: string, updates: Partial<InsertTeam>): Promise<Team | undefined>;
+  // Threads within Sources of Truth
+  getThreads(sourceCode?: string): Promise<Thread[]>;
+  getThread(sourceCode: string, threadId: string): Promise<Thread | undefined>;
+  createThread(thread: InsertThread): Promise<Thread>;
+  updateThread(sourceCode: string, threadId: string, updates: Partial<InsertThread>): Promise<Thread | undefined>;
   
   // Bulletins
   getBulletins(limit?: number, priority?: string, category?: string): Promise<Bulletin[]>;
@@ -54,7 +54,7 @@ export class MemStorage implements IStorage {
   private transactions: Map<number, Transaction> = new Map();
   private knowledgeLinks: Map<number, KnowledgeLink> = new Map();
   private performanceMetrics: Map<number, PerformanceMetric> = new Map();
-  private teams: Map<number, Team> = new Map();
+  private threads: Map<number, Thread> = new Map();
   
   private currentSourceId = 1;
   private currentBulletinId = 1;
@@ -62,7 +62,7 @@ export class MemStorage implements IStorage {
   private currentTransactionId = 1;
   private currentKnowledgeLinkId = 1;
   private currentMetricId = 1;
-  private currentTeamId = 1;
+  private currentThreadId = 1;
 
   constructor() {
     this.initializeDefaultData();
@@ -165,25 +165,25 @@ export class MemStorage implements IStorage {
 
     defaultSources.forEach(source => this.createSource(source));
 
-    // Initialize default teams for each division
-    const defaultTeams: InsertTeam[] = [
-      // STC Teams
-      { divisionCode: "STC", teamCode: "cache_mgmt", name: "Cache Management Team", description: "Manages cache entries, policies, and metrics", teamType: "cache_management", dataNodeTypes: ["cache_entries", "cache_policies", "cache_metrics"], nodeCount: 150 },
-      { divisionCode: "STC", teamCode: "sys_records", name: "System Records Team", description: "Manages system logs, audit trails, and performance data", teamType: "record_management", dataNodeTypes: ["system_logs", "audit_trails", "performance_data"], nodeCount: 320 },
-      { divisionCode: "STC", teamCode: "data_repos", name: "Data Repository Team", description: "Manages data stores, backup systems, and archival data", teamType: "repository_management", dataNodeTypes: ["data_stores", "backup_systems", "archival_data"], nodeCount: 89 },
+    // Initialize default threads for each source of truth
+    const defaultThreads: InsertThread[] = [
+      // STC Threads
+      { sourceCode: "STC", threadId: "cache_mgmt", name: "Cache Management Thread", description: "Clusters cache entries, policies, and metrics data nodes", threadType: "cache_management", dataNodeTypes: ["cache_entries", "cache_policies", "cache_metrics"], nodeCount: 150 },
+      { sourceCode: "STC", threadId: "sys_records", name: "System Records Thread", description: "Clusters system logs, audit trails, and performance data nodes", threadType: "record_management", dataNodeTypes: ["system_logs", "audit_trails", "performance_data"], nodeCount: 320 },
+      { sourceCode: "STC", threadId: "data_repos", name: "Data Repository Thread", description: "Clusters data stores, backup systems, and archival data nodes", threadType: "repository_management", dataNodeTypes: ["data_stores", "backup_systems", "archival_data"], nodeCount: 89 },
       
-      // CPT Teams  
-      { divisionCode: "CPT", teamCode: "config_files", name: "Configuration Files Team", description: "Manages configuration templates and deployment configs", teamType: "file_management", dataNodeTypes: ["config_templates", "environment_configs", "deployment_configs"], nodeCount: 67 },
-      { divisionCode: "CPT", teamCode: "settings_mgmt", name: "Settings Management Team", description: "Manages user settings, system settings, and feature flags", teamType: "settings_management", dataNodeTypes: ["user_settings", "system_settings", "feature_flags"], nodeCount: 234 },
-      { divisionCode: "CPT", teamCode: "policy_mgmt", name: "Policy Management Team", description: "Manages access policies, security policies, and compliance rules", teamType: "policy_management", dataNodeTypes: ["access_policies", "security_policies", "compliance_rules"], nodeCount: 145 },
+      // CPT Threads  
+      { sourceCode: "CPT", threadId: "config_files", name: "Configuration Files Thread", description: "Clusters configuration templates and deployment config data nodes", threadType: "file_management", dataNodeTypes: ["config_templates", "environment_configs", "deployment_configs"], nodeCount: 67 },
+      { sourceCode: "CPT", threadId: "settings_mgmt", name: "Settings Management Thread", description: "Clusters user settings, system settings, and feature flag data nodes", threadType: "settings_management", dataNodeTypes: ["user_settings", "system_settings", "feature_flags"], nodeCount: 234 },
+      { sourceCode: "CPT", threadId: "policy_mgmt", name: "Policy Management Thread", description: "Clusters access policies, security policies, and compliance rule data nodes", threadType: "policy_management", dataNodeTypes: ["access_policies", "security_policies", "compliance_rules"], nodeCount: 145 },
       
-      // TMC Teams
-      { divisionCode: "TMC", teamCode: "tx_processing", name: "Transaction Processing Team", description: "Handles transaction processing and workflow management", teamType: "transaction_processing", dataNodeTypes: ["active_transactions", "workflow_states", "processing_queue"], nodeCount: 1250 },
-      { divisionCode: "TMC", teamCode: "work_items", name: "Work Items Team", description: "Manages work items, task assignments, and completion tracking", teamType: "work_item_management", dataNodeTypes: ["work_items", "task_assignments", "completion_status"], nodeCount: 890 },
-      { divisionCode: "TMC", teamCode: "audit_logs", name: "Audit Logs Team", description: "Maintains audit trails, compliance logs, and transaction history", teamType: "audit_management", dataNodeTypes: ["audit_trails", "compliance_logs", "transaction_history"], nodeCount: 567 }
+      // TMC Threads
+      { sourceCode: "TMC", threadId: "tx_processing", name: "Transaction Processing Thread", description: "Clusters transaction processing and workflow management data nodes", threadType: "transaction_processing", dataNodeTypes: ["active_transactions", "workflow_states", "processing_queue"], nodeCount: 1250 },
+      { sourceCode: "TMC", threadId: "work_items", name: "Work Items Thread", description: "Clusters work items, task assignments, and completion tracking data nodes", threadType: "work_item_management", dataNodeTypes: ["work_items", "task_assignments", "completion_status"], nodeCount: 890 },
+      { sourceCode: "TMC", threadId: "audit_logs", name: "Audit Logs Thread", description: "Clusters audit trails, compliance logs, and transaction history data nodes", threadType: "audit_management", dataNodeTypes: ["audit_trails", "compliance_logs", "transaction_history"], nodeCount: 567 }
     ];
 
-    defaultTeams.forEach(team => this.createTeam(team));
+    defaultThreads.forEach(thread => this.createThread(thread));
 
     // Initialize default knowledge links
     const defaultKnowledgeLinks: InsertKnowledgeLink[] = [
@@ -251,39 +251,39 @@ export class MemStorage implements IStorage {
     return updatedSource;
   }
 
-  // Teams
-  async getTeams(divisionCode?: string): Promise<Team[]> {
-    const allTeams = Array.from(this.teams.values());
-    if (divisionCode) {
-      return allTeams.filter(team => team.divisionCode === divisionCode);
+  // Threads
+  async getThreads(sourceCode?: string): Promise<Thread[]> {
+    const allThreads = Array.from(this.threads.values());
+    if (sourceCode) {
+      return allThreads.filter(thread => thread.sourceCode === sourceCode);
     }
-    return allTeams;
+    return allThreads;
   }
 
-  async getTeam(divisionCode: string, teamCode: string): Promise<Team | undefined> {
-    return Array.from(this.teams.values()).find(
-      team => team.divisionCode === divisionCode && team.teamCode === teamCode
+  async getThread(sourceCode: string, threadId: string): Promise<Thread | undefined> {
+    return Array.from(this.threads.values()).find(
+      thread => thread.sourceCode === sourceCode && thread.threadId === threadId
     );
   }
 
-  async createTeam(insertTeam: InsertTeam): Promise<Team> {
-    const team: Team = {
-      id: this.currentTeamId++,
-      ...insertTeam,
+  async createThread(insertThread: InsertThread): Promise<Thread> {
+    const thread: Thread = {
+      id: this.currentThreadId++,
+      ...insertThread,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    this.teams.set(team.id, team);
-    return team;
+    this.threads.set(thread.id, thread);
+    return thread;
   }
 
-  async updateTeam(divisionCode: string, teamCode: string, updates: Partial<InsertTeam>): Promise<Team | undefined> {
-    const team = await this.getTeam(divisionCode, teamCode);
-    if (!team) return undefined;
+  async updateThread(sourceCode: string, threadId: string, updates: Partial<InsertThread>): Promise<Thread | undefined> {
+    const thread = await this.getThread(sourceCode, threadId);
+    if (!thread) return undefined;
 
-    const updatedTeam = { ...team, ...updates, updatedAt: new Date() };
-    this.teams.set(team.id, updatedTeam);
-    return updatedTeam;
+    const updatedThread = { ...thread, ...updates, updatedAt: new Date() };
+    this.threads.set(thread.id, updatedThread);
+    return updatedThread;
   }
 
   // Bulletins
