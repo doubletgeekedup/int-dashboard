@@ -1,4 +1,5 @@
 import type { IStorage } from "../storage";
+import { configManager } from '../config';
 
 export interface NodeSimilarity {
   nodeId: string;
@@ -269,15 +270,16 @@ export class SimilarityService {
     }
 
     try {
-      const schemaUrl = process.env.JANUSGRAPH_SCHEMA_URL;
+      const externalConfig = configManager.getExternalConfig();
+      const schemaUrl = externalConfig.janusgraph_schema.url;
       if (!schemaUrl) {
-        console.warn('JANUSGRAPH_SCHEMA_URL not configured, using local thread data only');
+        console.warn('JANUSGRAPH_SCHEMA_URL not configured in config.yaml, using local thread data only');
         return null;
       }
 
       const response = await fetch(schemaUrl, {
         headers: {
-          'Authorization': `Bearer ${process.env.JANUSGRAPH_API_KEY || ''}`,
+          'Authorization': `Bearer ${externalConfig.janusgraph_schema.api_key || ''}`,
           'Content-Type': 'application/json'
         }
       });

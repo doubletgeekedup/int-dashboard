@@ -7,9 +7,9 @@ export class GraphQLJanusClient {
   private isConnected: boolean = false;
 
   constructor() {
-    const config = configManager.getConfig();
-    // JanusGraph typically exposes GraphQL on port 8182 with /graphql endpoint
-    this.endpoint = process.env.JANUSGRAPH_GRAPHQL_URL || 'http://localhost:8182/graphql';
+    const config = configManager.getJanusGraphConfig();
+    // Use config.yaml connection URL or fallback to default
+    this.endpoint = config.connection.url.replace('ws://', 'http://').replace('/gremlin', '/graphql');
     
     this.client = new GraphQLClient(this.endpoint, {
       headers: {

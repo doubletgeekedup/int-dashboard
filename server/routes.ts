@@ -177,8 +177,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Count must be a positive number" });
       }
 
-      // Get external endpoint URL from environment
-      const externalEndpoint = process.env.EXTERNAL_LISTITEMS_URL;
+      // Get external endpoint URL from config
+      const externalConfig = configManager.getExternalConfig();
+      const externalEndpoint = externalConfig.listitems.url;
       
       if (!externalEndpoint) {
         console.warn("EXTERNAL_LISTITEMS_URL not configured, using mock data");
@@ -283,8 +284,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: {
           'Content-Type': 'application/json',
           // Add any required authentication headers here
-          ...(process.env.EXTERNAL_API_KEY && {
-            'Authorization': `Bearer ${process.env.EXTERNAL_API_KEY}`
+          ...(externalConfig.listitems.api_key && {
+            'Authorization': `Bearer ${externalConfig.listitems.api_key}`
           })
         }
       });
@@ -427,7 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/chat/ai-status", async (req, res) => {
     try {
       const aiEnabled = configManager.isAIChatEnabled();
-      const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+      const hasOpenAIKey = !!configManager.getOpenAIConfig().api_key;
       
       res.json({
         enabled: aiEnabled,

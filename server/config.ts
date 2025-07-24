@@ -77,6 +77,21 @@ interface WebSocketConfig {
   reconnect_delay_base: number;
 }
 
+interface ExternalConfig {
+  listitems: {
+    url?: string;
+    api_key?: string;
+  };
+  janusgraph_schema: {
+    url?: string;
+    api_key?: string;
+  };
+}
+
+interface AIConfig {
+  chat_enabled: string;
+}
+
 interface Config {
   app: AppConfig;
   openai: OpenAIConfig;
@@ -84,6 +99,8 @@ interface Config {
   janusgraph: JanusGraphConfig;
   sources: Record<string, SourceConfig>;
   database: DatabaseConfig;
+  external: ExternalConfig;
+  ai: AIConfig;
   websocket: WebSocketConfig;
   logging: {
     level: string;
@@ -186,6 +203,19 @@ class ConfigManager {
     return this.config.websocket;
   }
 
+  public getExternalConfig(): ExternalConfig {
+    return this.config.external;
+  }
+
+  public getAIConfig(): AIConfig {
+    return this.config.ai;
+  }
+
+  public getPort(): number {
+    // Support both config.yaml and environment variable with fallback
+    return this.config.app.port || parseInt(process.env.PORT || '5000', 10);
+  }
+
   public isFeatureEnabled(feature: string): boolean {
     switch (feature) {
       case 'openai_chat':
@@ -197,14 +227,14 @@ class ConfigManager {
       case 'janusgraph_remote':
         return this.config.janusgraph.enabled && this.config.janusgraph.useRemote;
       case 'ai_chat':
-        return process.env.AI_CHAT_ENABLED === 'true';
+        return this.config.ai.chat_enabled === 'true';
       default:
         return false;
     }
   }
 
   public isAIChatEnabled(): boolean {
-    return process.env.AI_CHAT_ENABLED === 'true';
+    return this.config.ai.chat_enabled === 'true';
   }
 }
 

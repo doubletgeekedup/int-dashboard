@@ -127,6 +127,19 @@ database:
   migrations:
     auto_run: true
 
+# External Services Configuration
+external:
+  listitems:
+    url: "${EXTERNAL_LISTITEMS_URL}"
+    api_key: "${EXTERNAL_API_KEY}"
+  janusgraph_schema:
+    url: "${JANUSGRAPH_SCHEMA_URL}"
+    api_key: "${JANUSGRAPH_API_KEY}"
+
+# AI Chat Configuration
+ai:
+  chat_enabled: "${AI_CHAT_ENABLED}"
+
 # WebSocket Configuration
 websocket:
   path: "/ws"

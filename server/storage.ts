@@ -548,6 +548,8 @@ export class MemStorage implements IStorage {
 import { DatabaseStorage } from './storage/database-storage';
 
 // Use database storage when DATABASE_URL is available, otherwise use in-memory storage
-export const storage = process.env.DATABASE_URL 
+import { configManager } from './config';
+
+export const storage = configManager.getDatabaseConfig().url 
   ? new DatabaseStorage() 
   : new MemStorage();

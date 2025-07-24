@@ -11,8 +11,9 @@ export function initializeStorage(): IStorage {
   }
 
   const config = configManager.getJanusGraphConfig();
-  const databaseUrl = process.env.DATABASE_URL;
-  const janusGraphUrl = process.env.JANUSGRAPH_GRAPHQL_URL;
+  const databaseConfig = configManager.getDatabaseConfig();
+  const databaseUrl = databaseConfig.url;
+  const janusGraphUrl = config.connection.url.replace('ws://', 'http://').replace('/gremlin', '/graphql');
   
   // Check if useRemote is enabled in config
   if (config.enabled && config.useRemote) {
@@ -33,8 +34,8 @@ export function initializeStorage(): IStorage {
     }
 
     console.log('⚠️  useRemote is true but no remote database configured - falling back to in-memory storage');
-    console.log('   To use JanusGraph GraphQL, set JANUSGRAPH_GRAPHQL_URL environment variable');
-    console.log('   To use PostgreSQL, set DATABASE_URL environment variable');
+    console.log('   To use JanusGraph GraphQL, configure JanusGraph connection in config.yaml');
+    console.log('   To use PostgreSQL, configure database URL in config.yaml');
     storage = new MemStorage();
     return storage;
   }
@@ -61,8 +62,9 @@ export function getStorageInfo(): {
   message: string;
 } {
   const config = configManager.getJanusGraphConfig();
-  const databaseUrl = process.env.DATABASE_URL;
-  const janusGraphUrl = process.env.JANUSGRAPH_GRAPHQL_URL;
+  const databaseConfig = configManager.getDatabaseConfig();
+  const databaseUrl = databaseConfig.url;
+  const janusGraphUrl = config.connection.url.replace('ws://', 'http://').replace('/gremlin', '/graphql');
   
   if (!config.useRemote) {
     return {
