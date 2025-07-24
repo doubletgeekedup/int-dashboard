@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -172,3 +172,71 @@ export type SourceStats = {
   responseTime: string;
   uptime: string;
 };
+
+export type SelectKnowledgeLink = typeof knowledgeLinks.$inferSelect;
+
+// Knowledge Retention Tables for Government-Level Security
+export const knowledgeEntries = pgTable("knowledge_entries", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category").notNull().default("general"), // system, analysis, insights, procedures
+  priority: text("priority").notNull().default("medium"), // low, medium, high, critical
+  tags: text("tags").array().default([]),
+  sourceCode: text("source_code"), // STC, CPT, SLC, TMC, CAS, NVL
+  sessionId: text("session_id"),
+  isConfidential: boolean("is_confidential").default(false),
+  retentionPolicy: text("retention_policy").default("permanent"), // temporary, standard, permanent
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
+  accessCount: integer("access_count").default(0),
+});
+
+export const knowledgeRelations = pgTable("knowledge_relations", {
+  id: serial("id").primaryKey(),
+  fromEntryId: integer("from_entry_id").references(() => knowledgeEntries.id),
+  toEntryId: integer("to_entry_id").references(() => knowledgeEntries.id),
+  relationType: text("relation_type").notNull(), // similar, depends_on, contradicts, updates
+  confidence: real("confidence").default(0.5), // 0.0 to 1.0
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const knowledgeAccess = pgTable("knowledge_access", {
+  id: serial("id").primaryKey(),
+  entryId: integer("entry_id").references(() => knowledgeEntries.id),
+  accessType: text("access_type").notNull(), // view, edit, search, reference
+  sessionId: text("session_id"),
+  sourceCode: text("source_code"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Zod schemas for knowledge entries
+export const insertKnowledgeEntrySchema = createInsertSchema(knowledgeEntries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastAccessedAt: true,
+  accessCount: true,
+});
+
+export const insertKnowledgeRelationSchema = createInsertSchema(knowledgeRelations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertKnowledgeAccessSchema = createInsertSchema(knowledgeAccess).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type KnowledgeEntry = typeof knowledgeEntries.$inferSelect;
+export type InsertKnowledgeEntry = z.infer<typeof insertKnowledgeEntrySchema>;
+export type KnowledgeRelation = typeof knowledgeRelations.$inferSelect;
+export type InsertKnowledgeRelation = z.infer<typeof insertKnowledgeRelationSchema>;
+export type KnowledgeAccess = typeof knowledgeAccess.$inferSelect;
+export type InsertKnowledgeAccess = z.infer<typeof insertKnowledgeAccessSchema>;
+
+export * from "drizzle-zod";

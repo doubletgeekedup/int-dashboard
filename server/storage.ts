@@ -545,5 +545,9 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Export the MemStorage class for use by storage factory
-// The actual storage instance is created by storage-factory.ts
+import { DatabaseStorage } from './storage/database-storage';
+
+// Use database storage when DATABASE_URL is available, otherwise use in-memory storage
+export const storage = process.env.DATABASE_URL 
+  ? new DatabaseStorage() 
+  : new MemStorage();

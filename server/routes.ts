@@ -732,5 +732,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Knowledge Retention API for Government-Level Security
+  app.post('/api/knowledge', async (req, res) => {
+    try {
+      const { knowledgeRetentionService } = await import('./services/knowledge-retention');
+      const { insertKnowledgeEntrySchema } = await import('@shared/schema');
+      
+      const knowledgeData = insertKnowledgeEntrySchema.parse(req.body);
+      const entry = await knowledgeRetentionService.storeKnowledge({
+        ...knowledgeData,
+        metadata: {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        }
+      });
+      res.json(entry);
+    } catch (error) {
+      console.error('Knowledge storage error:', error);
+      res.status(500).json({ error: 'Failed to store knowledge' });
+    }
+  });
+
+  // Search knowledge base
+  app.get('/api/knowledge/search', async (req, res) => {
+    try {
+      const { knowledgeRetentionService } = await import('./services/knowledge-retention');
+      
+      const query = {
+        searchText: req.query.q as string,
+        category: req.query.category as string,
+        priority: req.query.priority as string,
+        sourceCode: req.query.source as string,
+        isConfidential: req.query.confidential === 'true',
+        limit: parseInt(req.query.limit as string) || 50,
+        offset: parseInt(req.query.offset as string) || 0,
+        tags: req.query.tags ? (req.query.tags as string).split(',') : undefined
+      };
+
+      const result = await knowledgeRetentionService.searchKnowledge(query, {
+        sessionId: req.query.sessionId as string,
+        sourceCode: req.query.source as string,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('Knowledge search error:', error);
+      res.status(500).json({ error: 'Failed to search knowledge' });
+    }
+  });
+
+  // Get knowledge statistics for government reporting
+  app.get('/api/knowledge/stats', async (req, res) => {
+    try {
+      const { knowledgeRetentionService } = await import('./services/knowledge-retention');
+      const stats = await knowledgeRetentionService.getKnowledgeStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Knowledge stats error:', error);
+      res.status(500).json({ error: 'Failed to get knowledge statistics' });
+    }
+  });
+
   return httpServer;
 }
