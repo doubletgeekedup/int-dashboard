@@ -35,12 +35,12 @@ export class NonAIChatService {
       return this.handleDependencyRequest(message, lowerMessage);
     }
 
-    // Check for node search requests
-    if (this.isNodeSearchRequest(lowerMessage)) {
+    // Check for node search requests (but not if it's asking for sources)
+    if (this.isNodeSearchRequest(lowerMessage) && !lowerMessage.includes('source') && !lowerMessage.includes('truth')) {
       return this.handleNodeSearchRequest(message, lowerMessage);
     }
 
-    // General system information
+    // General system information (includes new commands)
     return this.handleGeneralRequest(message, sourceCode);
   }
 
@@ -169,19 +169,58 @@ export class NonAIChatService {
    * Handle general system information requests
    */
   private async handleGeneralRequest(message: string, sourceCode?: string): Promise<ChatResponse> {
+    const lowerMessage = message.toLowerCase();
+    
+    // Handle help commands
+    if (lowerMessage.includes('help') || lowerMessage.includes('command')) {
+      return await this.handleHelpRequest(sourceCode);
+    }
+
+    // Handle node counting requests
+    if (lowerMessage.includes('how many') && lowerMessage.includes('node')) {
+      return await this.handleNodeCountRequest(message);
+    }
+
+    // Handle node description requests
+    if ((lowerMessage.includes('description') || lowerMessage.includes('describe')) && lowerMessage.includes('node')) {
+      return await this.handleNodeDescriptionRequest(message);
+    }
+
+    // Handle system status requests
+    if (lowerMessage.includes('status') || lowerMessage.includes('system')) {
+      return await this.handleSystemStatusRequest(sourceCode);
+    }
+
+    // Handle list sources requests
+    if (lowerMessage.includes('list') && (lowerMessage.includes('source') || lowerMessage.includes('truth'))) {
+      return await this.handleListSourcesRequest();
+    }
+
+    // Default help response
+    return await this.handleHelpRequest(sourceCode);
+  }
+
+  /**
+   * Handle help command requests
+   */
+  private async handleHelpRequest(sourceCode?: string): Promise<ChatResponse> {
     try {
       const sources = await this.storage.getSources();
       const threads = await this.storage.getThreads();
+      const nodeCount = await this.getNodeCount();
       
       let response = "I can help you with:\n\n";
+      response += "• Node Analysis: 'How many [type] nodes', 'What's the description of node [ID]'\n";
       response += "• Similarity Analysis: 'Find similar nodes to [node ID/type]'\n";
       response += "• Impact Assessment: 'What's the impact of node [node ID]?'\n";
       response += "• Dependencies: 'Show dependencies for [node ID]'\n";
-      response += "• Node Search: 'Search for nodes with [criteria]'\n\n";
+      response += "• Node Search: 'Search for nodes with [criteria]'\n";
+      response += "• System Status: 'Show system status', 'List all sources'\n\n";
       
       response += `Current system status:\n`;
       response += `• ${sources.length} Sources of Truth configured\n`;
       response += `• ${threads.length} Threads available\n`;
+      response += `• ${nodeCount} Total nodes\n`;
       
       if (sourceCode) {
         const source = sources.find(s => s.code === sourceCode);
@@ -594,5 +633,284 @@ export class NonAIChatService {
     }
     
     return dependencies.slice(0, 15);
+  }
+
+  /**
+   * Handle node counting requests
+   */
+  private async handleNodeCountRequest(message: string): Promise<ChatResponse> {
+    try {
+      const lowerMessage = message.toLowerCase();
+      const threads = await this.storage.getThreads();
+      
+      // Extract node type from message (e.g., "HH", "AA", etc.)
+      const typeMatch = message.match(/how many (\w+) nodes/i);
+      const requestedType = typeMatch ? typeMatch[1].toUpperCase() : null;
+      
+      let totalCount = 0;
+      let typeCount = 0;
+      const typeCounts: { [key: string]: number } = {};
+      
+      // Count nodes in threads
+      for (const thread of threads) {
+        if (Array.isArray(thread.componentNode)) {
+          for (const cNode of thread.componentNode) {
+            if (cNode.node && Array.isArray(cNode.node)) {
+              for (const node of cNode.node) {
+                totalCount++;
+                
+                // Extract type from node ID (e.g., HH@id@934 -> HH)
+                const nodeType = node.id?.split('@')[0] || node.nodeKey?.split('@')[0] || 'Unknown';
+                typeCounts[nodeType] = (typeCounts[nodeType] || 0) + 1;
+                
+                if (requestedType && nodeType === requestedType) {
+                  typeCount++;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      let response = "";
+      if (requestedType) {
+        response = `Found ${typeCount} ${requestedType} nodes in the system.\n\n`;
+        if (typeCount === 0 && totalCount === 0) {
+          response += "No nodes currently loaded in the system. This may be because:\n";
+          response += "• No thread data is configured\n";
+          response += "• JanusGraph database is not connected\n";
+          response += "• Using in-memory storage without sample data\n";
+        }
+      } else {
+        response = `Node count summary:\n\n`;
+        response += `Total nodes: ${totalCount}\n\n`;
+        
+        if (Object.keys(typeCounts).length > 0) {
+          response += "Breakdown by type:\n";
+          Object.entries(typeCounts)
+            .sort(([,a], [,b]) => b - a)
+            .forEach(([type, count]) => {
+              response += `• ${type}: ${count} nodes\n`;
+            });
+        } else {
+          response += "No nodes currently loaded. Try connecting to JanusGraph or loading thread data.\n";
+        }
+      }
+      
+      return {
+        response,
+        data: { totalCount, typeCount, typeCounts, requestedType },
+        analysisType: 'node_count'
+      };
+    } catch (error) {
+      return {
+        response: "Unable to count nodes at this time. Please try again later.",
+        analysisType: 'node_count'
+      };
+    }
+  }
+
+  /**
+   * Handle node description requests
+   */
+  private async handleNodeDescriptionRequest(message: string): Promise<ChatResponse> {
+    try {
+      const nodeId = this.extractNodeId(message);
+      
+      if (!nodeId) {
+        return {
+          response: "Please specify a node ID. For example: 'What's the description of node HH@id@934' or 'Describe node 934'",
+          analysisType: 'node_description'
+        };
+      }
+
+      const threads = await this.storage.getThreads();
+      let foundNode = null;
+      let threadInfo = null;
+      
+      // Search for the node in threads
+      for (const thread of threads) {
+        if (Array.isArray(thread.componentNode)) {
+          for (const cNode of thread.componentNode) {
+            if (cNode.node && Array.isArray(cNode.node)) {
+              for (const node of cNode.node) {
+                if (node.id === nodeId || node.nodeKey === nodeId || 
+                    node.id?.includes(nodeId) || node.nodeKey?.includes(nodeId)) {
+                  foundNode = node;
+                  threadInfo = thread;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if (foundNode) break;
+      }
+      
+      if (!foundNode) {
+        return {
+          response: `Node ${nodeId} not found in the current system. Available commands:\n• 'How many nodes' - to see node counts\n• 'List all sources' - to see available sources\n• 'Search for nodes with [criteria]' - to find nodes`,
+          analysisType: 'node_description'
+        };
+      }
+      
+      let response = `Node ${nodeId} Details:\n\n`;
+      response += `• ID: ${foundNode.id || foundNode.nodeKey || 'N/A'}\n`;
+      response += `• Type: ${foundNode.type || 'Unknown'}\n`;
+      response += `• Function: ${foundNode.functionName || 'N/A'}\n`;
+      
+      if (foundNode.description) {
+        response += `• Description: ${foundNode.description}\n`;
+      }
+      
+      if (threadInfo) {
+        response += `• Thread: ${threadInfo.tqName || 'Unknown'}\n`;
+        response += `• Source: ${threadInfo.tqName?.split('_')[0] || 'Unknown'}\n`;
+      }
+      
+      // Add any other available properties
+      const additionalProps = Object.keys(foundNode).filter(key => 
+        !['id', 'nodeKey', 'type', 'functionName', 'description'].includes(key)
+      );
+      
+      if (additionalProps.length > 0) {
+        response += `\nAdditional Properties:\n`;
+        additionalProps.forEach(prop => {
+          const value = foundNode[prop];
+          if (value !== null && value !== undefined) {
+            response += `• ${prop}: ${typeof value === 'object' ? JSON.stringify(value) : value}\n`;
+          }
+        });
+      }
+      
+      return {
+        response,
+        data: { node: foundNode, thread: threadInfo },
+        analysisType: 'node_description'
+      };
+    } catch (error) {
+      return {
+        response: "Unable to retrieve node description at this time. Please check the node ID and try again.",
+        analysisType: 'node_description'
+      };
+    }
+  }
+
+  /**
+   * Handle system status requests
+   */
+  private async handleSystemStatusRequest(sourceCode?: string): Promise<ChatResponse> {
+    try {
+      const sources = await this.storage.getSources();
+      const threads = await this.storage.getThreads();
+      const nodeCount = await this.getNodeCount();
+      
+      let response = "System Status Report:\n\n";
+      
+      // Sources information
+      response += `📊 Sources of Truth: ${sources.length}\n`;
+      sources.forEach(source => {
+        response += `  • ${source.name} (${source.code}) - ${source.status || 'Active'}\n`;
+      });
+      
+      // Thread information
+      response += `\n🔗 Threads: ${threads.length}\n`;
+      if (threads.length > 0) {
+        const threadsBySources: { [key: string]: number } = {};
+        threads.forEach(thread => {
+          const source = thread.tqName?.split('_')[0] || 'Unknown';
+          threadsBySources[source] = (threadsBySources[source] || 0) + 1;
+        });
+        
+        Object.entries(threadsBySources).forEach(([source, count]) => {
+          response += `  • ${source}: ${count} threads\n`;
+        });
+      }
+      
+      // Node information
+      response += `\n📦 Total Nodes: ${nodeCount}\n`;
+      
+      // Current context
+      if (sourceCode) {
+        const source = sources.find(s => s.code === sourceCode);
+        if (source) {
+          response += `\n📍 Current Context: ${source.name} (${source.code})\n`;
+        }
+      }
+      
+      // System health
+      response += `\n🏥 System Health:\n`;
+      response += `  • Storage: ${threads.length > 0 ? 'Connected with data' : 'Connected (no data)'}\n`;
+      response += `  • JanusGraph: Simulated mode\n`;
+      response += `  • Chat AI: Available\n`;
+      
+      return {
+        response,
+        data: { sources, threads, nodeCount, sourceCode },
+        analysisType: 'system_status'
+      };
+    } catch (error) {
+      return {
+        response: "Unable to retrieve system status at this time. The system may be experiencing issues.",
+        analysisType: 'system_status'
+      };
+    }
+  }
+
+  /**
+   * Handle list sources requests
+   */
+  private async handleListSourcesRequest(): Promise<ChatResponse> {
+    try {
+      const sources = await this.storage.getSources();
+      
+      let response = "Available Sources of Truth:\n\n";
+      
+      sources.forEach((source, index) => {
+        response += `${index + 1}. ${source.name} (${source.code})\n`;
+        response += `   Description: ${source.description}\n`;
+        response += `   Status: ${source.status || 'Active'}\n\n`;
+      });
+      
+      if (sources.length === 0) {
+        response = "No sources of truth are currently configured in the system.\n";
+        response += "This may indicate a configuration issue or that the system is using default settings.\n";
+      }
+      
+      return {
+        response,
+        data: sources,
+        analysisType: 'list_sources'
+      };
+    } catch (error) {
+      return {
+        response: "Unable to retrieve sources list at this time. Please try again later.",
+        analysisType: 'list_sources'
+      };
+    }
+  }
+
+  /**
+   * Get total node count across all threads
+   */
+  private async getNodeCount(): Promise<number> {
+    try {
+      const threads = await this.storage.getThreads();
+      let count = 0;
+      
+      for (const thread of threads) {
+        if (Array.isArray(thread.componentNode)) {
+          for (const cNode of thread.componentNode) {
+            if (cNode.node && Array.isArray(cNode.node)) {
+              count += cNode.node.length;
+            }
+          }
+        }
+      }
+      
+      return count;
+    } catch (error) {
+      return 0;
+    }
   }
 }

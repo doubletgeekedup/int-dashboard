@@ -12,6 +12,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 24, 2025 - Enhanced Chat System with Comprehensive Commands**
+- Fixed OpenAI service integration and chat interface functionality
+- Implemented comprehensive dual-mode chat system (AI/non-AI toggle)
+- Added extensive non-AI command set: node counting, descriptions, system status, source listing
+- Created reusable AI assistant components (AIAssistant, MiniAssistant) for dashboard integration
+- Built intelligent command processing with local similarity analysis and impact assessment
+- Enhanced non-AI mode with mock data generation for demonstration when no real data available
+- Added comprehensive help system and command discovery features
+- Integrated AI assistants into dashboard and source pages for contextual assistance
+
 **July 24, 2025 - Threads Architecture**  
 - Clarified that Teams = Threads (clusters of related data nodes)
 - Updated all terminology from "teams" to "threads" throughout system

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LLMChat } from "@/components/chat/llm-chat";
+import { MiniAssistant } from "@/components/mini-assistant";
 import { PerformanceChart } from "@/components/charts/performance-chart";
 import { 
   Activity, 
@@ -291,6 +292,13 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Quick AI Assistant */}
+          <MiniAssistant 
+            context="dashboard"
+            placeholder="Ask about system status..."
+            className="mb-6"
+          />
 
           {/* LLM Chat */}
           <Card>
