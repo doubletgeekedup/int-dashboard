@@ -104,7 +104,7 @@ interface Config {
 }
 
 class ConfigManager {
-  private config: Config;
+  private config!: Config;
 
   constructor() {
     this.loadConfig();
