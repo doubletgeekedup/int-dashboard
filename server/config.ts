@@ -31,6 +31,7 @@ interface AzureOpenAIConfig {
 
 interface JanusGraphConfig {
   enabled: boolean;
+  useRemote: boolean;
   connection: {
     url: string;
     timeout: number;
@@ -193,6 +194,8 @@ class ConfigManager {
         return this.config.azure_openai.enabled;
       case 'janusgraph':
         return this.config.janusgraph.enabled;
+      case 'janusgraph_remote':
+        return this.config.janusgraph.enabled && this.config.janusgraph.useRemote;
       case 'ai_chat':
         return process.env.AI_CHAT_ENABLED === 'true';
       default:

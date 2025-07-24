@@ -27,6 +27,7 @@ azure_openai:
 # JanusGraph Configuration
 janusgraph:
   enabled: true
+  useRemote: false  # Set to true to use actual JanusGraph database, false for in-memory storage
   connection:
     url: "ws://localhost:8182/gremlin"
     timeout: 30000
