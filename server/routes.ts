@@ -332,11 +332,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Threads within Sources of Truth API Routes
+  // Threads API Routes
   app.get("/api/threads", async (req, res) => {
     try {
-      const { sourceCode } = req.query;
-      const threads = await storage.getThreads(sourceCode as string);
+      const { tqNamePrefix } = req.query;
+      const threads = await storage.getThreads(tqNamePrefix as string);
       res.json(threads);
     } catch (error) {
       console.error("Error fetching threads:", error);
@@ -344,10 +344,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/threads/:sourceCode/:threadId", async (req, res) => {
+  app.get("/api/threads/:threadId", async (req, res) => {
     try {
-      const { sourceCode, threadId } = req.params;
-      const thread = await storage.getThread(sourceCode, threadId);
+      const { threadId } = req.params;
+      const thread = await storage.getThread(threadId);
       if (!thread) {
         return res.status(404).json({ error: "Thread not found" });
       }

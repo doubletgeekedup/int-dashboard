@@ -331,21 +331,17 @@ export default function SourcePage() {
                                       <label className="text-sm font-medium text-muted-foreground">Thread Assignment</label>
                                       <p className="text-sm mt-1">
                                         {(() => {
-                                          const threadMapping = {
-                                            'b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e': 'Cache Management Thread (STC)',
-                                            'd3f8b2a5-1c9e-4a7b-8f2d-5e9a3b7c1f4d': 'System Records Thread (STC)',
-                                            'f9e2c7b4-6a8d-4f1e-9c3b-7a5d2f8e1c4b': 'Data Repository Thread (STC)',
-                                            'a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c': 'Configuration Files Thread (CPT)',
-                                            'c8b5e2f1-9a4d-4e7b-8c1f-3a6d9b2e5f8a': 'Settings Management Thread (CPT)',
-                                            'e4a7b1f8-2d9c-4f5e-a8b1-6c9f2a5d8b3e': 'Policy Management Thread (CPT)',
-                                            'f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d': 'Transaction Processing Thread (TMC)',
-                                            'b2e8f5a1-7c4d-4f9e-b5a8-2d7c1f4e8b5a': 'Work Items Thread (TMC)',
-                                            'd5f1b8c4-9a3e-4c7f-a1b8-5e9c4a7d1f8b': 'Audit Logs Thread (TMC)',
-                                            'e7f4a9b2-1d8c-4e5a-9f2b-7c4d1a8e5f9c': 'Service Orchestration Thread (SLC)',
-                                            'c3a8f5d1-9b4e-4c7a-8f1d-5b9e2a7c4f8d': 'Authentication Thread (CAS)',
-                                            '9e3f7a2d-5c8b-4f1e-a7d3-8b5c2f9e7a1d': 'Network Validation Thread (NVL)'
+                                          // Determine source from TQName pattern
+                                          const threadId = item.csWorkItemDetails.tid;
+                                          const sourceMapping = {
+                                            'b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e': 'STC Thread (STC_yy.STC_yy)',
+                                            'a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c': 'CPT Thread (CPT_config.CPT_config)',
+                                            'f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d': 'TMC Thread (TMC_transaction.TMC_transaction)',
+                                            'e7f4a9b2-1d8c-4e5a-9f2b-7c4d1a8e5f9c': 'SLC Thread (SLC_service.SLC_service)',
+                                            'c3a8f5d1-9b4e-4c7a-8f1d-5b9e2a7c4f8d': 'CAS Thread (CAS_auth.CAS_auth)',
+                                            '9e3f7a2d-5c8b-4f1e-a7d3-8b5c2f9e7a1d': 'NVL Thread (NVL_network.NVL_network)'
                                           };
-                                          return threadMapping[item.csWorkItemDetails.tid as keyof typeof threadMapping] || `Thread ${item.csWorkItemDetails.tid.substring(0, 8)}...`;
+                                          return sourceMapping[threadId as keyof typeof sourceMapping] || `Thread ${threadId.substring(0, 8)}...`;
                                         })()}
                                       </p>
                                     </div>

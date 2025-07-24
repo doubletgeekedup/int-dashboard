@@ -26,21 +26,16 @@ export const sources = pgTable("sources", {
 });
 
 // Threads within Sources of Truth
-// Each thread is a cluster of related data nodes
+// Each thread is a cluster of related data nodes with complex structure
 export const threads = pgTable("threads", {
   id: serial("id").primaryKey(),
-  sourceCode: text("source_code").notNull(), // references sources.code
+  nodekey: text("nodekey").notNull(), // Thread@id@{threadId}
+  tqName: text("tq_name").notNull(), // TQName like "STC_yy.STC_yy"
+  class: text("class").notNull().default("Thread"),
   threadId: text("thread_id").notNull(), // this corresponds to the 'tid' field from external work items
-  name: text("name").notNull(),
-  description: text("description").notNull(),
-  threadType: text("thread_type").notNull(), // cache_management, config_processing, auth_services, etc.
-  dataNodeTypes: text("data_node_types").array(), // types of data nodes this thread clusters
-  nodeCount: integer("node_count").default(0),
-  status: text("status").notNull().default("active"),
-  lastActivity: timestamp("last_activity").defaultNow(),
-  config: jsonb("config").default({}),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  componentNode: jsonb("component_node").notNull(), // Array of component nodes
+  createTime: jsonb("create_time").notNull(), // Array format: [year, month, day, hour, minute, second, nanoseconds]
+  updateTime: jsonb("update_time").notNull(), // Array format: [year, month, day, hour, minute, second, nanoseconds]
 });
 
 // Bulletins and Updates
@@ -138,8 +133,6 @@ export const insertPerformanceMetricSchema = createInsertSchema(performanceMetri
 
 export const insertThreadSchema = createInsertSchema(threads).omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 // Types

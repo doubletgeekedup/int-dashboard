@@ -21,6 +21,9 @@ Preferred communication style: Simple, everyday language.
 - Enhanced transaction modals to show thread assignment mapping
 - Thread names are now generated UIDs instead of descriptive names
 - Updated all mock data and storage to use UUID-format thread identifiers
+- Removed thread descriptions, threads now use complex structure with nodekey, componentNode, etc.
+- Updated thread schema to match new structure: nodekey, tqName, class, componentNode arrays
+- Thread storage now uses simplified API with threadId-only lookups
 
 **July 24, 2025 - Division Teams Architecture**
 - Implemented hierarchical Division Teams → Teams → Data Nodes structure
