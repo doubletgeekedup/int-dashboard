@@ -127,12 +127,13 @@ database:
   migrations:
     auto_run: true
 
-# External Services Configuration
+# External Services Configuration  
 external:
   listitems:
     url: "https://api.example.com/listitems"
   janusgraph_schema:
     url: "https://janusgraph.example.com/schema"
+  ssl_insecure: true  # Disable SSL certificate verification for external APIs
 
 # AI Chat Configuration
 ai:

@@ -283,9 +283,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Add any required authentication headers here
           // No API key needed - URLs only
-        }
+        },
+        // Disable SSL certificate verification for external APIs
+        // @ts-ignore - Node.js specific option
+        agent: externalUrl.startsWith('https:') ? new (await import('https')).Agent({
+          rejectUnauthorized: false
+        }) : undefined
       });
 
       if (!response.ok) {

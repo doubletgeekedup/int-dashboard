@@ -84,6 +84,7 @@ interface ExternalConfig {
   janusgraph_schema: {
     url: string;
   };
+  ssl_insecure?: boolean;
 }
 
 interface AIConfig {

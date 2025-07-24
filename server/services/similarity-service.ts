@@ -281,7 +281,12 @@ export class SimilarityService {
         headers: {
           // No API key needed - URLs only
           'Content-Type': 'application/json'
-        }
+        },
+        // Disable SSL certificate verification for external APIs
+        // @ts-ignore - Node.js specific option
+        agent: schemaUrl.startsWith('https:') ? new (await import('https')).Agent({
+          rejectUnauthorized: false
+        }) : undefined
       });
 
       if (!response.ok) {

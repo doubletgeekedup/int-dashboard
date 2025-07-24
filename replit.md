@@ -32,6 +32,7 @@ Preferred communication style: Simple, everyday language.
 - Note: package.json scripts still use NODE_ENV (can't be modified) but application ignores it in favor of config.yaml
 - Simplified external services to use URL-only configuration (no API keys) as string values
 - Updated external service fetch operations to remove all authentication headers
+- Added SSL insecure support for external APIs with certificate verification bypass
 - Created comprehensive WINDOWS_SETUP.md guide with Windows-specific NODE_ENV troubleshooting
 
 **July 24, 2025 - Government-Level Knowledge Retention System**
