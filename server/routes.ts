@@ -388,6 +388,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced GraphQL relationship and similarity API routes
+  app.get("/api/sources/:sourceCode/similar", async (req, res) => {
+    try {
+      const { sourceCode } = req.params;
+      const threshold = parseFloat(req.query.threshold as string) || 0.7;
+      
+      const storage = getStorage();
+      if (typeof (storage as any).findSimilarSources === 'function') {
+        const similarSources = await (storage as any).findSimilarSources(sourceCode, threshold);
+        res.json(similarSources);
+      } else {
+        res.status(501).json({ error: "Similarity search not supported with current storage backend" });
+      }
+    } catch (error) {
+      console.error("Error finding similar sources:", error);
+      res.status(500).json({ error: "Failed to find similar sources" });
+    }
+  });
+
+  app.get("/api/sources/range/:attribute", async (req, res) => {
+    try {
+      const { attribute } = req.params;
+      const { min, max } = req.query;
+      
+      if (!min || !max) {
+        return res.status(400).json({ error: "min and max query parameters are required" });
+      }
+
+      const storage = getStorage();
+      if (typeof (storage as any).findSourcesByAttributeRange === 'function') {
+        const sources = await (storage as any).findSourcesByAttributeRange(
+          attribute, 
+          parseFloat(min as string), 
+          parseFloat(max as string)
+        );
+        res.json(sources);
+      } else {
+        res.status(501).json({ error: "Attribute range search not supported with current storage backend" });
+      }
+    } catch (error) {
+      console.error("Error finding sources by attribute range:", error);
+      res.status(500).json({ error: "Failed to find sources by attribute range" });
+    }
+  });
+
+  app.get("/api/sources/clusters/:attribute", async (req, res) => {
+    try {
+      const { attribute } = req.params;
+      
+      const storage = getStorage();
+      if (typeof (storage as any).analyzeSourceClusters === 'function') {
+        const clusters = await (storage as any).analyzeSourceClusters(attribute);
+        res.json(clusters);
+      } else {
+        res.status(501).json({ error: "Cluster analysis not supported with current storage backend" });
+      }
+    } catch (error) {
+      console.error("Error analyzing source clusters:", error);
+      res.status(500).json({ error: "Failed to analyze source clusters" });
+    }
+  });
+
+  app.get("/api/sources/:sourceCode/relationships", async (req, res) => {
+    try {
+      const { sourceCode } = req.params;
+      const maxDepth = parseInt(req.query.depth as string) || 2;
+      
+      const storage = getStorage();
+      if (typeof (storage as any).getSourceRelationships === 'function') {
+        const relationships = await (storage as any).getSourceRelationships(sourceCode, maxDepth);
+        res.json(relationships);
+      } else {
+        res.status(501).json({ error: "Relationship analysis not supported with current storage backend" });
+      }
+    } catch (error) {
+      console.error("Error getting source relationships:", error);
+      res.status(500).json({ error: "Failed to get source relationships" });
+    }
+  });
+
   // System diagnostics
   app.post("/api/system/diagnostics", async (req, res) => {
     try {

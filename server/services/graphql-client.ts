@@ -191,6 +191,151 @@ export class GraphQLJanusClient {
     return this.executeQuery(query);
   }
 
+  // Advanced relationship and similarity queries
+  async findSimilarNodes(nodeId: string, similarityThreshold: number = 0.7) {
+    const query = `
+      query FindSimilarNodes($nodeId: ID!, $threshold: Float!) {
+        vertex(id: $nodeId) {
+          id
+          properties {
+            code
+            name
+            status
+            version
+            recordCount
+            avgResponseTime
+          }
+          similarNodes(threshold: $threshold) {
+            id
+            similarity
+            properties {
+              code
+              name
+              status
+              version
+              recordCount
+              avgResponseTime
+            }
+          }
+        }
+      }
+    `;
+
+    return this.executeQuery(query, { nodeId, threshold: similarityThreshold });
+  }
+
+  async findNodesByAttributeRange(attribute: string, minValue: any, maxValue: any) {
+    const query = `
+      query FindNodesByRange($attribute: String!, $min: String!, $max: String!) {
+        vertices {
+          id
+          properties {
+            code
+            name
+            ${attribute}
+          }
+        }
+      }
+    `;
+
+    return this.executeQuery(query, { attribute, min: minValue.toString(), max: maxValue.toString() });
+  }
+
+  async getNodeRelationships(nodeId: string, maxDepth: number = 2) {
+    const query = `
+      query GetNodeRelationships($nodeId: ID!, $depth: Int!) {
+        vertex(id: $nodeId) {
+          id
+          properties {
+            code
+            name
+          }
+          relationships(maxDepth: $depth) {
+            path {
+              vertices {
+                id
+                properties {
+                  code
+                  name
+                  status
+                }
+              }
+              edges {
+                label
+                properties
+              }
+            }
+            distance
+          }
+        }
+      }
+    `;
+
+    return this.executeQuery(query, { nodeId, depth: maxDepth });
+  }
+
+  async findNodesWithSimilarAttributes(sourceCode: string, attributes: string[]) {
+    const query = `
+      query FindSimilarAttributes($sourceCode: String!, $attributes: [String!]!) {
+        vertices(filter: { code: { eq: $sourceCode } }) {
+          id
+          properties {
+            code
+            name
+            status
+            version
+            recordCount
+            avgResponseTime
+          }
+          similarByAttributes(attributes: $attributes) {
+            node {
+              id
+              properties {
+                code
+                name
+                status
+                version
+                recordCount
+                avgResponseTime
+              }
+            }
+            matchScore
+            matchingAttributes
+          }
+        }
+      }
+    `;
+
+    return this.executeQuery(query, { sourceCode, attributes });
+  }
+
+  async analyzeNodeClusters(clusterAttribute: string) {
+    const query = `
+      query AnalyzeNodeClusters($attribute: String!) {
+        clusters(groupBy: $attribute) {
+          key
+          count
+          avgMetrics {
+            recordCount
+            avgResponseTime
+            uptime
+          }
+          nodes {
+            id
+            properties {
+              code
+              name
+              status
+              ${clusterAttribute}
+            }
+          }
+        }
+      }
+    `;
+
+    return this.executeQuery(query, { attribute: clusterAttribute });
+  }
+
   // GraphQL mutations for data creation
   async createSource(sourceData: any) {
     const mutation = `
@@ -314,6 +459,74 @@ export class GraphQLJanusClient {
               apiEndpoint: "http://localhost:3001/api/config",
               config: { timeout: 5000, retries: 3 }
             }
+          }
+        ]
+      };
+    }
+
+    if (query.includes('FindSimilarNodes')) {
+      return {
+        vertex: {
+          id: "1",
+          properties: { code: "STC", name: "System Truth Cache", status: "active" },
+          similarNodes: [
+            {
+              id: "4",
+              similarity: 0.85,
+              properties: { code: "TMC", name: "Transaction Management Center", status: "active" }
+            },
+            {
+              id: "5",
+              similarity: 0.72,
+              properties: { code: "CAS", name: "Central Authentication Service", status: "active" }
+            }
+          ]
+        }
+      };
+    }
+
+    if (query.includes('FindSimilarAttributes')) {
+      return {
+        vertices: [
+          {
+            id: "1",
+            properties: { code: "STC", status: "active", recordCount: 1200000 },
+            similarByAttributes: [
+              {
+                node: { id: "4", properties: { code: "TMC", status: "active", recordCount: 2100000 } },
+                matchScore: 0.90,
+                matchingAttributes: ["status", "recordCount"]
+              },
+              {
+                node: { id: "5", properties: { code: "CAS", status: "active", recordCount: 45000 } },
+                matchScore: 0.65,
+                matchingAttributes: ["status"]
+              }
+            ]
+          }
+        ]
+      };
+    }
+
+    if (query.includes('AnalyzeNodeClusters')) {
+      return {
+        clusters: [
+          {
+            key: "active",
+            count: 5,
+            avgMetrics: { recordCount: 1038000, avgResponseTime: 135, uptime: "99.2%" },
+            nodes: [
+              { id: "1", properties: { code: "STC", name: "System Truth Cache", status: "active" } },
+              { id: "2", properties: { code: "CPT", name: "Configuration Processing Tool", status: "active" } }
+            ]
+          },
+          {
+            key: "syncing",
+            count: 1,
+            avgMetrics: { recordCount: 650000, avgResponseTime: 156, uptime: "99.2%" },
+            nodes: [
+              { id: "3", properties: { code: "SLC", name: "Service Layer Coordinator", status: "syncing" } }
+            ]
           }
         ]
       };

@@ -318,4 +318,203 @@ export class GraphQLStorage implements IStorage {
     }
     return num.toString();
   }
+
+  // Advanced relationship and similarity analysis methods
+  async findSimilarSources(sourceCode: string, similarityThreshold: number = 0.7): Promise<any[]> {
+    try {
+      const sources = await this.getSources();
+      const targetSource = sources.find(s => s.code === sourceCode);
+      
+      if (!targetSource) {
+        return [];
+      }
+
+      // Use GraphQL similarity query if connected, otherwise calculate locally
+      if (graphqlJanusClient.getConnectionStatus().connected) {
+        const result = await graphqlJanusClient.findSimilarNodes(targetSource.id.toString(), similarityThreshold);
+        return result.vertex?.similarNodes || [];
+      }
+
+      // Local similarity calculation for development
+      return this.calculateLocalSimilarity(targetSource, sources, similarityThreshold);
+    } catch (error) {
+      console.error('Error finding similar sources:', error);
+      return [];
+    }
+  }
+
+  async findSourcesByAttributeRange(attribute: string, minValue: any, maxValue: any): Promise<Source[]> {
+    try {
+      if (graphqlJanusClient.getConnectionStatus().connected) {
+        const result = await graphqlJanusClient.findNodesByAttributeRange(attribute, minValue, maxValue);
+        return result.vertices?.map((vertex: any) => ({
+          id: parseInt(vertex.id),
+          ...vertex.properties
+        })) || [];
+      }
+
+      // Local filtering for development
+      const sources = await this.getSources();
+      return sources.filter(source => {
+        const value = (source as any)[attribute];
+        if (typeof value === 'number') {
+          return value >= minValue && value <= maxValue;
+        }
+        return false;
+      });
+    } catch (error) {
+      console.error('Error finding sources by attribute range:', error);
+      return [];
+    }
+  }
+
+  async analyzeSourceClusters(clusterAttribute: string): Promise<any> {
+    try {
+      if (graphqlJanusClient.getConnectionStatus().connected) {
+        return await graphqlJanusClient.analyzeNodeClusters(clusterAttribute);
+      }
+
+      // Local clustering analysis for development
+      const sources = await this.getSources();
+      const clusters = this.groupSourcesByAttribute(sources, clusterAttribute);
+      
+      return {
+        clusters: Object.entries(clusters).map(([key, nodes]) => ({
+          key,
+          count: nodes.length,
+          avgMetrics: this.calculateClusterMetrics(nodes),
+          nodes: nodes.map(node => ({
+            id: node.id,
+            properties: {
+              code: node.code,
+              name: node.name,
+              status: node.status,
+              [clusterAttribute]: (node as any)[clusterAttribute]
+            }
+          }))
+        }))
+      };
+    } catch (error) {
+      console.error('Error analyzing source clusters:', error);
+      return { clusters: [] };
+    }
+  }
+
+  async getSourceRelationships(sourceCode: string, maxDepth: number = 2): Promise<any> {
+    try {
+      const source = await this.getSourceByCode(sourceCode);
+      if (!source) return null;
+
+      if (graphqlJanusClient.getConnectionStatus().connected) {
+        return await graphqlJanusClient.getNodeRelationships(source.id.toString(), maxDepth);
+      }
+
+      // Mock relationship data for development
+      return {
+        vertex: {
+          id: source.id,
+          properties: { code: source.code, name: source.name },
+          relationships: [
+            {
+              path: {
+                vertices: [
+                  { id: source.id, properties: { code: source.code, name: source.name, status: source.status } }
+                ],
+                edges: []
+              },
+              distance: 0
+            }
+          ]
+        }
+      };
+    } catch (error) {
+      console.error('Error getting source relationships:', error);
+      return null;
+    }
+  }
+
+  // Helper methods for local similarity calculations
+  private calculateLocalSimilarity(targetSource: Source, allSources: Source[], threshold: number): any[] {
+    const similarities = allSources
+      .filter(s => s.id !== targetSource.id)
+      .map(source => ({
+        id: source.id.toString(),
+        similarity: this.calculateSimilarityScore(targetSource, source),
+        properties: {
+          code: source.code,
+          name: source.name,
+          status: source.status,
+          version: source.version,
+          recordCount: source.recordCount,
+          avgResponseTime: source.avgResponseTime
+        }
+      }))
+      .filter(item => item.similarity >= threshold)
+      .sort((a, b) => b.similarity - a.similarity);
+
+    return similarities;
+  }
+
+  private calculateSimilarityScore(source1: Source, source2: Source): number {
+    let score = 0;
+    let comparisons = 0;
+
+    // Status similarity
+    if (source1.status === source2.status) score += 0.3;
+    comparisons++;
+
+    // Record count similarity (normalized)
+    if (source1.recordCount && source2.recordCount) {
+      const ratio = Math.min(source1.recordCount, source2.recordCount) / Math.max(source1.recordCount, source2.recordCount);
+      score += ratio * 0.25;
+      comparisons++;
+    }
+
+    // Response time similarity (normalized)
+    if (source1.avgResponseTime && source2.avgResponseTime) {
+      const ratio = Math.min(source1.avgResponseTime, source2.avgResponseTime) / Math.max(source1.avgResponseTime, source2.avgResponseTime);
+      score += ratio * 0.2;
+      comparisons++;
+    }
+
+    // Type similarity (JanusGraph vs non-JanusGraph)
+    if (source1.isJanusGraph === source2.isJanusGraph) score += 0.15;
+    comparisons++;
+
+    // Version similarity (basic string comparison)
+    if (source1.version && source2.version) {
+      const version1Parts = source1.version.split('.');
+      const version2Parts = source2.version.split('.');
+      if (version1Parts[0] === version2Parts[0]) score += 0.1; // Major version match
+      comparisons++;
+    }
+
+    return comparisons > 0 ? score / comparisons : 0;
+  }
+
+  private groupSourcesByAttribute(sources: Source[], attribute: string): Record<string, Source[]> {
+    return sources.reduce((groups, source) => {
+      const key = (source as any)[attribute]?.toString() || 'unknown';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(source);
+      return groups;
+    }, {} as Record<string, Source[]>);
+  }
+
+  private calculateClusterMetrics(sources: Source[]): any {
+    const totals = sources.reduce(
+      (acc, source) => ({
+        recordCount: acc.recordCount + (source.recordCount || 0),
+        avgResponseTime: acc.avgResponseTime + (source.avgResponseTime || 0),
+        count: acc.count + 1
+      }),
+      { recordCount: 0, avgResponseTime: 0, count: 0 }
+    );
+
+    return {
+      recordCount: Math.round(totals.recordCount / totals.count),
+      avgResponseTime: Math.round(totals.avgResponseTime / totals.count),
+      uptime: "99.2%" // Placeholder - would be calculated from actual data
+    };
+  }
 }
