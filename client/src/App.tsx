@@ -8,6 +8,7 @@ import Dashboard from "@/pages/dashboard";
 import SourcePage from "@/pages/source-page";
 import Bulletins from "@/pages/bulletins";
 import KnowledgeBase from "@/pages/knowledge-base";
+import GrafanaDashboard from "@/pages/grafana-dashboard";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { useWebSocket } from "@/hooks/use-websocket";
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/source/:code" component={SourcePage} />
       <Route path="/bulletins" component={Bulletins} />
       <Route path="/knowledge-base" component={KnowledgeBase} />
+      <Route path="/grafana" component={GrafanaDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

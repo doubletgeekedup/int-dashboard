@@ -468,6 +468,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Grafana Integration API Routes
+  app.get("/api/grafana/status", async (req, res) => {
+    try {
+      const { grafanaService } = await import('./services/grafana-service');
+      const status = grafanaService.getConnectionStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get Grafana status" });
+    }
+  });
+
+  app.post("/api/grafana/dashboard/create", async (req, res) => {
+    try {
+      const { grafanaService } = await import('./services/grafana-service');
+      const dashboard = await grafanaService.createIntegrationDashboard();
+      const dashboardUrl = await grafanaService.getDashboardUrl(dashboard.uid || 'integration-dashboard');
+      
+      res.json({
+        dashboard,
+        url: dashboardUrl,
+        message: "Integration dashboard created successfully"
+      });
+    } catch (error) {
+      console.error("Error creating Grafana dashboard:", error);
+      res.status(500).json({ error: "Failed to create Grafana dashboard" });
+    }
+  });
+
+  app.post("/api/grafana/dashboard/similarity", async (req, res) => {
+    try {
+      const { grafanaService } = await import('./services/grafana-service');
+      const dashboard = await grafanaService.createSimilarityAnalyticsDashboard();
+      const dashboardUrl = await grafanaService.getDashboardUrl(dashboard.uid || 'similarity-analytics');
+
+      res.json({
+        dashboard,
+        url: dashboardUrl,
+        message: "Similarity analytics dashboard created successfully"
+      });
+    } catch (error) {
+      console.error("Error creating similarity dashboard:", error);
+      res.status(500).json({ error: "Failed to create similarity dashboard" });
+    }
+  });
+
+  app.post("/api/grafana/metrics/query", async (req, res) => {
+    try {
+      const { queries, timeRange } = req.body;
+      
+      if (!queries || !Array.isArray(queries)) {
+        return res.status(400).json({ error: "Queries array is required" });
+      }
+
+      const { grafanaService } = await import('./services/grafana-service');
+      const results = await grafanaService.queryMetrics(queries, timeRange || {
+        from: 'now-1h',
+        to: 'now'
+      });
+
+      res.json({ results });
+    } catch (error) {
+      console.error("Error querying Grafana metrics:", error);
+      res.status(500).json({ error: "Failed to query metrics" });
+    }
+  });
+
+  app.get("/api/grafana/dashboard/:uid/export", async (req, res) => {
+    try {
+      const { uid } = req.params;
+      const { grafanaService } = await import('./services/grafana-service');
+      const dashboard = await grafanaService.exportDashboard(uid);
+
+      if (!dashboard) {
+        return res.status(404).json({ error: "Dashboard not found" });
+      }
+
+      res.json(dashboard);
+    } catch (error) {
+      console.error("Error exporting dashboard:", error);
+      res.status(500).json({ error: "Failed to export dashboard" });
+    }
+  });
+
   // System diagnostics
   app.post("/api/system/diagnostics", async (req, res) => {
     try {
