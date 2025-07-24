@@ -3,12 +3,12 @@ import type {
   Source, 
   Transaction, 
   Bulletin, 
-  KnowledgeBase, 
+  KnowledgeLink, 
   ChatMessage,
   InsertSource,
   InsertTransaction,
   InsertBulletin,
-  InsertKnowledgeBase,
+  InsertKnowledgeLink,
   InsertChatMessage
 } from '../../shared/schema';
 import { graphqlJanusClient } from '../services/graphql-client';
@@ -67,14 +67,18 @@ export class GraphQLStorage implements IStorage {
     }
   }
 
-  async updateSource(id: number, data: Partial<InsertSource>): Promise<Source | null> {
+  async updateSource(code: string, data: Partial<InsertSource>): Promise<Source | null> {
     // GraphQL update would require a specific mutation
     // For now, return existing source with updated data
-    const source = await this.getSourceByCode(data.code || '');
+    const source = await this.getSourceByCode(code);
     if (source) {
       return { ...source, ...data, updatedAt: new Date() };
     }
     return null;
+  }
+
+  async getSource(code: string): Promise<Source | null> {
+    return this.getSourceByCode(code);
   }
 
   async deleteSource(id: number): Promise<boolean> {
@@ -113,7 +117,8 @@ export class GraphQLStorage implements IStorage {
       return {
         id: parseInt(result.addVertex.id),
         ...data,
-        timestamp: new Date()
+        timestamp: new Date(),
+        createdAt: new Date()
       } as Transaction;
     } catch (error) {
       console.error('Error creating transaction in GraphQL:', error);
@@ -121,8 +126,8 @@ export class GraphQLStorage implements IStorage {
     }
   }
 
-  async updateTransaction(id: number, data: Partial<InsertTransaction>): Promise<Transaction | null> {
-    console.log(`Update transaction ${id} - GraphQL mutation needed`);
+  async updateTransaction(transactionId: string, data: Partial<InsertTransaction>): Promise<Transaction | null> {
+    console.log(`Update transaction ${transactionId} - GraphQL mutation needed`);
     return null;
   }
 
@@ -172,13 +177,23 @@ export class GraphQLStorage implements IStorage {
     return null;
   }
 
+  async getBulletin(id: number): Promise<Bulletin | null> {
+    const bulletins = await this.getBulletins();
+    return bulletins.find(b => b.id === id) || null;
+  }
+
+  async markBulletinAsRead(id: number, userId: string): Promise<boolean> {
+    console.log(`Mark bulletin ${id} as read for user ${userId} - GraphQL mutation needed`);
+    return true;
+  }
+
   async deleteBulletin(id: number): Promise<boolean> {
     console.log(`Delete bulletin ${id} - GraphQL mutation needed`);
     return true;
   }
 
-  // Knowledge Base operations
-  async getKnowledgeBase(): Promise<KnowledgeBase[]> {
+  // Knowledge Link operations
+  async getKnowledgeLinks(): Promise<KnowledgeLink[]> {
     try {
       const result = await graphqlJanusClient.getKnowledgeBase();
       return result.vertices?.map((vertex: any) => ({
@@ -188,17 +203,17 @@ export class GraphQLStorage implements IStorage {
         updatedAt: new Date(vertex.properties.updatedAt)
       })) || [];
     } catch (error) {
-      console.error('Error fetching knowledge base from GraphQL:', error);
+      console.error('Error fetching knowledge links from GraphQL:', error);
       return [];
     }
   }
 
-  async getKnowledgeBySource(sourceCode: string): Promise<KnowledgeBase[]> {
-    const knowledge = await this.getKnowledgeBase();
+  async getKnowledgeLinksBySource(sourceCode: string): Promise<KnowledgeLink[]> {
+    const knowledge = await this.getKnowledgeLinks();
     return knowledge.filter(kb => kb.sourceCode === sourceCode);
   }
 
-  async createKnowledgeBase(data: InsertKnowledgeBase): Promise<KnowledgeBase> {
+  async createKnowledgeLink(data: InsertKnowledgeLink): Promise<KnowledgeLink> {
     try {
       const result = await graphqlJanusClient.createKnowledgeEntry({
         ...data,
@@ -211,20 +226,20 @@ export class GraphQLStorage implements IStorage {
         ...data,
         createdAt: new Date(),
         updatedAt: new Date()
-      } as KnowledgeBase;
+      } as KnowledgeLink;
     } catch (error) {
       console.error('Error creating knowledge entry in GraphQL:', error);
       throw error;
     }
   }
 
-  async updateKnowledgeBase(id: number, data: Partial<InsertKnowledgeBase>): Promise<KnowledgeBase | null> {
-    console.log(`Update knowledge base ${id} - GraphQL mutation needed`);
+  async updateKnowledgeLink(id: number, data: Partial<InsertKnowledgeLink>): Promise<KnowledgeLink | null> {
+    console.log(`Update knowledge link ${id} - GraphQL mutation needed`);
     return null;
   }
 
-  async deleteKnowledgeBase(id: number): Promise<boolean> {
-    console.log(`Delete knowledge base ${id} - GraphQL mutation needed`);
+  async deleteKnowledgeLink(id: number): Promise<boolean> {
+    console.log(`Delete knowledge link ${id} - GraphQL mutation needed`);
     return true;
   }
 

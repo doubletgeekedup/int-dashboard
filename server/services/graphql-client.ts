@@ -15,7 +15,6 @@ export class GraphQLJanusClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 10000,
     });
   }
 

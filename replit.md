@@ -12,6 +12,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 24, 2025 - JanusGraph GraphQL Integration**
+- Added full GraphQL support for JanusGraph database connectivity
+- Created GraphQLStorage implementation with complete CRUD operations
+- Built GraphQL client service with automatic fallback to simulated mode
+- Implemented storage factory pattern supporting GraphQL, PostgreSQL, and in-memory options
+- Added comprehensive JanusGraph setup guide with schema initialization
+- Created environment configuration for JANUSGRAPH_GRAPHQL_URL
+- Updated storage priority: JanusGraph GraphQL > PostgreSQL > In-memory storage
+
 **December 22, 2025 - Comprehensive IDE Documentation Suite**
 - Created complete setup guides for VS Code, IntelliJ IDEA, and Eclipse IDEs
 - Implemented advanced VS Code debugging with 8 specialized debug configurations
@@ -38,11 +47,14 @@ Preferred communication style: Simple, everyday language.
 - **Build System**: Vite for frontend bundling, esbuild for backend compilation
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL with Neon serverless driver
+- **Primary Database**: JanusGraph with GraphQL interface (preferred for graph operations)
+- **Alternative Database**: PostgreSQL with Neon serverless driver  
+- **Fallback Storage**: In-memory storage for development without database setup
 - **ORM**: Drizzle ORM for type-safe database operations
-- **Graph Database**: JanusGraph integration for complex relationship mapping
+- **Graph Database**: JanusGraph integration with GraphQL and Gremlin query support
 - **Schema Management**: Drizzle migrations with shared schema definitions
 - **Session Storage**: PostgreSQL-based session management with connect-pg-simple
+- **Storage Factory**: Automatic selection based on environment configuration
 
 ## Key Components
 

@@ -1,0 +1,15 @@
+overwrite: true
+schema: "http://localhost:8182/graphql"
+documents: "server/**/*.ts"
+generates:
+  server/generated/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-graphql-request"
+    config:
+      rawRequest: false
+      scalars:
+        Date: Date
+        DateTime: Date
+        JSON: any
