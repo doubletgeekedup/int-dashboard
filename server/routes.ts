@@ -165,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // New endpoint for listing work items
+  // Proxy endpoint for external listitems service
   app.get("/api/listitems/:count", async (req, res) => {
     try {
       const { count } = req.params;
@@ -175,101 +175,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Count must be a positive number" });
       }
 
-      // Mock data structure based on the provided example
-      // In a real implementation, this would fetch from your actual data source
-      const mockWorkItems = [
-        {
-          csWorkItemDetails: {
-            csWorkItemType: "IMPORT",
-            qName: "STC_yy.STC_yy",
-            tid: "486h5fj86fj7ref8644f79j56"
+      // Get external endpoint URL from environment
+      const externalEndpoint = process.env.EXTERNAL_LISTITEMS_URL;
+      
+      if (!externalEndpoint) {
+        console.warn("EXTERNAL_LISTITEMS_URL not configured, using mock data");
+        
+        // Fallback mock data when external endpoint is not available
+        const mockWorkItems = [
+          {
+            csWorkItemDetails: {
+              csWorkItemType: "IMPORT",
+              qName: "STC_yy.STC_yy",
+              tid: "486h5fj86fj7ref8644f79j56"
+            },
+            csWorkItemProcessInfo: {
+              csWorkItemProcessDetail: "Import completed successfully",
+              csWorkItemProcessSatus: "COMPLETED"
+            },
+            createDate: Date.now() - 300000,
+            id: "675h-5hyt-6th7",
+            lastModified: Date.now() - 240000
           },
-          csWorkItemProcessInfo: {
-            csWorkItemProcessDetail: "Import completed successfully",
-            csWorkItemProcessSatus: "COMPLETED"
+          {
+            csWorkItemDetails: {
+              csWorkItemType: "EXPORT",
+              qName: "CPT_config.CPT_config",
+              tid: "abc123def456ghi789"
+            },
+            csWorkItemProcessInfo: {
+              csWorkItemProcessDetail: "Configuration export in progress",
+              csWorkItemProcessSatus: "STARTED"
+            },
+            createDate: Date.now() - 600000,
+            id: "789a-bcde-fgh1",
+            lastModified: Date.now() - 120000
           },
-          createDate: Date.now() - 300000, // 5 minutes ago
-          id: "675h-5hyt-6th7",
-          lastModified: Date.now() - 240000 // 4 minutes ago
-        },
-        {
-          csWorkItemDetails: {
-            csWorkItemType: "EXPORT",
-            qName: "CPT_config.CPT_config",
-            tid: "abc123def456ghi789"
+          {
+            csWorkItemDetails: {
+              csWorkItemType: "SYNC",
+              qName: "SLC_service.SLC_service",
+              tid: "xyz789abc123def456"
+            },
+            csWorkItemProcessInfo: {
+              csWorkItemProcessDetail: "Service synchronization failed - timeout",
+              csWorkItemProcessSatus: "FAILED"
+            },
+            createDate: Date.now() - 900000,
+            id: "def4-56gh-789i",
+            lastModified: Date.now() - 60000
           },
-          csWorkItemProcessInfo: {
-            csWorkItemProcessDetail: "Configuration export in progress",
-            csWorkItemProcessSatus: "STARTED"
+          {
+            csWorkItemDetails: {
+              csWorkItemType: "VALIDATE",
+              qName: "TMC_transaction.TMC_transaction", 
+              tid: "validate123trans456"
+            },
+            csWorkItemProcessInfo: {
+              csWorkItemProcessDetail: "Transaction validation completed",
+              csWorkItemProcessSatus: "COMPLETED"
+            },
+            createDate: Date.now() - 1200000,
+            id: "ghi7-89jk-lmn0",
+            lastModified: Date.now() - 900000
           },
-          createDate: Date.now() - 600000, // 10 minutes ago
-          id: "789a-bcde-fgh1",
-          lastModified: Date.now() - 120000 // 2 minutes ago
-        },
-        {
-          csWorkItemDetails: {
-            csWorkItemType: "SYNC",
-            qName: "SLC_service.SLC_service",
-            tid: "xyz789abc123def456"
+          {
+            csWorkItemDetails: {
+              csWorkItemType: "AUTHENTICATION",
+              qName: "CAS_auth.CAS_auth",
+              tid: "auth789secure123"
+            },
+            csWorkItemProcessInfo: {
+              csWorkItemProcessDetail: "Authentication token refresh completed",
+              csWorkItemProcessSatus: "COMPLETED"
+            },
+            createDate: Date.now() - 1800000,
+            id: "jkl0-12mn-345o",
+            lastModified: Date.now() - 1500000
           },
-          csWorkItemProcessInfo: {
-            csWorkItemProcessDetail: "Service synchronization failed - timeout",
-            csWorkItemProcessSatus: "FAILED"
-          },
-          createDate: Date.now() - 900000, // 15 minutes ago
-          id: "def4-56gh-789i",
-          lastModified: Date.now() - 60000 // 1 minute ago
-        },
-        {
-          csWorkItemDetails: {
-            csWorkItemType: "VALIDATE",
-            qName: "TMC_transaction.TMC_transaction", 
-            tid: "validate123trans456"
-          },
-          csWorkItemProcessInfo: {
-            csWorkItemProcessDetail: "Transaction validation completed",
-            csWorkItemProcessSatus: "COMPLETED"
-          },
-          createDate: Date.now() - 1200000, // 20 minutes ago
-          id: "ghi7-89jk-lmn0",
-          lastModified: Date.now() - 900000 // 15 minutes ago
-        },
-        {
-          csWorkItemDetails: {
-            csWorkItemType: "AUTHENTICATION",
-            qName: "CAS_auth.CAS_auth",
-            tid: "auth789secure123"
-          },
-          csWorkItemProcessInfo: {
-            csWorkItemProcessDetail: "Authentication token refresh completed",
-            csWorkItemProcessSatus: "COMPLETED"
-          },
-          createDate: Date.now() - 1800000, // 30 minutes ago
-          id: "jkl0-12mn-345o",
-          lastModified: Date.now() - 1500000 // 25 minutes ago
-        },
-        {
-          csWorkItemDetails: {
-            csWorkItemType: "NETWORK_CHECK",
-            qName: "NVL_network.NVL_network",
-            tid: "network456check789"
-          },
-          csWorkItemProcessInfo: {
-            csWorkItemProcessDetail: "Network validation completed successfully",
-            csWorkItemProcessSatus: "COMPLETED"
-          },
-          createDate: Date.now() - 2400000, // 40 minutes ago
-          id: "mno3-45pq-678r",
-          lastModified: Date.now() - 2100000 // 35 minutes ago
-        }
-      ];
+          {
+            csWorkItemDetails: {
+              csWorkItemType: "NETWORK_CHECK",
+              qName: "NVL_network.NVL_network",
+              tid: "network456check789"
+            },
+            csWorkItemProcessInfo: {
+              csWorkItemProcessDetail: "Network validation completed successfully",
+              csWorkItemProcessSatus: "COMPLETED"
+            },
+            createDate: Date.now() - 2400000,
+            id: "mno3-45pq-678r",
+            lastModified: Date.now() - 2100000
+          }
+        ];
+        
+        return res.json(mockWorkItems.slice(0, numCount));
+      }
 
-      // Return only the requested count
-      const items = mockWorkItems.slice(0, numCount);
-      res.json(items);
+      // Fetch from external endpoint
+      const externalUrl = `${externalEndpoint}/listitems/${count}`;
+      console.log(`Fetching work items from: ${externalUrl}`);
+      
+      const response = await fetch(externalUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any required authentication headers here
+          ...(process.env.EXTERNAL_API_KEY && {
+            'Authorization': `Bearer ${process.env.EXTERNAL_API_KEY}`
+          })
+        },
+        timeout: 10000 // 10 second timeout
+      });
+
+      if (!response.ok) {
+        throw new Error(`External API returned ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      res.json(data);
+      
     } catch (error) {
-      console.error("Error fetching list items:", error);
-      res.status(500).json({ error: "Failed to fetch list items" });
+      console.error("Error fetching work items from external service:", error);
+      
+      // Return error but don't expose internal details
+      res.status(500).json({ 
+        error: "Failed to fetch work items",
+        message: "External service unavailable"
+      });
     }
   });
 

@@ -12,6 +12,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 24, 2025 - External Work Items Integration**
+- Added proxy endpoint `/api/listitems/{count}` that fetches from external service
+- Configured environment variables for EXTERNAL_LISTITEMS_URL and EXTERNAL_API_KEY
+- Implemented fallback to mock data when external endpoint is not configured
+- Updated source pages to display work items with proper field mappings
+- Added clickable transaction IDs with modal showing tid and process details
+- Displays "no recent transactions" message when none found in last 100 items
+
 **July 24, 2025 - Custom Brand Theme Implementation**
 - Implemented complete custom brand theme using specified colors: #fee1c2, #caae8f, #694628, #fcb567, #27150c
 - Updated all CSS variables to use brand colors while maintaining white and modern design
