@@ -2,7 +2,8 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Sources of Truth
+// Sources of Truth - Cluster Nodes
+// Each source represents a central node that organizes and groups related data points by type
 export const sources = pgTable("sources", {
   id: serial("id").primaryKey(),
   code: text("code").notNull().unique(), // STC, CPT, SLC, TMC, CAS, NVL
@@ -17,6 +18,8 @@ export const sources = pgTable("sources", {
   connectionString: text("connection_string"),
   apiEndpoint: text("api_endpoint"),
   isJanusGraph: boolean("is_janus_graph").default(false),
+  clusterType: text("cluster_type"), // system_data, configuration_data, service_data, etc.
+  dataPointTypes: text("data_point_types").array(), // types of data points this cluster organizes
   config: jsonb("config").default({}),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

@@ -76,13 +76,13 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Sources of Truth Management
-The system monitors six main integration sources:
-- **STC (System Truth Cache)**: Primary data repository and caching layer
-- **CPT (Configuration Processing Tool)**: Configuration management system
-- **SLC (Service Layer Coordinator)**: Service orchestration layer
-- **TMC (Transaction Management Center)**: Transaction monitoring system
-- **CAS (Central Authentication Service)**: Authentication management
-- **NVL (Network Validation Layer)**: Network validation and monitoring
+The system monitors six main cluster nodes, each organizing related data points by type:
+- **STC (System Truth Cache)**: Central node clustering system data repositories and caching layers
+- **CPT (Configuration Processing Tool)**: Central node clustering configuration management data points
+- **SLC (Service Layer Coordinator)**: Central node clustering service orchestration data points
+- **TMC (Transaction Management Center)**: Central node clustering transaction monitoring data points
+- **CAS (Central Authentication Service)**: Central node clustering authentication and authorization data points
+- **NVL (Network Validation Layer)**: Central node clustering network validation data points
 
 ### Core Features
 1. **Dashboard**: Real-time metrics, performance charts, system health overview

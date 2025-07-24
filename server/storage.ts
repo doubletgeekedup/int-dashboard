@@ -66,7 +66,7 @@ export class MemStorage implements IStorage {
       {
         code: "STC",
         name: "System Truth Cache",
-        description: "Primary data repository and caching layer for system state management",
+        description: "Central node clustering system data repositories and caching layers",
         status: "active",
         version: "2.4.1",
         uptime: "99.9%",
@@ -74,12 +74,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 142,
         isJanusGraph: true,
         apiEndpoint: "http://localhost:8182/gremlin",
+        clusterType: "system_data",
+        dataPointTypes: ["cache_entries", "system_records", "data_repositories"],
         config: { database: "janusgraph", traversal: "g" }
       },
       {
         code: "CPT",
         name: "Configuration Processing Tool",
-        description: "Configuration management and processing system",
+        description: "Central node clustering configuration management data points",
         status: "active",
         version: "1.8.3",
         uptime: "98.7%",
@@ -87,12 +89,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 98,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3001/api/config",
+        clusterType: "configuration_data",
+        dataPointTypes: ["config_files", "settings", "parameters", "policies"],
         config: { timeout: 5000, retries: 3 }
       },
       {
         code: "SLC",
         name: "Service Layer Coordinator",
-        description: "Service orchestration and coordination layer",
+        description: "Central node clustering service orchestration data points",
         status: "syncing",
         version: "3.1.0",
         uptime: "99.2%",
@@ -100,12 +104,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 156,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3002/api/services",
+        clusterType: "service_data",
+        dataPointTypes: ["service_definitions", "endpoints", "orchestration_rules"],
         config: { maxConcurrency: 100 }
       },
       {
         code: "TMC",
         name: "Transaction Management Center",
-        description: "Transaction monitoring and management interface",
+        description: "Central node clustering transaction monitoring data points",
         status: "active",
         version: "2.7.2",
         uptime: "99.5%",
@@ -113,12 +119,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 203,
         isJanusGraph: true,
         apiEndpoint: "http://localhost:8182/gremlin",
+        clusterType: "transaction_data",
+        dataPointTypes: ["transactions", "work_items", "processing_states", "audit_logs"],
         config: { database: "transactions", traversal: "tx" }
       },
       {
         code: "CAS",
         name: "Central Authentication Service",
-        description: "Authentication and authorization management system",
+        description: "Central node clustering authentication and authorization data points",
         status: "active",
         version: "4.2.1",
         uptime: "99.8%",
@@ -126,12 +134,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 67,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3003/api/auth",
+        clusterType: "auth_data",
+        dataPointTypes: ["user_credentials", "permissions", "roles", "access_tokens"],
         config: { tokenExpiry: 3600, refreshEnabled: true }
       },
       {
         code: "NVL",
         name: "Network Validation Layer",
-        description: "Network validation and monitoring interface",
+        description: "Central node clustering network validation data points",
         status: "active",
         version: "1.9.4",
         uptime: "98.9%",
@@ -139,6 +149,8 @@ export class MemStorage implements IStorage {
         avgResponseTime: 178,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3004/api/network",
+        clusterType: "network_data",
+        dataPointTypes: ["network_configs", "validation_rules", "connectivity_tests"],
         config: { pingInterval: 30, healthCheckTimeout: 10 }
       }
     ];
