@@ -264,6 +264,81 @@ export class GrafanaService {
     return `${this.config.url}/d/${uid}/integration-dashboard-sources-of-truth`;
   }
 
+  async getEmbeddableUrl(uid: string, options: {
+    from?: string;
+    to?: string;
+    refresh?: string;
+    theme?: 'light' | 'dark';
+    kiosk?: boolean;
+    autofitpanels?: boolean;
+  } = {}): Promise<string> {
+    const params = new URLSearchParams();
+    
+    if (options.from) params.set('from', options.from);
+    if (options.to) params.set('to', options.to);
+    if (options.refresh) params.set('refresh', options.refresh);
+    if (options.theme) params.set('theme', options.theme);
+    if (options.kiosk) params.set('kiosk', 'true');
+    if (options.autofitpanels) params.set('autofitpanels', 'true');
+    
+    // Add orgId for proper context
+    params.set('orgId', this.config.orgId?.toString() || '1');
+    
+    const queryString = params.toString();
+    return `${this.config.url}/d-solo/${uid}?${queryString}`;
+  }
+
+  async getPanelEmbedUrl(dashboardUid: string, panelId: number, options: {
+    from?: string;
+    to?: string;
+    refresh?: string;
+    theme?: 'light' | 'dark';
+    width?: number;
+    height?: number;
+  } = {}): Promise<string> {
+    const params = new URLSearchParams();
+    
+    params.set('panelId', panelId.toString());
+    params.set('orgId', this.config.orgId?.toString() || '1');
+    
+    if (options.from) params.set('from', options.from);
+    if (options.to) params.set('to', options.to);
+    if (options.refresh) params.set('refresh', options.refresh);
+    if (options.theme) params.set('theme', options.theme);
+    if (options.width) params.set('width', options.width.toString());
+    if (options.height) params.set('height', options.height.toString());
+    
+    const queryString = params.toString();
+    return `${this.config.url}/d-solo/${dashboardUid}?${queryString}`;
+  }
+
+  async generateEmbedToken(dashboardUid: string, panelId?: number): Promise<string | null> {
+    if (!this.isConnected) {
+      // Return a mock token for development
+      return `mock-embed-token-${dashboardUid}${panelId ? `-panel-${panelId}` : ''}`;
+    }
+
+    try {
+      const response = await this.makeGrafanaRequest('/api/auth/keys', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: `embed-${dashboardUid}${panelId ? `-panel-${panelId}` : ''}`,
+          role: 'Viewer',
+          secondsToLive: 3600 // 1 hour expiry
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.key;
+      }
+    } catch (error) {
+      console.error('Error generating embed token:', error);
+    }
+
+    return null;
+  }
+
   async exportDashboard(uid: string): Promise<GrafanaDashboard | null> {
     if (!this.isConnected) {
       return null;

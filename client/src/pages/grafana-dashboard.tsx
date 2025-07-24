@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Activity, BarChart3, TrendingUp, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { ExternalLink, Activity, BarChart3, TrendingUp, AlertCircle, CheckCircle, Clock, Monitor } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import EmbeddedDashboard from '@/components/grafana/embedded-dashboard';
 
 interface GrafanaStatus {
   connected: boolean;
@@ -36,6 +37,7 @@ interface DashboardResponse {
 
 export default function GrafanaDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [embeddedDashboards, setEmbeddedDashboards] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   // Query Grafana status
@@ -147,9 +149,10 @@ export default function GrafanaDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="dashboards">Dashboards</TabsTrigger>
+          <TabsTrigger value="embedded">Embedded</TabsTrigger>
           <TabsTrigger value="metrics">Metrics</TabsTrigger>
         </TabsList>
 
@@ -265,14 +268,31 @@ export default function GrafanaDashboard() {
                   </ul>
                 </div>
                 <Separator />
-                <Button 
-                  onClick={handleCreateDashboard}
-                  disabled={createDashboardMutation.isPending}
-                  className="w-full"
-                >
-                  {createDashboardMutation.isPending ? 'Creating...' : 'Create Dashboard'}
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={handleCreateDashboard}
+                    disabled={createDashboardMutation.isPending}
+                    className="w-full"
+                  >
+                    {createDashboardMutation.isPending ? 'Creating...' : 'Create Dashboard'}
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      handleCreateDashboard();
+                      if (!embeddedDashboards.includes('integration-dashboard')) {
+                        setEmbeddedDashboards(prev => [...prev, 'integration-dashboard']);
+                        setActiveTab('embedded');
+                      }
+                    }}
+                    disabled={createDashboardMutation.isPending}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Monitor className="mr-2 h-4 w-4" />
+                    Embed Dashboard
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
@@ -297,14 +317,31 @@ export default function GrafanaDashboard() {
                   </ul>
                 </div>
                 <Separator />
-                <Button 
-                  onClick={handleCreateSimilarityDashboard}
-                  disabled={createSimilarityDashboardMutation.isPending}
-                  className="w-full"
-                >
-                  {createSimilarityDashboardMutation.isPending ? 'Creating...' : 'Create Dashboard'}
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={handleCreateSimilarityDashboard}
+                    disabled={createSimilarityDashboardMutation.isPending}
+                    className="w-full"
+                  >
+                    {createSimilarityDashboardMutation.isPending ? 'Creating...' : 'Create Dashboard'}
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      handleCreateSimilarityDashboard();
+                      if (!embeddedDashboards.includes('similarity-analytics')) {
+                        setEmbeddedDashboards(prev => [...prev, 'similarity-analytics']);
+                        setActiveTab('embedded');
+                      }
+                    }}
+                    disabled={createSimilarityDashboardMutation.isPending}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Monitor className="mr-2 h-4 w-4" />
+                    Embed Dashboard
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -318,6 +355,100 @@ export default function GrafanaDashboard() {
               </AlertDescription>
             </Alert>
           )}
+        </TabsContent>
+
+        <TabsContent value="embedded" className="space-y-6">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Embedded Dashboards</h3>
+                <p className="text-sm text-muted-foreground">
+                  Interactive Grafana dashboards embedded directly in the interface
+                </p>
+              </div>
+              <Badge variant="outline">
+                {embeddedDashboards.length} Active
+              </Badge>
+            </div>
+
+            {embeddedDashboards.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Monitor className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h4 className="text-lg font-semibold mb-2">No Embedded Dashboards</h4>
+                  <p className="text-muted-foreground mb-4">
+                    Create and embed Grafana dashboards to view them directly here
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={() => {
+                      setEmbeddedDashboards(prev => [...prev, 'integration-dashboard']);
+                    }}>
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      Embed Integration Dashboard
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      setEmbeddedDashboards(prev => [...prev, 'similarity-analytics']);
+                    }}>
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      Embed Similarity Analytics
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-8">
+                {embeddedDashboards.includes('integration-dashboard') && (
+                  <EmbeddedDashboard
+                    dashboardUid="integration-dashboard"
+                    title="Integration Dashboard - Sources of Truth"
+                    height={600}
+                    autoRefresh={true}
+                    defaultTimeRange={{ from: 'now-1h', to: 'now' }}
+                  />
+                )}
+                
+                {embeddedDashboards.includes('similarity-analytics') && (
+                  <EmbeddedDashboard
+                    dashboardUid="similarity-analytics"
+                    title="Similarity Analytics Dashboard"
+                    height={600}
+                    autoRefresh={true}
+                    defaultTimeRange={{ from: 'now-24h', to: 'now' }}
+                  />
+                )}
+              </div>
+            )}
+
+            {embeddedDashboards.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Embed Individual Panels</CardTitle>
+                  <CardDescription>
+                    Embed specific dashboard panels for focused monitoring
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      // Add individual panel embedding logic here
+                    }}>
+                      Response Times Panel
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      // Add individual panel embedding logic here
+                    }}>
+                      Record Count Panel
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      // Add individual panel embedding logic here
+                    }}>
+                      System Uptime Panel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="metrics" className="space-y-6">

@@ -551,6 +551,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Grafana Embedding API Routes
+  app.get("/api/grafana/embed/dashboard/:uid", async (req, res) => {
+    try {
+      const { uid } = req.params;
+      const { from, to, refresh, theme, kiosk, autofitpanels } = req.query;
+      
+      const { grafanaService } = await import('./services/grafana-service');
+      const embedUrl = await grafanaService.getEmbeddableUrl(uid, {
+        from: from as string,
+        to: to as string,
+        refresh: refresh as string,
+        theme: theme as 'light' | 'dark',
+        kiosk: kiosk === 'true',
+        autofitpanels: autofitpanels === 'true'
+      });
+
+      const embedToken = await grafanaService.generateEmbedToken(uid);
+
+      res.json({
+        embedUrl,
+        embedToken,
+        iframe: `<iframe src="${embedUrl}" width="100%" height="400" frameborder="0"></iframe>`
+      });
+    } catch (error) {
+      console.error("Error generating dashboard embed:", error);
+      res.status(500).json({ error: "Failed to generate dashboard embed" });
+    }
+  });
+
+  app.get("/api/grafana/embed/panel/:uid/:panelId", async (req, res) => {
+    try {
+      const { uid, panelId } = req.params;
+      const { from, to, refresh, theme, width, height } = req.query;
+      
+      const { grafanaService } = await import('./services/grafana-service');
+      const embedUrl = await grafanaService.getPanelEmbedUrl(uid, parseInt(panelId), {
+        from: from as string,
+        to: to as string,
+        refresh: refresh as string,
+        theme: theme as 'light' | 'dark',
+        width: width ? parseInt(width as string) : undefined,
+        height: height ? parseInt(height as string) : undefined
+      });
+
+      const embedToken = await grafanaService.generateEmbedToken(uid, parseInt(panelId));
+
+      res.json({
+        embedUrl,
+        embedToken,
+        panelId: parseInt(panelId),
+        iframe: `<iframe src="${embedUrl}" width="${width || '100%'}" height="${height || '300'}" frameborder="0"></iframe>`
+      });
+    } catch (error) {
+      console.error("Error generating panel embed:", error);
+      res.status(500).json({ error: "Failed to generate panel embed" });
+    }
+  });
+
+  app.post("/api/grafana/embed/refresh-token", async (req, res) => {
+    try {
+      const { dashboardUid, panelId } = req.body;
+      
+      if (!dashboardUid) {
+        return res.status(400).json({ error: "Dashboard UID is required" });
+      }
+
+      const { grafanaService } = await import('./services/grafana-service');
+      const newToken = await grafanaService.generateEmbedToken(dashboardUid, panelId);
+
+      if (!newToken) {
+        return res.status(500).json({ error: "Failed to generate new embed token" });
+      }
+
+      res.json({ embedToken: newToken });
+    } catch (error) {
+      console.error("Error refreshing embed token:", error);
+      res.status(500).json({ error: "Failed to refresh embed token" });
+    }
+  });
+
   // System diagnostics
   app.post("/api/system/diagnostics", async (req, res) => {
     try {
