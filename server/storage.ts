@@ -1,11 +1,9 @@
 import { 
   sources, threads, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics,
-  roles, userRoles, permissions,
   type Source, type InsertSource, type Thread, type InsertThread, type Bulletin, type InsertBulletin,
   type ChatMessage, type InsertChatMessage, type Transaction, type InsertTransaction,
   type KnowledgeLink, type InsertKnowledgeLink, type PerformanceMetric, type InsertPerformanceMetric,
-  type DashboardStats, type SourceStats, type Role, type InsertRole, type UserRole, type InsertUserRole,
-  type Permission, type InsertPermission, type User
+  type DashboardStats, type SourceStats
 } from "@shared/schema";
 
 export interface IStorage {
@@ -47,21 +45,6 @@ export interface IStorage {
   // Dashboard Stats
   getDashboardStats(): Promise<DashboardStats>;
   getSourceStats(sourceCode: string): Promise<SourceStats>;
-  
-  // RBAC - Role-Based Access Control (optional for storage implementations)
-  createRole?(role: InsertRole): Promise<Role>;
-  getRoles?(): Promise<Role[]>;
-  getRoleById?(roleId: string): Promise<Role | undefined>;
-  updateRole?(roleId: string, updates: Partial<InsertRole>): Promise<Role>;
-  deleteRole?(roleId: string): Promise<void>;
-  
-  createPermission?(permission: InsertPermission): Promise<Permission>;
-  getPermissions?(): Promise<Permission[]>;
-  
-  assignUserRole?(userRole: InsertUserRole): Promise<UserRole>;
-  getUserRoles?(userId: string): Promise<UserRole[]>;
-  removeUserRole?(userRoleId: string): Promise<void>;
-  getUsersWithRole?(roleName: string): Promise<{ user: User; userRole: UserRole }[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -72,9 +55,6 @@ export class MemStorage implements IStorage {
   private knowledgeLinks: Map<number, KnowledgeLink> = new Map();
   private performanceMetrics: Map<number, PerformanceMetric> = new Map();
   private threads: Map<number, Thread> = new Map();
-  private roles: Map<string, Role> = new Map();
-  private userRoles: Map<string, UserRole> = new Map();
-  private permissions: Map<string, Permission> = new Map();
   
   private currentSourceId = 1;
   private currentBulletinId = 1;
@@ -562,92 +542,6 @@ export class MemStorage implements IStorage {
       responseTime: `${source.avgResponseTime}ms`,
       uptime: source.uptime
     };
-  }
-
-  // RBAC Implementation
-  async createRole(role: InsertRole): Promise<Role> {
-    const newRole: Role = {
-      ...role,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.roles.set(role.id, newRole);
-    return newRole;
-  }
-
-  async getRoles(): Promise<Role[]> {
-    return Array.from(this.roles.values());
-  }
-
-  async getRoleById(roleId: string): Promise<Role | undefined> {
-    return this.roles.get(roleId);
-  }
-
-  async updateRole(roleId: string, updates: Partial<InsertRole>): Promise<Role> {
-    const existing = this.roles.get(roleId);
-    if (!existing) {
-      throw new Error(`Role ${roleId} not found`);
-    }
-    const updated: Role = {
-      ...existing,
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.roles.set(roleId, updated);
-    return updated;
-  }
-
-  async deleteRole(roleId: string): Promise<void> {
-    this.roles.delete(roleId);
-    // Also remove any user role assignments
-    for (const [id, userRole] of this.userRoles) {
-      if (userRole.roleId === roleId) {
-        this.userRoles.delete(id);
-      }
-    }
-  }
-
-  async createPermission(permission: InsertPermission): Promise<Permission> {
-    const newPermission: Permission = {
-      ...permission,
-      createdAt: new Date(),
-    };
-    this.permissions.set(permission.id, newPermission);
-    return newPermission;
-  }
-
-  async getPermissions(): Promise<Permission[]> {
-    return Array.from(this.permissions.values());
-  }
-
-  async assignUserRole(userRole: InsertUserRole): Promise<UserRole> {
-    const newUserRole: UserRole = {
-      ...userRole,
-      assignedAt: new Date(),
-    };
-    this.userRoles.set(userRole.id, newUserRole);
-    return newUserRole;
-  }
-
-  async getUserRoles(userId: string): Promise<UserRole[]> {
-    return Array.from(this.userRoles.values()).filter(ur => ur.userId === userId);
-  }
-
-  async removeUserRole(userRoleId: string): Promise<void> {
-    this.userRoles.delete(userRoleId);
-  }
-
-  async getUsersWithRole(roleName: string): Promise<{ user: User; userRole: UserRole }[]> {
-    // Find role by name
-    const role = Array.from(this.roles.values()).find(r => r.name === roleName);
-    if (!role) return [];
-
-    // Find user roles for this role
-    const roleAssignments = Array.from(this.userRoles.values()).filter(ur => ur.roleId === role.id);
-    
-    // This would need user storage implementation to return actual users
-    // For now, return empty array since we don't have user management in MemStorage
-    return [];
   }
 }
 

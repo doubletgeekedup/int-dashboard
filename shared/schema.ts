@@ -1,5 +1,4 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, jsonb, real } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -239,85 +238,5 @@ export type KnowledgeRelation = typeof knowledgeRelations.$inferSelect;
 export type InsertKnowledgeRelation = z.infer<typeof insertKnowledgeRelationSchema>;
 export type KnowledgeAccess = typeof knowledgeAccess.$inferSelect;
 export type InsertKnowledgeAccess = z.infer<typeof insertKnowledgeAccessSchema>;
-
-// Role-based access control tables
-export const roles = pgTable("roles", {
-  id: varchar("id").primaryKey().notNull(),
-  name: varchar("name").notNull().unique(),
-  description: varchar("description"),
-  permissions: jsonb("permissions").notNull().default([]),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const userRoles = pgTable("user_roles", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  roleId: varchar("role_id").notNull().references(() => roles.id, { onDelete: "cascade" }),
-  sourceCode: varchar("source_code"), // Optional: role specific to a source
-  assignedBy: varchar("assigned_by").references(() => users.id),
-  assignedAt: timestamp("assigned_at").defaultNow(),
-  expiresAt: timestamp("expires_at"),
-});
-
-export const permissions = pgTable("permissions", {
-  id: varchar("id").primaryKey().notNull(),
-  name: varchar("name").notNull().unique(),
-  description: varchar("description"),
-  resource: varchar("resource").notNull(), // e.g., 'sources', 'bulletins', 'knowledge'
-  action: varchar("action").notNull(), // e.g., 'read', 'write', 'delete', 'admin'
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Relations for RBAC
-export const usersRelations = relations(users, ({ many }) => ({
-  userRoles: many(userRoles),
-}));
-
-export const rolesRelations = relations(roles, ({ many }) => ({
-  userRoles: many(userRoles),
-}));
-
-export const userRolesRelations = relations(userRoles, ({ one }) => ({
-  user: one(users, {
-    fields: [userRoles.userId],
-    references: [users.id],
-  }),
-  role: one(roles, {
-    fields: [userRoles.roleId],
-    references: [roles.id],
-  }),
-  assignedByUser: one(users, {
-    fields: [userRoles.assignedBy],
-    references: [users.id],
-  }),
-}));
-
-// RBAC Insert Schemas
-export const insertRoleSchema = createInsertSchema(roles).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
-  id: true,
-  assignedAt: true,
-});
-
-export const insertPermissionSchema = createInsertSchema(permissions).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type Role = typeof roles.$inferSelect;
-export type InsertRole = z.infer<typeof insertRoleSchema>;
-export type UserRole = typeof userRoles.$inferSelect;
-export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
-export type Permission = typeof permissions.$inferSelect;
-export type InsertPermission = z.infer<typeof insertPermissionSchema>;
-
-export type UpsertUser = typeof users.$inferInsert;
-export type User = typeof users.$inferSelect;
 
 export * from "drizzle-zod";
