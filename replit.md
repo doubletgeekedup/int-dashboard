@@ -14,7 +14,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 24, 2025 - Gremlin Node Visualizer Implementation**
+**July 24, 2025 - Gremlin Node Visualizer Implementation with Visual Connections**
 - Created comprehensive Gremlin visualizer interface for each Source of Truth
 - Built interactive node relationship visualization showing one level up and down connections
 - Added dynamic source selection and node ID input with real-time graph generation
@@ -25,6 +25,10 @@ Preferred communication style: Simple, everyday language.
 - Built comprehensive graph data display with node properties, edges, and relationship summaries
 - Implemented source-specific node typing (cache_entry, config_file, service_endpoint, etc.)
 - Added responsive card-based layout with color-coded node levels and relationship visualization
+- **NEW**: Added visual connection lines showing parent-to-child relationships with arrows
+- **NEW**: Implemented "+more" popup dialog for nodes with extensive properties
+- **NEW**: Created expandable property viewer with formatted JSON display and search capabilities
+- **NEW**: Enhanced visual layout with connection arrows, animated target node indicator, and hierarchical flow display
 
 **July 24, 2025 - Complete Config.yaml Migration & NODE_ENV Removal**
 - Migrated entire system from environment variables to config.yaml-based configuration

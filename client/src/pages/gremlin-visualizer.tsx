@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, GitBranch } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Loader2, Search, GitBranch, Eye, ArrowDown, ArrowUp, ArrowRight } from "lucide-react";
 
 interface GraphNode {
   id: string;
@@ -64,6 +65,59 @@ export default function GremlinVisualizer() {
     }
   };
 
+  const NodePropertiesDialog = ({ node }: { node: GraphNode }) => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+          <Eye className="w-3 h-3 mr-1" />
+          +more
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <GitBranch className="w-4 h-4" />
+            Node Properties: {node.label}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-semibold text-muted-foreground">ID:</span>
+              <p className="font-mono bg-gray-50 p-2 rounded mt-1">{node.id}</p>
+            </div>
+            <div>
+              <span className="font-semibold text-muted-foreground">Type:</span>
+              <p className="font-mono bg-gray-50 p-2 rounded mt-1">{node.type}</p>
+            </div>
+            <div>
+              <span className="font-semibold text-muted-foreground">Label:</span>
+              <p className="font-mono bg-gray-50 p-2 rounded mt-1">{node.label}</p>
+            </div>
+            <div>
+              <span className="font-semibold text-muted-foreground">Source:</span>
+              <p className="font-mono bg-gray-50 p-2 rounded mt-1">{node.sourceCode}</p>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold text-muted-foreground mb-2">All Properties ({Object.keys(node.properties).length})</h4>
+            <div className="space-y-2 max-h-96 overflow-auto">
+              {Object.entries(node.properties).map(([key, value]) => (
+                <div key={key} className="flex flex-col gap-1 p-3 bg-gray-50 rounded">
+                  <span className="font-semibold text-sm">{key}</span>
+                  <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap break-words">
+                    {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   const renderNode = (node: GraphNode, level: 'up' | 'center' | 'down') => {
     const levelColors = {
       up: 'border-blue-200 bg-blue-50',
@@ -74,7 +128,7 @@ export default function GremlinVisualizer() {
     return (
       <div
         key={node.id}
-        className={`p-4 rounded-lg border-2 ${levelColors[level]} min-w-[200px] max-w-[300px]`}
+        className={`p-4 rounded-lg border-2 ${levelColors[level]} min-w-[200px] max-w-[300px] relative`}
       >
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="outline" className="text-xs">
@@ -98,9 +152,12 @@ export default function GremlinVisualizer() {
               </div>
             ))}
             {Object.entries(node.properties).length > 3 && (
-              <p className="text-xs text-muted-foreground">
-                +{Object.entries(node.properties).length - 3} more
-              </p>
+              <div className="flex justify-between items-center mt-2">
+                <p className="text-xs text-muted-foreground">
+                  +{Object.entries(node.properties).length - 3} more
+                </p>
+                <NodePropertiesDialog node={node} />
+              </div>
             )}
           </div>
         )}
@@ -174,60 +231,88 @@ export default function GremlinVisualizer() {
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
-                {/* Level Up Nodes */}
-                {graphData.levels.up.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-200 rounded-full"></div>
-                      Connected Nodes (Level Up) - {graphData.levels.up.length}
-                    </h3>
-                    <div className="flex gap-4 overflow-x-auto pb-2">
-                      {graphData.levels.up.map((node: GraphNode) => renderNode(node, 'up'))}
+                {/* Visual Graph Layout */}
+                <div className="relative p-8 bg-gray-50 rounded-lg overflow-hidden">
+                  {/* Level Up Nodes */}
+                  {graphData.levels.up.length > 0 && (
+                    <div className="mb-8">
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <ArrowUp className="w-4 h-4 text-blue-600" />
+                        <h3 className="text-sm font-semibold text-blue-600">
+                          Parent Nodes ({graphData.levels.up.length})
+                        </h3>
+                      </div>
+                      <div className="flex gap-4 justify-center flex-wrap">
+                        {graphData.levels.up.map((node: GraphNode) => renderNode(node, 'up'))}
+                      </div>
+                      {/* Connection lines from parent to center */}
+                      <div className="flex justify-center mt-4 mb-2">
+                        <div className="flex flex-col items-center">
+                          {Array.from({ length: graphData.levels.up.length }).map((_, i) => (
+                            <div key={i} className="w-px h-6 bg-blue-300"></div>
+                          ))}
+                          <ArrowDown className="w-4 h-4 text-blue-400" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Center Node */}
+                  <div className="flex justify-center mb-8">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <div className="w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
+                        <h3 className="text-sm font-semibold text-amber-600">Target Node</h3>
+                      </div>
+                      {renderNode(graphData.centerNode, 'center')}
                     </div>
                   </div>
-                )}
 
-                {/* Center Node */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                    <div className="w-3 h-3 bg-amber-300 rounded-full"></div>
-                    Target Node
-                  </h3>
-                  <div className="flex justify-center">
-                    {renderNode(graphData.centerNode, 'center')}
-                  </div>
+                  {/* Level Down Nodes */}
+                  {graphData.levels.down.length > 0 && (
+                    <div>
+                      {/* Connection lines from center to children */}
+                      <div className="flex justify-center mb-2 mt-4">
+                        <div className="flex flex-col items-center">
+                          <ArrowDown className="w-4 h-4 text-green-400" />
+                          {Array.from({ length: graphData.levels.down.length }).map((_, i) => (
+                            <div key={i} className="w-px h-6 bg-green-300"></div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <ArrowDown className="w-4 h-4 text-green-600" />
+                        <h3 className="text-sm font-semibold text-green-600">
+                          Child Nodes ({graphData.levels.down.length})
+                        </h3>
+                      </div>
+                      <div className="flex gap-4 justify-center flex-wrap">
+                        {graphData.levels.down.map((node: GraphNode) => renderNode(node, 'down'))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Level Down Nodes */}
-                {graphData.levels.down.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-200 rounded-full"></div>
-                      Connected Nodes (Level Down) - {graphData.levels.down.length}
-                    </h3>
-                    <div className="flex gap-4 overflow-x-auto pb-2">
-                      {graphData.levels.down.map((node: GraphNode) => renderNode(node, 'down'))}
-                    </div>
-                  </div>
-                )}
 
                 {/* Edges Summary */}
                 {graphData.edges.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-semibold mb-4">Relationships - {graphData.edges.length}</h3>
+                    <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                      <ArrowRight className="w-4 h-4" />
+                      Relationships ({graphData.edges.length})
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {graphData.edges.map((edge: GraphEdge) => (
-                        <div key={edge.id} className="p-3 bg-gray-50 rounded-lg">
+                        <div key={edge.id} className="p-3 bg-gray-50 rounded-lg border">
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="font-mono text-xs bg-white px-2 py-1 rounded">
-                              {edge.source.slice(0, 8)}...
+                            <span className="font-mono text-xs bg-white px-2 py-1 rounded border">
+                              {edge.source.slice(0, 12)}...
                             </span>
-                            <span className="text-muted-foreground">→</span>
-                            <span className="font-mono text-xs bg-white px-2 py-1 rounded">
-                              {edge.target.slice(0, 8)}...
+                            <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                            <span className="font-mono text-xs bg-white px-2 py-1 rounded border">
+                              {edge.target.slice(0, 12)}...
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">{edge.label}</p>
+                          <p className="text-xs text-muted-foreground mt-1 font-medium">{edge.label}</p>
                           {Object.keys(edge.properties).length > 0 && (
                             <p className="text-xs text-muted-foreground">
                               {Object.keys(edge.properties).length} properties
