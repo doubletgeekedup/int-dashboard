@@ -693,17 +693,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Similarity Analysis and Impact Assessment API Routes
   app.post("/api/similarity/analyze", async (req, res) => {
     try {
-      const { nodeData, threshold = 0.7 } = req.body;
+      const { nodeData, threshold = 0.7, useSchema = true } = req.body;
       
       if (!nodeData) {
         return res.status(400).json({ error: "Node data is required" });
       }
 
-      const similarNodes = await similarityService.findSimilarNodes(nodeData, threshold);
+      // Use enhanced schema-based analysis if requested
+      const similarNodes = useSchema 
+        ? await similarityService.findSimilarNodesWithSchema(nodeData, threshold)
+        : await similarityService.findSimilarNodes(nodeData, threshold);
+        
       res.json({
         similarNodes,
         totalFound: similarNodes.length,
-        threshold
+        threshold,
+        schemaEnhanced: useSchema
       });
     } catch (error) {
       console.error("Error in similarity analysis:", error);
@@ -714,12 +719,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/impact-assessment/:nodeId", async (req, res) => {
     try {
       const { nodeId } = req.params;
+      const { useSchema = 'true' } = req.query;
       
       if (!nodeId) {
         return res.status(400).json({ error: "Node ID is required" });
       }
 
-      const impactAssessment = await similarityService.performImpactAssessment(nodeId);
+      // Use schema-enhanced assessment by default
+      const impactAssessment = useSchema === 'true'
+        ? await similarityService.getSchemaBasedImpactAssessment(nodeId)
+        : await similarityService.performImpactAssessment(nodeId);
+        
       res.json(impactAssessment);
     } catch (error) {
       console.error("Error in impact assessment:", error);
@@ -779,6 +789,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error searching nodes:", error);
       res.status(500).json({ error: "Failed to search nodes" });
+    }
+  });
+
+  // JanusGraph Schema API Routes
+  app.get("/api/janusgraph/schema", async (req, res) => {
+    try {
+      const schemaUrl = process.env.JANUSGRAPH_SCHEMA_URL;
+      if (!schemaUrl) {
+        return res.status(501).json({ 
+          error: "JanusGraph schema endpoint not configured",
+          message: "Set JANUSGRAPH_SCHEMA_URL environment variable to enable schema access"
+        });
+      }
+
+      const response = await fetch(schemaUrl, {
+        headers: {
+          'Authorization': `Bearer ${process.env.JANUSGRAPH_API_KEY || ''}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Schema fetch failed: ${response.status} ${response.statusText}`);
+      }
+
+      const schema = await response.json();
+      res.json({
+        schema,
+        timestamp: new Date().toISOString(),
+        source: 'external_endpoint'
+      });
+    } catch (error) {
+      console.error("Error fetching JanusGraph schema:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch schema from external endpoint",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

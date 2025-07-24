@@ -22,6 +22,10 @@ export interface ImpactAssessment {
 }
 
 export class SimilarityService {
+  private schemaCache: any = null;
+  private lastSchemaFetch: number = 0;
+  private readonly SCHEMA_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
   constructor(private storage: IStorage) {}
 
   /**
@@ -251,6 +255,179 @@ export class SimilarityService {
     }
 
     return null;
+  }
+
+  /**
+   * Fetch JanusGraph schema from external endpoint
+   */
+  private async fetchJanusGraphSchema(): Promise<any> {
+    const now = Date.now();
+    
+    // Return cached schema if still valid
+    if (this.schemaCache && (now - this.lastSchemaFetch) < this.SCHEMA_CACHE_TTL) {
+      return this.schemaCache;
+    }
+
+    try {
+      const schemaUrl = process.env.JANUSGRAPH_SCHEMA_URL;
+      if (!schemaUrl) {
+        console.warn('JANUSGRAPH_SCHEMA_URL not configured, using local thread data only');
+        return null;
+      }
+
+      const response = await fetch(schemaUrl, {
+        headers: {
+          'Authorization': `Bearer ${process.env.JANUSGRAPH_API_KEY || ''}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Schema fetch failed: ${response.status} ${response.statusText}`);
+      }
+
+      this.schemaCache = await response.json();
+      this.lastSchemaFetch = now;
+      
+      console.log('JanusGraph schema fetched successfully');
+      return this.schemaCache;
+    } catch (error) {
+      console.error('Failed to fetch JanusGraph schema:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhanced similarity analysis using JanusGraph schema data
+   */
+  async findSimilarNodesWithSchema(targetNode: any, threshold: number = 0.7): Promise<NodeSimilarity[]> {
+    const schema = await this.fetchJanusGraphSchema();
+    const localSimilarNodes = await this.findSimilarNodes(targetNode, threshold);
+    
+    if (!schema) {
+      return localSimilarNodes;
+    }
+
+    // Enhance analysis with schema data
+    const enhancedNodes = localSimilarNodes.map(node => {
+      const schemaMatch = this.findSchemaMatch(node.nodeData, schema);
+      if (schemaMatch) {
+        return {
+          ...node,
+          schemaContext: schemaMatch,
+          similarity: Math.min(node.similarity + 0.1, 1.0), // Boost similarity for schema matches
+          impactLevel: this.enhanceImpactWithSchema(node.impactLevel, schemaMatch)
+        };
+      }
+      return node;
+    });
+
+    return enhancedNodes.sort((a, b) => b.similarity - a.similarity);
+  }
+
+  /**
+   * Find matching schema elements for a node
+   */
+  private findSchemaMatch(nodeData: any, schema: any): any {
+    if (!schema || !schema.vertices) return null;
+
+    // Look for vertex types that match the node
+    const matchingVertices = schema.vertices.filter((vertex: any) => 
+      vertex.label === nodeData.type || 
+      vertex.label === nodeData.class ||
+      (vertex.properties && vertex.properties.some((prop: any) => 
+        prop.key === 'functionName' && prop.value === nodeData.functionName
+      ))
+    );
+
+    if (matchingVertices.length > 0) {
+      return {
+        vertexType: matchingVertices[0],
+        relatedEdges: schema.edges?.filter((edge: any) => 
+          edge.inVertex === matchingVertices[0].label || 
+          edge.outVertex === matchingVertices[0].label
+        ) || []
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Enhance impact level based on schema context
+   */
+  private enhanceImpactWithSchema(currentLevel: string, schemaMatch: any): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+    if (!schemaMatch) return currentLevel as any;
+
+    // If node has many relationships in schema, increase impact
+    const relationshipCount = schemaMatch.relatedEdges?.length || 0;
+    
+    if (relationshipCount > 10) return 'CRITICAL';
+    if (relationshipCount > 5 && currentLevel !== 'CRITICAL') return 'HIGH';
+    if (relationshipCount > 2 && ['LOW', 'MEDIUM'].includes(currentLevel)) return 'MEDIUM';
+    
+    return currentLevel as any;
+  }
+
+  /**
+   * Get comprehensive impact analysis including schema relationships
+   */
+  async getSchemaBasedImpactAssessment(nodeId: string): Promise<ImpactAssessment> {
+    const basicAssessment = await this.performImpactAssessment(nodeId);
+    const schema = await this.fetchJanusGraphSchema();
+    
+    if (!schema) {
+      return basicAssessment;
+    }
+
+    // Enhance with schema-based relationships
+    const targetNode = await this.findNodeById(nodeId);
+    if (targetNode) {
+      const schemaMatch = this.findSchemaMatch(targetNode, schema);
+      if (schemaMatch) {
+        // Add schema-specific recommendations
+        const schemaRecommendations = this.generateSchemaRecommendations(schemaMatch);
+        basicAssessment.recommendations.push(...schemaRecommendations);
+        
+        // Update impact score based on schema relationships
+        const relationshipBonus = Math.min(schemaMatch.relatedEdges?.length * 5 || 0, 25);
+        basicAssessment.impactSummary.estimatedImpactScore = Math.min(
+          basicAssessment.impactSummary.estimatedImpactScore + relationshipBonus, 
+          100
+        );
+      }
+    }
+
+    return basicAssessment;
+  }
+
+  /**
+   * Generate recommendations based on schema relationships
+   */
+  private generateSchemaRecommendations(schemaMatch: any): string[] {
+    const recommendations: string[] = [];
+    const edgeCount = schemaMatch.relatedEdges?.length || 0;
+
+    if (edgeCount > 10) {
+      recommendations.push('🔗 Highly connected node detected - review all downstream dependencies');
+    }
+    
+    if (edgeCount > 5) {
+      recommendations.push('📊 Multiple relationships found - consider cascading update strategy');
+    }
+
+    // Check for specific edge types that indicate critical relationships
+    const criticalEdges = schemaMatch.relatedEdges?.filter((edge: any) => 
+      edge.label?.includes('DEPENDS_ON') || 
+      edge.label?.includes('CONTROLS') ||
+      edge.label?.includes('MANAGES')
+    ) || [];
+
+    if (criticalEdges.length > 0) {
+      recommendations.push(`⚠️ ${criticalEdges.length} critical dependencies identified - coordinate with dependent systems`);
+    }
+
+    return recommendations;
   }
 
   /**

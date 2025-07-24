@@ -33,6 +33,9 @@ Preferred communication style: Simple, everyday language.
 - Added severity-based impact scoring (LOW/MEDIUM/HIGH/CRITICAL)
 - Created actionable recommendations based on impact analysis
 - Enabled cross-system dependency tracking through node data analysis
+- Added JanusGraph schema integration for enhanced similarity analysis
+- Implemented schema-based impact assessment with relationship mapping
+- Created external schema endpoint support with caching and authentication
 
 **July 24, 2025 - Division Teams Architecture**
 - Implemented hierarchical Division Teams → Teams → Data Nodes structure
