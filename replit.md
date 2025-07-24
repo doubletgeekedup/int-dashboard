@@ -20,6 +20,10 @@ Preferred communication style: Simple, everyday language.
 - Added knowledge search, statistics, and access audit capabilities for compliance reporting
 - Implemented retention policies (temporary, standard, permanent) for data lifecycle management
 - Created secure API endpoints for knowledge management with full access logging
+- Enhanced with specialized node relationship detection and storage for similarity analysis
+- Added automatic capture of attribute matching patterns and correlation discoveries
+- Built dedicated APIs for storing and searching node relationships with confidence scoring
+- Created UI interface for viewing node relationship discoveries and patterns
 
 **July 24, 2025 - Environment-Controlled AI Chat System**
 - Removed user toggles for AI/non-AI mode - now controlled by AI_CHAT_ENABLED environment variable

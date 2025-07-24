@@ -795,5 +795,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Store node relationship information specifically
+  app.post('/api/knowledge/node-relationship', async (req, res) => {
+    try {
+      const { knowledgeRetentionService } = await import('./services/knowledge-retention');
+      
+      const relationshipData = {
+        ...req.body,
+        metadata: {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        }
+      };
+      
+      const entry = await knowledgeRetentionService.storeNodeRelationship(relationshipData);
+      res.json(entry);
+    } catch (error) {
+      console.error('Node relationship storage error:', error);
+      res.status(500).json({ error: 'Failed to store node relationship' });
+    }
+  });
+
+  // Search for node relationships
+  app.get('/api/knowledge/node-relationships', async (req, res) => {
+    try {
+      const { knowledgeRetentionService } = await import('./services/knowledge-retention');
+      
+      const query = {
+        sourceNode: req.query.sourceNode as string,
+        targetNode: req.query.targetNode as string,
+        relationshipType: req.query.relationshipType as string,
+        minConfidence: req.query.minConfidence ? parseFloat(req.query.minConfidence as string) : undefined,
+        limit: parseInt(req.query.limit as string) || 50
+      };
+      
+      const relationships = await knowledgeRetentionService.searchNodeRelationships(query);
+      res.json(relationships);
+    } catch (error) {
+      console.error('Node relationship search error:', error);
+      res.status(500).json({ error: 'Failed to search node relationships' });
+    }
+  });
+
   return httpServer;
 }

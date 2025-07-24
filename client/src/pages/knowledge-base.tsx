@@ -14,6 +14,22 @@ import { z } from 'zod';
 import { Search, Shield, Database, TrendingUp, Clock, FileText, AlertTriangle } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
+// Schema for node relationship entries
+const nodeRelationshipSchema = z.object({
+  sourceNode: z.string().min(1, "Source node is required"),
+  targetNode: z.string().min(1, "Target node is required"), 
+  relationshipType: z.enum(['similarity', 'attribute_match', 'manual_mapping', 'correlation']),
+  confidence: z.number().min(0).max(1),
+  discoveryMethod: z.string().min(1, "Discovery method is required"),
+  attributes: z.array(z.object({
+    sourceName: z.string(),
+    targetName: z.string(),
+    matchPercentage: z.number().min(0).max(100),
+    value: z.string().optional()
+  })).optional(),
+  sourceCode: z.string().optional()
+});
+
 // Form schema for adding knowledge entries
 const knowledgeSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -206,9 +222,10 @@ export default function KnowledgeBasePage() {
         )}
 
         <Tabs defaultValue="search" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="search">Search Knowledge</TabsTrigger>
             <TabsTrigger value="add">Add Entry</TabsTrigger>
+            <TabsTrigger value="relationships">Node Relationships</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -492,6 +509,58 @@ export default function KnowledgeBasePage() {
                     </Button>
                   </form>
                 </Form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="relationships" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Node Relationship Discovery
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                      Automated Relationship Detection
+                    </h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      The system automatically captures node relationships when you analyze data through chat:
+                    </p>
+                    <ul className="mt-2 text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                      <li>• "Node xyz is related to dbx by similarity analysis"</li>
+                      <li>• "These nodes share attributes with 90% matching values"</li>
+                      <li>• "Node attributes named differently but have same values"</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input placeholder="Search source node (e.g., xyz)" />
+                    <Input placeholder="Search target node (e.g., dbx)" />
+                  </div>
+                  
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by relationship type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="similarity">Similarity Analysis</SelectItem>
+                      <SelectItem value="attribute_match">Attribute Matching</SelectItem>
+                      <SelectItem value="manual_mapping">Manual Mapping</SelectItem>
+                      <SelectItem value="correlation">Data Correlation</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <div className="text-center py-8 text-muted-foreground">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Use the chat interface to analyze node relationships.</p>
+                    <p className="text-sm">Discoveries will be automatically captured and stored here.</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

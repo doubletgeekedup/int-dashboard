@@ -361,6 +361,45 @@ export class KnowledgeRetentionService {
   }> {
     const insights = [];
     
+    // Check for node relationship discoveries
+    if (this.containsNodeRelationshipInfo(message, response)) {
+      insights.push({
+        title: `Node Relationship Discovery - ${new Date().toISOString().slice(0, 10)}`,
+        content: `Relationship Query: ${message}\n\nRelationship Analysis: ${response}`,
+        category: "analysis",
+        priority: "high",
+        tags: ["node-relationships", "similarity-analysis", "data-mapping"],
+        isConfidential: false,
+        retentionPolicy: "permanent"
+      });
+    }
+
+    // Check for attribute matching patterns
+    if (this.containsAttributeMatchingInfo(message, response)) {
+      insights.push({
+        title: `Attribute Matching Pattern - ${new Date().toISOString().slice(0, 10)}`,
+        content: `Attribute Analysis: ${message}\n\nMatching Results: ${response}`,
+        category: "analysis", 
+        priority: "medium",
+        tags: ["attribute-matching", "data-correlation", "pattern-recognition"],
+        isConfidential: false,
+        retentionPolicy: "permanent"
+      });
+    }
+
+    // Check for similarity threshold discoveries
+    if (this.containsSimilarityThresholdInfo(message, response)) {
+      insights.push({
+        title: `Similarity Threshold Analysis - ${new Date().toISOString().slice(0, 10)}`,
+        content: `Threshold Query: ${message}\n\nSimilarity Analysis: ${response}`,
+        category: "analysis",
+        priority: "medium", 
+        tags: ["similarity-thresholds", "matching-criteria", "data-analysis"],
+        isConfidential: false,
+        retentionPolicy: "permanent"
+      });
+    }
+    
     // Check for system configurations
     if (message.toLowerCase().includes('config') || response.toLowerCase().includes('configuration')) {
       insights.push({
@@ -433,6 +472,185 @@ export class KnowledgeRetentionService {
     }
 
     return insights;
+  }
+
+  /**
+   * Detect if the conversation contains node relationship information
+   */
+  private containsNodeRelationshipInfo(message: string, response: string): boolean {
+    const relationshipKeywords = [
+      'node', 'related', 'relationship', 'connection', 'linked',
+      'similar', 'xyz', 'dbx', 'correlation', 'mapping'
+    ];
+    
+    const combinedText = `${message} ${response}`.toLowerCase();
+    return relationshipKeywords.some(keyword => combinedText.includes(keyword)) &&
+           (combinedText.includes('related') || combinedText.includes('connection'));
+  }
+
+  /**
+   * Detect if the conversation contains attribute matching information
+   */
+  private containsAttributeMatchingInfo(message: string, response: string): boolean {
+    const attributeKeywords = [
+      'attribute', 'field', 'property', 'value', 'match', 'same',
+      'share', 'percentage', '90%', 'similar', 'named differently'
+    ];
+    
+    const combinedText = `${message} ${response}`.toLowerCase();
+    return attributeKeywords.some(keyword => combinedText.includes(keyword)) &&
+           (combinedText.includes('attribute') || combinedText.includes('value'));
+  }
+
+  /**
+   * Detect if the conversation contains similarity threshold information
+   */
+  private containsSimilarityThresholdInfo(message: string, response: string): boolean {
+    const thresholdKeywords = [
+      'threshold', 'percentage', '%', 'similarity', 'match', 
+      'criteria', 'cutoff', 'level', '90%', 'same value'
+    ];
+    
+    const combinedText = `${message} ${response}`.toLowerCase();
+    return thresholdKeywords.some(keyword => combinedText.includes(keyword)) &&
+           (combinedText.includes('threshold') || combinedText.includes('%') || combinedText.includes('criteria'));
+  }
+
+  /**
+   * Store node relationship information specifically
+   */
+  async storeNodeRelationship(data: {
+    sourceNode: string;
+    targetNode: string;
+    relationshipType: 'similarity' | 'attribute_match' | 'manual_mapping' | 'correlation';
+    confidence: number;
+    attributes?: Array<{
+      sourceName: string;
+      targetName: string;
+      matchPercentage: number;
+      value?: string;
+    }>;
+    discoveryMethod: string;
+    sessionId?: string;
+    sourceCode?: string;
+    metadata?: {
+      ipAddress?: string;
+      userAgent?: string;
+    };
+  }): Promise<KnowledgeEntry> {
+    
+    const relationshipContent = this.formatNodeRelationshipContent(data);
+    
+    return await this.storeKnowledge({
+      title: `Node Relationship: ${data.sourceNode} ↔ ${data.targetNode}`,
+      content: relationshipContent,
+      category: "analysis",
+      priority: data.confidence > 0.8 ? "high" : "medium",
+      tags: [
+        "node-relationships", 
+        data.relationshipType, 
+        data.sourceNode, 
+        data.targetNode,
+        `confidence-${Math.round(data.confidence * 100)}`
+      ],
+      sourceCode: data.sourceCode,
+      sessionId: data.sessionId,
+      isConfidential: false,
+      retentionPolicy: "permanent",
+      metadata: data.metadata
+    });
+  }
+
+  /**
+   * Format node relationship content for storage
+   */
+  private formatNodeRelationshipContent(data: {
+    sourceNode: string;
+    targetNode: string;
+    relationshipType: string;
+    confidence: number;
+    attributes?: Array<{
+      sourceName: string;
+      targetName: string;
+      matchPercentage: number;
+      value?: string;
+    }>;
+    discoveryMethod: string;
+  }): string {
+    let content = `Node Relationship Discovery\n\n`;
+    content += `Source Node: ${data.sourceNode}\n`;
+    content += `Target Node: ${data.targetNode}\n`;
+    content += `Relationship Type: ${data.relationshipType}\n`;
+    content += `Confidence: ${Math.round(data.confidence * 100)}%\n`;
+    content += `Discovery Method: ${data.discoveryMethod}\n\n`;
+    
+    if (data.attributes && data.attributes.length > 0) {
+      content += `Attribute Matches:\n`;
+      data.attributes.forEach((attr, index) => {
+        content += `${index + 1}. ${attr.sourceName} ↔ ${attr.targetName}\n`;
+        content += `   Match Percentage: ${attr.matchPercentage}%\n`;
+        if (attr.value) {
+          content += `   Shared Value: ${attr.value}\n`;
+        }
+        content += '\n';
+      });
+    }
+    
+    content += `Analysis: These nodes are related through ${data.relationshipType}. `;
+    if (data.attributes && data.attributes.length > 0) {
+      const avgMatch = data.attributes.reduce((sum, attr) => sum + attr.matchPercentage, 0) / data.attributes.length;
+      content += `Average attribute match percentage: ${Math.round(avgMatch)}%. `;
+    }
+    content += `This relationship can be used for future similarity analysis and data correlation.`;
+    
+    return content;
+  }
+
+  /**
+   * Search for node relationships in knowledge base
+   */
+  async searchNodeRelationships(query: {
+    sourceNode?: string;
+    targetNode?: string;
+    relationshipType?: string;
+    minConfidence?: number;
+    limit?: number;
+  }): Promise<KnowledgeEntry[]> {
+    const searchTags = ["node-relationships"];
+    
+    if (query.relationshipType) {
+      searchTags.push(query.relationshipType);
+    }
+    
+    let searchText = "";
+    if (query.sourceNode) {
+      searchText += query.sourceNode + " ";
+    }
+    if (query.targetNode) {
+      searchText += query.targetNode + " ";
+    }
+    
+    const results = await this.searchKnowledge({
+      searchText: searchText.trim(),
+      category: "analysis",
+      tags: searchTags,
+      limit: query.limit || 50
+    });
+    
+    // Filter by confidence if specified
+    if (query.minConfidence) {
+      const confidenceThreshold = query.minConfidence * 100;
+      results.entries = results.entries.filter(entry => {
+        const confidenceTag = entry.tags.find(tag => tag.startsWith('confidence-'));
+        if (confidenceTag) {
+          const confidence = parseInt(confidenceTag.split('-')[1]);
+          return confidence >= confidenceThreshold;
+        }
+        return false;
+      });
+    }
+    
+    return results.entries;
   }
 }
 
