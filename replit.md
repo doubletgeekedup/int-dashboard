@@ -17,6 +17,8 @@ Preferred communication style: Simple, everyday language.
 - Added AI status endpoint (/api/chat/ai-status) showing enabled/available/hasApiKey status
 - Updated AI assistant components to show proper status indicators based on environment configuration
 - Enhanced dashboard with dynamic AI status indicators (green = AI ready, yellow = direct mode)
+- Fixed AI status indicator inconsistencies - now properly shows yellow "Direct Mode" when AI_CHAT_ENABLED=false
+- Added proper TypeScript interfaces for AI status responses
 - Fixed OpenAI service integration and chat interface functionality
 - Implemented comprehensive dual-mode chat system with environment control
 - Added extensive non-AI command set: node counting, descriptions, system status, source listing

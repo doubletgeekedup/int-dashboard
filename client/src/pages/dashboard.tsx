@@ -19,18 +19,26 @@ import {
 } from "lucide-react";
 import type { DashboardStats, Source, Transaction } from "@shared/schema";
 
+interface AIStatus {
+  enabled: boolean;
+  available: boolean;
+  hasApiKey: boolean;
+}
+
 function AIStatusIndicator() {
-  const { data: aiStatus } = useQuery({
+  const { data: aiStatus } = useQuery<AIStatus>({
     queryKey: ["/api/chat/ai-status"],
   });
+
+  const isAvailable = aiStatus?.available ?? false;
 
   return (
     <div className="flex items-center space-x-2 text-sm">
       <div className={`w-2 h-2 rounded-full ${
-        aiStatus?.available ? 'bg-green-400' : 'bg-yellow-400'
+        isAvailable ? 'bg-green-400' : 'bg-yellow-400'
       }`} />
-      <span className={aiStatus?.available ? 'text-green-600' : 'text-yellow-600'}>
-        {aiStatus?.available ? "AI Ready" : "Direct Mode"}
+      <span className={isAvailable ? 'text-green-600' : 'text-yellow-600'}>
+        {isAvailable ? "AI Ready" : "Direct Mode"}
       </span>
     </div>
   );
