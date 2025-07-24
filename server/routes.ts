@@ -456,13 +456,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const chatResponse = await openAIService.chatCompletion([
         {
           role: 'system',
-          content: 'You are an AI assistant for an integration dashboard. Provide helpful, concise responses about system integration data and performance.'
+          content: 'You are an AI assistant for an integration dashboard. Provide helpful, concise responses about system integration data and performance. When users ask about node similarities, impact assessments, or dependencies, use the provided similarity analysis data to give detailed insights.'
         },
         {
           role: 'user',
           content: `${message}\n\nContext: ${JSON.stringify(contextData, null, 2)}`
         }
-      ]);
+      ], storage);
 
       // Store chat message
       const chatMessage = await storage.createChatMessage({
@@ -690,144 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Similarity Analysis and Impact Assessment API Routes
-  app.post("/api/similarity/analyze", async (req, res) => {
-    try {
-      const { nodeData, threshold = 0.7, useSchema = true } = req.body;
-      
-      if (!nodeData) {
-        return res.status(400).json({ error: "Node data is required" });
-      }
 
-      // Use enhanced schema-based analysis if requested
-      const similarNodes = useSchema 
-        ? await similarityService.findSimilarNodesWithSchema(nodeData, threshold)
-        : await similarityService.findSimilarNodes(nodeData, threshold);
-        
-      res.json({
-        similarNodes,
-        totalFound: similarNodes.length,
-        threshold,
-        schemaEnhanced: useSchema
-      });
-    } catch (error) {
-      console.error("Error in similarity analysis:", error);
-      res.status(500).json({ error: "Failed to perform similarity analysis" });
-    }
-  });
-
-  app.get("/api/impact-assessment/:nodeId", async (req, res) => {
-    try {
-      const { nodeId } = req.params;
-      const { useSchema = 'true' } = req.query;
-      
-      if (!nodeId) {
-        return res.status(400).json({ error: "Node ID is required" });
-      }
-
-      // Use schema-enhanced assessment by default
-      const impactAssessment = useSchema === 'true'
-        ? await similarityService.getSchemaBasedImpactAssessment(nodeId)
-        : await similarityService.performImpactAssessment(nodeId);
-        
-      res.json(impactAssessment);
-    } catch (error) {
-      console.error("Error in impact assessment:", error);
-      
-      if (error instanceof Error && error.message.includes("not found")) {
-        return res.status(404).json({ error: error.message });
-      }
-      
-      res.status(500).json({ error: "Failed to perform impact assessment" });
-    }
-  });
-
-  app.get("/api/nodes/search", async (req, res) => {
-    try {
-      const { query, type, sourceCode } = req.query;
-      
-      const allThreads = await storage.getThreads();
-      const foundNodes: any[] = [];
-
-      for (const thread of allThreads) {
-        // Skip if sourceCode filter specified and doesn't match
-        if (sourceCode && !thread.tqName.startsWith(sourceCode as string)) {
-          continue;
-        }
-
-        const componentNodes = Array.isArray(thread.componentNode) ? thread.componentNode : [];
-        
-        for (const cNode of componentNodes) {
-          if (cNode.node && Array.isArray(cNode.node)) {
-            for (const node of cNode.node) {
-              let matches = true;
-              
-              // Apply filters
-              if (type && node.type !== type) matches = false;
-              if (query && !JSON.stringify(node).toLowerCase().includes((query as string).toLowerCase())) {
-                matches = false;
-              }
-              
-              if (matches) {
-                foundNodes.push({
-                  ...node,
-                  threadId: thread.threadId,
-                  sourceCode: thread.tqName.split('_')[0],
-                  tqName: thread.tqName
-                });
-              }
-            }
-          }
-        }
-      }
-
-      res.json({
-        nodes: foundNodes,
-        totalFound: foundNodes.length,
-        filters: { query, type, sourceCode }
-      });
-    } catch (error) {
-      console.error("Error searching nodes:", error);
-      res.status(500).json({ error: "Failed to search nodes" });
-    }
-  });
-
-  // JanusGraph Schema API Routes
-  app.get("/api/janusgraph/schema", async (req, res) => {
-    try {
-      const schemaUrl = process.env.JANUSGRAPH_SCHEMA_URL;
-      if (!schemaUrl) {
-        return res.status(501).json({ 
-          error: "JanusGraph schema endpoint not configured",
-          message: "Set JANUSGRAPH_SCHEMA_URL environment variable to enable schema access"
-        });
-      }
-
-      const response = await fetch(schemaUrl, {
-        headers: {
-          'Authorization': `Bearer ${process.env.JANUSGRAPH_API_KEY || ''}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Schema fetch failed: ${response.status} ${response.statusText}`);
-      }
-
-      const schema = await response.json();
-      res.json({
-        schema,
-        timestamp: new Date().toISOString(),
-        source: 'external_endpoint'
-      });
-    } catch (error) {
-      console.error("Error fetching JanusGraph schema:", error);
-      res.status(500).json({ 
-        error: "Failed to fetch schema from external endpoint",
-        details: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
 
   return httpServer;
 }

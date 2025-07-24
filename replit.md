@@ -36,6 +36,9 @@ Preferred communication style: Simple, everyday language.
 - Added JanusGraph schema integration for enhanced similarity analysis
 - Implemented schema-based impact assessment with relationship mapping
 - Created external schema endpoint support with caching and authentication
+- Integrated similarity analysis into chat interface only (no exposed endpoints)
+- Enhanced OpenAI service to automatically detect similarity/impact requests in chat
+- Added intelligent node data extraction from user messages for analysis
 
 **July 24, 2025 - Division Teams Architecture**
 - Implemented hierarchical Division Teams → Teams → Data Nodes structure

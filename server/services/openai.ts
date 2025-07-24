@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { configManager, type OpenAIConfig } from '../config.js';
+import { SimilarityService } from "./similarity-service";
+import type { IStorage } from "../storage";
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -22,6 +24,7 @@ export interface AnalysisResult {
 export class OpenAIService {
   private client: OpenAI;
   private config: OpenAIConfig;
+  private similarityService: SimilarityService | null = null;
 
   constructor() {
     this.config = configManager.getOpenAIConfig();
@@ -30,15 +33,28 @@ export class OpenAIService {
     });
   }
 
-  async chatCompletion(messages: ChatMessage[]): Promise<string> {
+  // Initialize similarity service with storage
+  initializeSimilarityService(storage: IStorage) {
+    this.similarityService = new SimilarityService(storage);
+  }
+
+  async chatCompletion(messages: ChatMessage[], storage?: IStorage): Promise<string> {
     try {
       if (!this.config.features.chat_analysis) {
         throw new Error("Chat analysis is disabled in configuration");
       }
 
+      // Initialize similarity service if storage is provided and not already initialized
+      if (storage && !this.similarityService) {
+        this.initializeSimilarityService(storage);
+      }
+
+      // Enhance messages with similarity analysis capabilities if requested
+      const enhancedMessages = await this.enhanceMessagesWithSimilarityData(messages);
+
       const response = await this.client.chat.completions.create({
         model: this.config.model, // Uses gpt-4o from YAML config
-        messages: messages,
+        messages: enhancedMessages,
         max_tokens: this.config.max_tokens,
         temperature: this.config.temperature,
       });
