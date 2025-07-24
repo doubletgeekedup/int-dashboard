@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { configManager, type OpenAIConfig } from '../config.js';
 import { SimilarityService } from "./similarity-service";
+import { JanusGraphSimilarityService } from "./janusgraph-similarity";
 import type { IStorage } from "../storage";
 
 export interface ChatMessage {
@@ -25,6 +26,7 @@ export class OpenAIService {
   private client: OpenAI;
   private config: OpenAIConfig;
   private similarityService: SimilarityService | null = null;
+  private janusGraphSimilarityService: JanusGraphSimilarityService | null = null;
 
   constructor() {
     this.config = configManager.getOpenAIConfig();
@@ -33,9 +35,10 @@ export class OpenAIService {
     });
   }
 
-  // Initialize similarity service with storage
-  initializeSimilarityService(storage: IStorage) {
+  // Initialize similarity services with storage
+  initializeSimilarityServices(storage: IStorage) {
     this.similarityService = new SimilarityService(storage);
+    this.janusGraphSimilarityService = new JanusGraphSimilarityService(storage);
   }
 
   async chatCompletion(messages: ChatMessage[], storage?: IStorage): Promise<string> {
@@ -44,9 +47,9 @@ export class OpenAIService {
         throw new Error("Chat analysis is disabled in configuration");
       }
 
-      // Initialize similarity service if storage is provided and not already initialized
+      // Initialize similarity services if storage is provided and not already initialized
       if (storage && !this.similarityService) {
-        this.initializeSimilarityService(storage);
+        this.initializeSimilarityServices(storage);
       }
 
       // Enhance messages with similarity analysis capabilities if requested

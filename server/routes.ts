@@ -5,7 +5,7 @@ import { getStorage, getStorageInfo } from "./storage-factory";
 import { openAIService } from "./services/openai";
 import { janusGraphService } from "./services/janusgraph";
 import { configManager } from "./config";
-import { SimilarityService } from "./services/similarity-service";
+import { NonAIChatService } from "./services/non-ai-chat";
 import { 
   insertBulletinSchema, insertChatMessageSchema, 
   insertTransactionSchema, insertKnowledgeLinkSchema 
@@ -15,9 +15,9 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
-  // Initialize storage and similarity service
+  // Initialize storage and services
   const storage = getStorage();
-  const similarityService = new SimilarityService(storage);
+  const nonAIChatService = new NonAIChatService(storage);
 
   // Initialize JanusGraph connection
   janusGraphService.connect().catch(console.error);
@@ -426,43 +426,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chat/analyze", async (req, res) => {
     try {
-      const { message, sourceCode, sessionId } = req.body;
+      const { message, sourceCode, sessionId, useAI = false } = req.body;
       
       if (!message || !sessionId) {
         return res.status(400).json({ error: "Message and sessionId are required" });
       }
 
-      // Get context data if sourceCode is provided
-      let contextData = {};
-      if (sourceCode) {
-        const source = await storage.getSource(sourceCode);
-        const metrics = await storage.getPerformanceMetrics(sourceCode, undefined, 10);
-        const transactions = await storage.getTransactions(sourceCode, 5);
-        
-        contextData = {
-          source,
-          recentMetrics: metrics,
-          recentTransactions: transactions
-        };
-      }
+      let chatResponse: string;
+      let analysisResult: any = null;
 
-      // Analyze with OpenAI
-      const analysisResult = await openAIService.analyzeData({
-        data: contextData,
-        context: `User message: ${message}`,
-        source: sourceCode
-      });
+      if (useAI && configManager.getOpenAIConfig().features.chat_analysis) {
+        // AI-powered response
+        try {
+          // Get context data if sourceCode is provided
+          let contextData = {};
+          if (sourceCode) {
+            const source = await storage.getSource(sourceCode);
+            const metrics = await storage.getPerformanceMetrics(sourceCode, undefined, 10);
+            const transactions = await storage.getTransactions(sourceCode, 5);
+            
+            contextData = {
+              source,
+              recentMetrics: metrics,
+              recentTransactions: transactions
+            };
+          }
 
-      const chatResponse = await openAIService.chatCompletion([
-        {
-          role: 'system',
-          content: 'You are an AI assistant for an integration dashboard. Provide helpful, concise responses about system integration data and performance. When users ask about node similarities, impact assessments, or dependencies, use the provided similarity analysis data to give detailed insights.'
-        },
-        {
-          role: 'user',
-          content: `${message}\n\nContext: ${JSON.stringify(contextData, null, 2)}`
+          // Analyze with OpenAI
+          analysisResult = await openAIService.analyzeData({
+            data: contextData,
+            context: `User message: ${message}`,
+            source: sourceCode
+          });
+
+          chatResponse = await openAIService.chatCompletion([
+            {
+              role: 'system',
+              content: 'You are an AI assistant for an integration dashboard. Provide helpful, concise responses about system integration data and performance. When users ask about node similarities, impact assessments, or dependencies, use the provided similarity analysis data to give detailed insights.'
+            },
+            {
+              role: 'user',
+              content: `${message}\n\nContext: ${JSON.stringify(contextData, null, 2)}`
+            }
+          ], storage);
+        } catch (error) {
+          console.log('AI chat failed, falling back to non-AI response:', error);
+          const nonAIResponse = await nonAIChatService.processMessage(message, sourceCode);
+          chatResponse = nonAIResponse.response;
         }
-      ], storage);
+      } else {
+        // Non-AI response using direct JanusGraph queries
+        const nonAIResponse = await nonAIChatService.processMessage(message, sourceCode);
+        chatResponse = nonAIResponse.response;
+      }
 
       // Store chat message
       const chatMessage = await storage.createChatMessage({
@@ -479,12 +495,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: chatMessage
       });
 
-      res.json({
+      const responseData: any = {
         message: chatMessage,
-        insights: analysisResult.insights,
-        recommendations: analysisResult.recommendations,
-        summary: analysisResult.summary
-      });
+        aiPowered: useAI && !!analysisResult
+      };
+
+      if (analysisResult) {
+        responseData.insights = analysisResult.insights;
+        responseData.recommendations = analysisResult.recommendations;
+        responseData.summary = analysisResult.summary;
+      }
+
+      res.json(responseData);
     } catch (error) {
       console.error("Chat analysis error:", error);
       res.status(500).json({ error: "Failed to analyze message" });

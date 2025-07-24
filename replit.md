@@ -39,6 +39,9 @@ Preferred communication style: Simple, everyday language.
 - Integrated similarity analysis into chat interface only (no exposed endpoints)
 - Enhanced OpenAI service to automatically detect similarity/impact requests in chat
 - Added intelligent node data extraction from user messages for analysis
+- Created non-AI chat service using direct JanusGraph queries for similarity analysis
+- Implemented toggleable AI/non-AI chat modes with automatic fallback
+- Built comprehensive JanusGraph-based similarity and impact assessment without OpenAI dependency
 
 **July 24, 2025 - Division Teams Architecture**
 - Implemented hierarchical Division Teams → Teams → Data Nodes structure

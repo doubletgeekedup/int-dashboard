@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChatInterface } from "@/components/chat-interface";
 import { 
   Book, 
   Code, 
@@ -13,7 +14,8 @@ import {
   Search,
   Filter,
   Star,
-  Clock
+  Clock,
+  MessageSquare
 } from "lucide-react";
 import type { KnowledgeLink } from "@shared/schema";
 
@@ -111,6 +113,10 @@ export default function KnowledgeBase() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-auto">
           <TabsTrigger value="all">All Resources</TabsTrigger>
+          <TabsTrigger value="chat">
+            <MessageSquare className="w-4 h-4 mr-1" />
+            Chat Assistant
+          </TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
           {sourceCodes.map(code => (
             <TabsTrigger key={code} value={code || "general"}>
@@ -118,6 +124,10 @@ export default function KnowledgeBase() {
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <TabsContent value="chat" className="mt-6">
+          <ChatInterface title="System Analysis Assistant" />
+        </TabsContent>
 
         <TabsContent value={activeTab} className="mt-6">
           {Object.keys(linksByCategory).length === 0 ? (
