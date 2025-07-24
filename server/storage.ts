@@ -1,17 +1,23 @@
 import { 
-  sources, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics,
-  type Source, type InsertSource, type Bulletin, type InsertBulletin,
+  sources, teams, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics,
+  type Source, type InsertSource, type Team, type InsertTeam, type Bulletin, type InsertBulletin,
   type ChatMessage, type InsertChatMessage, type Transaction, type InsertTransaction,
   type KnowledgeLink, type InsertKnowledgeLink, type PerformanceMetric, type InsertPerformanceMetric,
   type DashboardStats, type SourceStats
 } from "@shared/schema";
 
 export interface IStorage {
-  // Sources
+  // Division Teams (Sources)
   getSources(): Promise<Source[]>;
   getSource(code: string): Promise<Source | undefined>;
   createSource(source: InsertSource): Promise<Source>;
   updateSource(code: string, updates: Partial<InsertSource>): Promise<Source | undefined>;
+  
+  // Teams within Division Teams
+  getTeams(divisionCode?: string): Promise<Team[]>;
+  getTeam(divisionCode: string, teamCode: string): Promise<Team | undefined>;
+  createTeam(team: InsertTeam): Promise<Team>;
+  updateTeam(divisionCode: string, teamCode: string, updates: Partial<InsertTeam>): Promise<Team | undefined>;
   
   // Bulletins
   getBulletins(limit?: number, priority?: string, category?: string): Promise<Bulletin[]>;
@@ -66,7 +72,7 @@ export class MemStorage implements IStorage {
       {
         code: "STC",
         name: "System Truth Cache",
-        description: "Central node clustering system data repositories and caching layers",
+        description: "Division team managing system operations through specialized teams",
         status: "active",
         version: "2.4.1",
         uptime: "99.9%",
@@ -74,14 +80,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 142,
         isJanusGraph: true,
         apiEndpoint: "http://localhost:8182/gremlin",
-        clusterType: "system_data",
-        dataPointTypes: ["cache_entries", "system_records", "data_repositories"],
-        config: { database: "janusgraph", traversal: "g" }
+        divisionType: "system_operations",
+        teamCount: 3,
+        config: { database: "janusgraph", traversal: "g", teams: ["cache_mgmt", "sys_records", "data_repos"] }
       },
       {
         code: "CPT",
         name: "Configuration Processing Tool",
-        description: "Central node clustering configuration management data points",
+        description: "Division team managing configuration operations through specialized teams",
         status: "active",
         version: "1.8.3",
         uptime: "98.7%",
@@ -89,14 +95,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 98,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3001/api/config",
-        clusterType: "configuration_data",
-        dataPointTypes: ["config_files", "settings", "parameters", "policies"],
-        config: { timeout: 5000, retries: 3 }
+        divisionType: "configuration_mgmt",
+        teamCount: 3,
+        config: { timeout: 5000, retries: 3, teams: ["config_files", "settings_mgmt", "policy_mgmt"] }
       },
       {
         code: "SLC",
         name: "Service Layer Coordinator",
-        description: "Central node clustering service orchestration data points",
+        description: "Division team managing service operations through specialized teams",
         status: "syncing",
         version: "3.1.0",
         uptime: "99.2%",
@@ -104,14 +110,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 156,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3002/api/services",
-        clusterType: "service_data",
-        dataPointTypes: ["service_definitions", "endpoints", "orchestration_rules"],
-        config: { maxConcurrency: 100 }
+        divisionType: "service_coordination",
+        teamCount: 3,
+        config: { maxConcurrency: 100, teams: ["orchestration", "endpoints", "coordination"] }
       },
       {
         code: "TMC",
         name: "Transaction Management Center",
-        description: "Central node clustering transaction monitoring data points",
+        description: "Division team managing transaction operations through specialized teams",
         status: "active",
         version: "2.7.2",
         uptime: "99.5%",
@@ -119,14 +125,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 203,
         isJanusGraph: true,
         apiEndpoint: "http://localhost:8182/gremlin",
-        clusterType: "transaction_data",
-        dataPointTypes: ["transactions", "work_items", "processing_states", "audit_logs"],
-        config: { database: "transactions", traversal: "tx" }
+        divisionType: "transaction_mgmt",
+        teamCount: 4,
+        config: { database: "transactions", traversal: "tx", teams: ["processing", "monitoring", "audit", "work_items"] }
       },
       {
         code: "CAS",
         name: "Central Authentication Service",
-        description: "Central node clustering authentication and authorization data points",
+        description: "Division team managing authentication operations through specialized teams",
         status: "active",
         version: "4.2.1",
         uptime: "99.8%",
@@ -134,14 +140,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 67,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3003/api/auth",
-        clusterType: "auth_data",
-        dataPointTypes: ["user_credentials", "permissions", "roles", "access_tokens"],
-        config: { tokenExpiry: 3600, refreshEnabled: true }
+        divisionType: "authentication_mgmt",
+        teamCount: 4,
+        config: { tokenExpiry: 3600, refreshEnabled: true, teams: ["credentials", "permissions", "roles", "tokens"] }
       },
       {
         code: "NVL",
         name: "Network Validation Layer",
-        description: "Central node clustering network validation data points",
+        description: "Division team managing network operations through specialized teams",
         status: "active",
         version: "1.9.4",
         uptime: "98.9%",
@@ -149,9 +155,9 @@ export class MemStorage implements IStorage {
         avgResponseTime: 178,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3004/api/network",
-        clusterType: "network_data",
-        dataPointTypes: ["network_configs", "validation_rules", "connectivity_tests"],
-        config: { pingInterval: 30, healthCheckTimeout: 10 }
+        divisionType: "network_operations",
+        teamCount: 3,
+        config: { pingInterval: 30, healthCheckTimeout: 10, teams: ["validation", "connectivity", "monitoring"] }
       }
     ];
 

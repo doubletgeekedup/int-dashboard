@@ -40,24 +40,48 @@ janusgraph:
     schema_introspection: true
     performance_monitoring: true
 
-# Sources of Truth Configuration - Cluster Nodes
-# Each source represents a central node that organizes and groups related data points by type
+# Division Teams Configuration
+# Each division team contains multiple teams that cluster data nodes by type
 sources:
   stc:
     name: "System Truth Cache"
-    description: "Central node clustering system data repositories and caching layers"
+    description: "Division team managing system operations through specialized teams"
     type: "janusgraph"
     connection_string: "ws://localhost:8182/gremlin"
-    cluster_type: "system_data"
-    data_point_types: ["cache_entries", "system_records", "data_repositories"]
+    division_type: "system_operations"
+    teams:
+      - team_code: "cache_mgmt"
+        name: "Cache Management Team"
+        team_type: "cache_management"
+        data_node_types: ["cache_entries", "cache_policies", "cache_metrics"]
+      - team_code: "sys_records"
+        name: "System Records Team" 
+        team_type: "record_management"
+        data_node_types: ["system_logs", "audit_trails", "performance_data"]
+      - team_code: "data_repos"
+        name: "Data Repository Team"
+        team_type: "repository_management"
+        data_node_types: ["data_stores", "backup_systems", "archival_data"]
     health_check_interval: 60
   cpt:
     name: "Configuration Processing Tool"
-    description: "Central node clustering configuration management data points"
+    description: "Division team managing configuration operations through specialized teams"
     type: "rest_api"
     endpoint: "http://localhost:3001/api/config"
-    cluster_type: "configuration_data"
-    data_point_types: ["config_files", "settings", "parameters", "policies"]
+    division_type: "configuration_mgmt"
+    teams:
+      - team_code: "config_files"
+        name: "Configuration Files Team"
+        team_type: "file_management"
+        data_node_types: ["config_templates", "environment_configs", "deployment_configs"]
+      - team_code: "settings_mgmt"
+        name: "Settings Management Team"
+        team_type: "settings_management"
+        data_node_types: ["user_settings", "system_settings", "feature_flags"]
+      - team_code: "policy_mgmt"
+        name: "Policy Management Team"
+        team_type: "policy_management"
+        data_node_types: ["access_policies", "security_policies", "compliance_rules"]
     health_check_interval: 60
   slc:
     name: "Service Layer Coordinator"

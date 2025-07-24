@@ -1,6 +1,6 @@
 # Integration Dashboard
 
-A comprehensive enterprise integration monitoring system that provides real-time insights into six cluster nodes (STC, CPT, SLC, TMC, CAS, NVL), each organizing related data points by type, with AI-powered analysis and graph database integration.
+A comprehensive enterprise integration monitoring system featuring six Division Teams (STC, CPT, SLC, TMC, CAS, NVL). Each division team contains multiple specialized teams that cluster data nodes by type, providing hierarchical organization with AI-powered analysis and graph database integration.
 
 ## Features
 

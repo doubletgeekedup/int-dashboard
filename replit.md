@@ -12,6 +12,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 24, 2025 - Division Teams Architecture**
+- Implemented hierarchical Division Teams → Teams → Data Nodes structure
+- Updated schema to support teams within division teams concept
+- Each division team (Source of Truth) now contains multiple specialized teams
+- Teams cluster data nodes by type (cache management, config processing, etc.)
+- Updated all configurations and storage to reflect organizational hierarchy
+- Division teams manage operations through specialized sub-teams for better organization
+
 **July 24, 2025 - External Work Items Integration**
 - Added proxy endpoint `/api/listitems/{count}` that fetches from external service
 - Configured environment variables for EXTERNAL_LISTITEMS_URL and EXTERNAL_API_KEY
@@ -75,14 +83,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Key Components
 
-### Sources of Truth Management
-The system monitors six main cluster nodes, each organizing related data points by type:
-- **STC (System Truth Cache)**: Central node clustering system data repositories and caching layers
-- **CPT (Configuration Processing Tool)**: Central node clustering configuration management data points
-- **SLC (Service Layer Coordinator)**: Central node clustering service orchestration data points
-- **TMC (Transaction Management Center)**: Central node clustering transaction monitoring data points
-- **CAS (Central Authentication Service)**: Central node clustering authentication and authorization data points
-- **NVL (Network Validation Layer)**: Central node clustering network validation data points
+### Division Teams Management
+The system monitors six main division teams, each containing multiple teams that cluster data nodes by type:
+- **STC (System Truth Cache)**: Division team managing system operations through cache management, system records, and data repository teams
+- **CPT (Configuration Processing Tool)**: Division team managing configuration operations through file management, settings, and policy teams
+- **SLC (Service Layer Coordinator)**: Division team managing service operations through orchestration, endpoint, and coordination teams
+- **TMC (Transaction Management Center)**: Division team managing transaction operations through processing, monitoring, and audit teams
+- **CAS (Central Authentication Service)**: Division team managing authentication operations through credential, permission, and token teams
+- **NVL (Network Validation Layer)**: Division team managing network operations through validation, connectivity, and monitoring teams
 
 ### Core Features
 1. **Dashboard**: Real-time metrics, performance charts, system health overview

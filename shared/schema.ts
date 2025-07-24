@@ -2,8 +2,8 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Sources of Truth - Cluster Nodes
-// Each source represents a central node that organizes and groups related data points by type
+// Division Teams (Sources of Truth)
+// Each division team contains multiple teams that cluster data nodes by type
 export const sources = pgTable("sources", {
   id: serial("id").primaryKey(),
   code: text("code").notNull().unique(), // STC, CPT, SLC, TMC, CAS, NVL
@@ -18,8 +18,26 @@ export const sources = pgTable("sources", {
   connectionString: text("connection_string"),
   apiEndpoint: text("api_endpoint"),
   isJanusGraph: boolean("is_janus_graph").default(false),
-  clusterType: text("cluster_type"), // system_data, configuration_data, service_data, etc.
-  dataPointTypes: text("data_point_types").array(), // types of data points this cluster organizes
+  divisionType: text("division_type"), // system_operations, configuration_mgmt, service_coordination, etc.
+  teamCount: integer("team_count").default(0), // number of teams in this division
+  config: jsonb("config").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Teams within Division Teams
+// Each team is a cluster of data nodes grouped by type
+export const teams = pgTable("teams", {
+  id: serial("id").primaryKey(),
+  divisionCode: text("division_code").notNull(), // references sources.code
+  teamCode: text("team_code").notNull(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  teamType: text("team_type").notNull(), // cache_management, config_processing, auth_services, etc.
+  dataNodeTypes: text("data_node_types").array(), // types of data nodes this team clusters
+  nodeCount: integer("node_count").default(0),
+  status: text("status").notNull().default("active"),
+  lastActivity: timestamp("last_activity").defaultNow(),
   config: jsonb("config").default({}),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
