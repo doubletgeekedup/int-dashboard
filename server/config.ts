@@ -112,147 +112,18 @@ class ConfigManager {
 
   private loadConfig() {
     try {
-      const configPath = join(process.cwd(), 'config.properties');
+      const configPath = join(process.cwd(), 'config.yaml');
       const fileContents = readFileSync(configPath, 'utf8');
-      const rawConfig = this.parseProperties(fileContents);
+      const rawConfig = load(fileContents) as any;
       
-      // Process environment variables and build config object
-      this.config = this.buildConfigFromProperties(rawConfig);
+      // Process environment variables
+      this.config = this.processEnvironmentVariables(rawConfig);
       
       console.log('Configuration loaded successfully');
     } catch (error) {
       console.error('Failed to load configuration:', error);
       process.exit(1);
     }
-  }
-
-  private parseProperties(content: string): Record<string, string> {
-    const properties: Record<string, string> = {};
-    const lines = content.split('\n');
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      
-      // Skip empty lines and comments
-      if (!trimmed || trimmed.startsWith('#')) {
-        continue;
-      }
-      
-      const equalIndex = trimmed.indexOf('=');
-      if (equalIndex === -1) {
-        continue;
-      }
-      
-      const key = trimmed.substring(0, equalIndex).trim();
-      const value = trimmed.substring(equalIndex + 1).trim();
-      
-      // Process environment variable substitution
-      const processedValue = this.processEnvironmentVariable(value);
-      properties[key] = processedValue;
-    }
-    
-    return properties;
-  }
-
-  private buildConfigFromProperties(props: Record<string, string>): Config {
-    return {
-      app: {
-        name: props['app.name'] || 'Integration Dashboard',
-        version: props['app.version'] || '1.3.0',
-        environment: props['app.environment'] || 'development',
-        port: parseInt(props['app.port'] || '5000')
-      },
-      openai: {
-        api_key: props['openai.api_key'] || '',
-        model: props['openai.model'] || 'gpt-4o',
-        max_tokens: parseInt(props['openai.max_tokens'] || '2000'),
-        temperature: parseFloat(props['openai.temperature'] || '0.1'),
-        features: {
-          chat_analysis: props['openai.chat_analysis'] === 'true',
-          data_insights: props['openai.data_insights'] === 'true',
-          performance_recommendations: props['openai.performance_recommendations'] === 'true'
-        }
-      },
-      azure_openai: {
-        enabled: false
-      },
-      janusgraph: {
-        enabled: props['janusgraph.enabled'] === 'true',
-        connection: {
-          url: props['janusgraph.url'] || 'ws://localhost:8182/gremlin',
-          timeout: parseInt(props['janusgraph.timeout'] || '30000'),
-          ping_interval: parseInt(props['janusgraph.ping_interval'] || '30000'),
-          max_retries: parseInt(props['janusgraph.max_retries'] || '3')
-        },
-        database: {
-          name: props['janusgraph.database_name'] || 'integration_dashboard',
-          traversal_source: props['janusgraph.traversal_source'] || 'g'
-        },
-        features: {
-          health_check: props['janusgraph.health_check'] === 'true',
-          schema_introspection: props['janusgraph.schema_introspection'] === 'true',
-          performance_monitoring: props['janusgraph.performance_monitoring'] === 'true'
-        }
-      },
-      sources: this.buildSourcesConfig(props),
-      database: {
-        type: props['database.type'] || 'postgresql',
-        url: props['database.url'] || '',
-        pool: {
-          min: parseInt(props['database.pool_min'] || '2'),
-          max: parseInt(props['database.pool_max'] || '10')
-        },
-        migrations: {
-          auto_run: props['database.auto_run_migrations'] === 'true'
-        }
-      },
-      websocket: {
-        path: props['websocket.path'] || '/ws',
-        ping_interval: parseInt(props['websocket.ping_interval'] || '25000'),
-        reconnect_attempts: parseInt(props['websocket.reconnect_attempts'] || '5'),
-        reconnect_delay_base: parseInt(props['websocket.reconnect_delay_base'] || '1000')
-      },
-      logging: {
-        level: props['logging.level'] || 'info',
-        format: props['logging.format'] || 'combined',
-        outputs: ['console'],
-        request_logging: props['logging.request_logging'] === 'true',
-        performance_logging: props['logging.performance_logging'] === 'true'
-      },
-      security: {
-        cors: {
-          enabled: props['security.cors_enabled'] === 'true',
-          origins: props['security.cors_origins']?.split(',') || ['*']
-        },
-        rate_limiting: {
-          enabled: props['security.rate_limiting_enabled'] === 'true',
-          requests_per_minute: parseInt(props['security.rate_limiting_requests_per_minute'] || '60')
-        }
-      }
-    };
-  }
-
-  private buildSourcesConfig(props: Record<string, string>): Record<string, SourceConfig> {
-    const sources: Record<string, SourceConfig> = {};
-    const sourceKeys = ['stc', 'cpt', 'slc', 'tmc', 'cas', 'nvl'];
-    
-    for (const sourceKey of sourceKeys) {
-      const name = props[`sources.${sourceKey}.name`];
-      const description = props[`sources.${sourceKey}.description`];
-      const type = props[`sources.${sourceKey}.type`] as 'janusgraph' | 'rest_api' | 'database';
-      const healthCheckInterval = parseInt(props[`sources.${sourceKey}.health_check_interval`] || '30');
-      
-      if (name && description && type) {
-        sources[sourceKey] = {
-          name,
-          description,
-          type,
-          health_check_interval: healthCheckInterval
-        };
-      }
-    }
-    
-    return sources;
   }
 
   private processEnvironmentVariables(obj: any): any {
