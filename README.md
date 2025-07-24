@@ -57,8 +57,7 @@ cd integration-dashboard
 npm install
 
 # Create environment file
-cp .env.example .env
-# Edit .env with your database configuration
+# Create .env file with your database configuration
 
 # Generate database schema
 npx drizzle-kit generate

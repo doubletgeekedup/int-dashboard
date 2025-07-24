@@ -6,7 +6,7 @@ This is a full-stack web application designed to monitor and manage multiple "So
 
 The system automatically captures important information from conversations, including node relationships like "node xyz is related to dbx" and attribute matching patterns with 90% similarity detection. All data is stored locally for government-level security compliance with comprehensive audit trails.
 
-All configurations are managed through YAML files and environment variables for easy deployment and environment management.
+All configurations are managed through YAML files (config.yaml) and environment variables for easy deployment and environment management.
 
 ## User Preferences
 
