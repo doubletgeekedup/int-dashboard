@@ -59,11 +59,8 @@ npm install
 # Create environment file
 # Create .env file with your database configuration
 
-# Generate database schema
-npx drizzle-kit generate
-
-# Run database migrations
-npx drizzle-kit migrate
+# Push database schema directly (recommended)
+npm run db:push
 
 # Start development server
 npm run dev
@@ -199,8 +196,7 @@ npm run lint
 npm run format
 
 # Database operations
-npm run db:generate    # Generate new migrations
-npm run db:migrate     # Apply migrations
+npm run db:push        # Push schema changes to database
 ```
 
 ### IDE-Specific Commands
