@@ -9,6 +9,12 @@ import { Send, Bot, Lightbulb, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+interface AIStatus {
+  enabled: boolean;
+  available: boolean;
+  hasApiKey: boolean;
+}
+
 interface ChatResponse {
   message: {
     response: string;
@@ -37,7 +43,7 @@ export function MiniAssistant({
   const { toast } = useToast();
 
   // Get AI status from server
-  const { data: aiStatus } = useQuery({
+  const { data: aiStatus } = useQuery<AIStatus>({
     queryKey: ["/api/chat/ai-status"],
   });
 
@@ -98,7 +104,7 @@ export function MiniAssistant({
             aiStatus?.available ? 'bg-green-400' : 'bg-yellow-400'
           }`} />
           <span className="text-xs text-brand-text-muted">
-            {aiStatus?.available ? "AI Ready" : "Direct Mode"}
+            {aiStatus?.available ? "AI Assistant Active" : "Direct Mode"}
           </span>
         </div>
       </div>
@@ -136,7 +142,7 @@ export function MiniAssistant({
         {lastResponse && !chatMutation.isPending && (
           <div className="bg-brand-surface rounded p-3">
             <div className="text-xs text-brand-text-muted mb-1">
-              {aiStatus?.available ? "AI Response:" : "Direct Response:"}
+              {aiStatus?.available ? "AI Assistant:" : "Direct Response:"}
             </div>
             <div className="text-sm text-brand-text whitespace-pre-wrap max-h-20 overflow-y-auto">
               {lastResponse}

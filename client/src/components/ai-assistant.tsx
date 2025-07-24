@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,6 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Bot, User, Lightbulb, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+
+interface AIStatus {
+  enabled: boolean;
+  available: boolean;
+  hasApiKey: boolean;
+}
 
 interface ChatMessage {
   id: number;
@@ -38,7 +44,7 @@ interface AIAssistantProps {
 export function AIAssistant({ 
   sourceCode, 
   context = "general", 
-  title = "AI Assistant",
+  title = "My Assistant",
   placeholder = "Ask me about nodes, similarities, impacts, or dependencies...",
   className = ""
 }: AIAssistantProps) {
@@ -50,7 +56,7 @@ export function AIAssistant({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Get AI status from server
-  const { data: aiStatus } = useQuery({
+  const { data: aiStatus } = useQuery<AIStatus>({
     queryKey: ["/api/chat/ai-status"],
   });
 
@@ -119,7 +125,7 @@ export function AIAssistant({
               aiStatus?.available ? 'bg-green-400' : 'bg-yellow-400'
             }`} />
             <span className="text-sm text-brand-text-muted">
-              {aiStatus?.available ? "AI Ready" : "Direct Mode"}
+              {aiStatus?.available ? "AI Assistant Active" : "Direct Mode"}
             </span>
           </div>
         </div>
@@ -173,7 +179,7 @@ export function AIAssistant({
                   </div>
                   <div className="text-xs text-brand-text-muted mt-1">
                     {formatTimestamp(message.timestamp)} • 
-                    {aiStatus?.available ? " AI Mode" : " Direct Mode"}
+                    {aiStatus?.available ? " AI Assistant Active" : " Direct Mode"}
                   </div>
                 </div>
               </div>

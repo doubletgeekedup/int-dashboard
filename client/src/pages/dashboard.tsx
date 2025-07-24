@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LLMChat } from "@/components/chat/llm-chat";
-import { MiniAssistant } from "@/components/mini-assistant";
 import { PerformanceChart } from "@/components/charts/performance-chart";
 import { 
   Activity, 
@@ -25,7 +24,7 @@ interface AIStatus {
   hasApiKey: boolean;
 }
 
-function AIStatusIndicator() {
+function MyAssistantStatusIndicator() {
   const { data: aiStatus } = useQuery<AIStatus>({
     queryKey: ["/api/chat/ai-status"],
   });
@@ -38,7 +37,7 @@ function AIStatusIndicator() {
         isAvailable ? 'bg-green-400' : 'bg-yellow-400'
       }`} />
       <span className={isAvailable ? 'text-green-600' : 'text-yellow-600'}>
-        {isAvailable ? "AI Ready" : "Direct Mode"}
+        {isAvailable ? "AI Assistant Active" : "Direct Mode"}
       </span>
     </div>
   );
@@ -318,19 +317,12 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Quick AI Assistant */}
-          <MiniAssistant 
-            context="dashboard"
-            placeholder="Ask about system status..."
-            className="mb-6"
-          />
-
-          {/* LLM Chat */}
+          {/* My Assistant */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>AI Assistant</CardTitle>
-                <AIStatusIndicator />
+                <CardTitle>My Assistant</CardTitle>
+                <MyAssistantStatusIndicator />
               </div>
             </CardHeader>
             <CardContent>

@@ -19,6 +19,9 @@ Preferred communication style: Simple, everyday language.
 - Enhanced dashboard with dynamic AI status indicators (green = AI ready, yellow = direct mode)
 - Fixed AI status indicator inconsistencies - now properly shows yellow "Direct Mode" when AI_CHAT_ENABLED=false
 - Added proper TypeScript interfaces for AI status responses
+- Removed Quick AI Assistant box from dashboard as requested
+- Renamed "AI Assistant" to "My Assistant" throughout the system
+- Updated status indicators: "AI Assistant Active" (green) when enabled, "Direct Mode" (yellow) when disabled
 - Fixed OpenAI service integration and chat interface functionality
 - Implemented comprehensive dual-mode chat system with environment control
 - Added extensive non-AI command set: node counting, descriptions, system status, source listing
