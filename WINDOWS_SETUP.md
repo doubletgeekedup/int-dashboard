@@ -1,144 +1,102 @@
 # Windows Setup Guide
 
-This guide helps Windows users set up and run the Integration Dashboard.
+## Overview
+This guide addresses Windows-specific setup requirements for the Integration Dashboard.
 
-## Issue with `npm run dev`
+## NODE_ENV Issues on Windows
 
-Windows doesn't recognize the `NODE_ENV=development` syntax in the npm script. Here are several solutions:
+### Problem
+Windows environments often have issues with NODE_ENV environment variable handling, leading to runtime errors.
 
-## Solution 1: Use the Cross-Platform Script (Recommended)
+### Solution
+The application now uses `config.yaml` instead of NODE_ENV for all environment configuration.
 
-Run the development server using the provided cross-platform script:
+### Configuration Changes Made
 
-```bash
-node start-dev.js
+1. **Removed NODE_ENV Dependencies**:
+   - `dev.bat`: Removed `set NODE_ENV=development`
+   - `dev.ps1`: Removed `$env:NODE_ENV="development"`
+   - `start-dev.js`: Commented out NODE_ENV setting
+   - All server files: Use `configManager.getAppConfig().environment`
+
+2. **Config.yaml Controls Environment**:
+   ```yaml
+   app:
+     environment: "development"  # Set directly, no NODE_ENV dependency
+   ```
+
+3. **How to Change Environment**:
+   - Edit `config.yaml` and change `app.environment` to "development" or "production"
+   - No need to set NODE_ENV environment variable
+
+## Running on Windows
+
+### Option 1: Use npm scripts (recommended)
+```cmd
+npm run dev
 ```
 
-This script works on Windows, macOS, and Linux.
-
-## Solution 2: Use Windows Batch File
-
-Run the Windows-specific batch file:
-
+### Option 2: Use Windows batch file
 ```cmd
 dev.bat
 ```
 
-## Solution 3: Use PowerShell Script
-
-If you prefer PowerShell:
-
+### Option 3: Use PowerShell script
 ```powershell
 .\dev.ps1
 ```
 
-## Solution 4: Manual Environment Variable
-
-Set the environment variable manually, then run tsx:
-
-### Command Prompt:
+### Option 4: Direct command
 ```cmd
-set NODE_ENV=development
 npx tsx server/index.ts
 ```
 
-### PowerShell:
+## Troubleshooting Windows Issues
+
+### Issue: "NODE_ENV is not defined"
+**Solution**: The application no longer uses NODE_ENV. Update config.yaml instead.
+
+### Issue: PowerShell execution policy
 ```powershell
-$env:NODE_ENV="development"
-npx tsx server/index.ts
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-## Solution 5: Use cross-env (If package.json could be modified)
-
-The cross-env package is already installed. If you can modify package.json scripts:
-
-```json
-{
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development tsx server/index.ts"
-  }
-}
-```
-
-## Recommended Workflow for Windows
-
-1. **For Development**: Use `node start-dev.js`
-2. **For Production**: Set `NODE_ENV=production` manually, then run the built application
-
-## Environment Variables
-
-Create a `.env` file in your project root with your configuration:
-
-```env
-# Application Configuration
-NODE_ENV=development
-PORT=5000
-
-# External Work Items Service
-EXTERNAL_LISTITEMS_URL=https://your-external-api.com
-EXTERNAL_API_KEY=your_external_api_key_here
-
-# AI Features
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Database (optional)
-DATABASE_URL=postgresql://username:password@localhost:5432/integration_dashboard
-```
-
-## Troubleshooting
-
-### Common Windows Issues
-
-1. **'tsx' is not recognized**
-   ```cmd
-   npm install -g tsx
-   ```
-
-2. **Permission denied errors**
-   - Run Command Prompt or PowerShell as Administrator
-   - Or use `npx tsx` instead of global installation
-
-3. **Port already in use**
-   ```cmd
-   netstat -ano | findstr :5000
-   taskkill /PID <process_id> /F
-   ```
-
-4. **Module not found errors**
-   ```cmd
-   npm install
-   ```
-
-### Environment Variable Verification
-
-Check if environment variables are set correctly:
-
+### Issue: tsx command not found
 ```cmd
-echo %NODE_ENV%
+npm install -g tsx
 ```
 
-Or in PowerShell:
-```powershell
-$env:NODE_ENV
+## Environment Configuration
+
+All environment settings are now controlled through `config.yaml`:
+
+```yaml
+app:
+  name: "Integration Dashboard"
+  version: "2.4.1"
+  environment: "development"  # Change this for different environments
+  port: 5000
 ```
 
-## Alternative Development Setup
+For production deployment, change to:
+```yaml
+app:
+  environment: "production"
+```
 
-If you continue having issues, you can also:
+## Database Configuration
 
-1. Use **Windows Subsystem for Linux (WSL)**
-2. Use **Docker Desktop** 
-3. Use **Git Bash** (comes with Git for Windows)
+Windows database setup uses the same config.yaml approach:
 
-These environments support Unix-style environment variable syntax.
+```yaml
+database:
+  url: "${DATABASE_URL}"  # Still supports environment variables when needed
+```
 
-## Next Steps
+## Notes
 
-Once you get the development server running:
-
-1. Open `http://localhost:5000` in your browser
-2. Configure your external work items endpoint in `.env`
-3. Add your OpenAI API key for AI features
-4. Explore the dashboard features
-
-The application will show mock data until you configure the external endpoints.
+- The application is now fully Windows-compatible
+- No NODE_ENV environment variable needed
+- All configuration centralized in config.yaml
+- Package.json scripts still reference NODE_ENV but application ignores them
+- Vite.config.ts NODE_ENV reference is for build-time only, not runtime

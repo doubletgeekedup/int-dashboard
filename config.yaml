@@ -2,7 +2,7 @@
 app:
   name: "Integration Dashboard"
   version: "2.4.1"
-  environment: "${NODE_ENV:-development}"  # Supports NODE_ENV environment variable with fallback
+  environment: "development"  # Set directly in config.yaml to avoid Windows NODE_ENV issues
   port: 5000
 
 # OpenAI Configuration
