@@ -19,6 +19,8 @@ Preferred communication style: Simple, everyday language.
 - Thread IDs (tid) from external work items now map to specific threads
 - Updated API endpoints from /api/teams to /api/threads
 - Enhanced transaction modals to show thread assignment mapping
+- Thread names are now generated UIDs instead of descriptive names
+- Updated all mock data and storage to use UUID-format thread identifiers
 
 **July 24, 2025 - Division Teams Architecture**
 - Implemented hierarchical Division Teams → Teams → Data Nodes structure

@@ -165,22 +165,22 @@ export class MemStorage implements IStorage {
 
     defaultSources.forEach(source => this.createSource(source));
 
-    // Initialize default threads for each source of truth
+    // Initialize default threads for each source of truth with generated UIDs
     const defaultThreads: InsertThread[] = [
       // STC Threads
-      { sourceCode: "STC", threadId: "cache_mgmt", name: "Cache Management Thread", description: "Clusters cache entries, policies, and metrics data nodes", threadType: "cache_management", dataNodeTypes: ["cache_entries", "cache_policies", "cache_metrics"], nodeCount: 150 },
-      { sourceCode: "STC", threadId: "sys_records", name: "System Records Thread", description: "Clusters system logs, audit trails, and performance data nodes", threadType: "record_management", dataNodeTypes: ["system_logs", "audit_trails", "performance_data"], nodeCount: 320 },
-      { sourceCode: "STC", threadId: "data_repos", name: "Data Repository Thread", description: "Clusters data stores, backup systems, and archival data nodes", threadType: "repository_management", dataNodeTypes: ["data_stores", "backup_systems", "archival_data"], nodeCount: 89 },
+      { sourceCode: "STC", threadId: "b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e", name: "b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e", description: "Clusters cache entries, policies, and metrics data nodes", threadType: "cache_management", dataNodeTypes: ["cache_entries", "cache_policies", "cache_metrics"], nodeCount: 150 },
+      { sourceCode: "STC", threadId: "d3f8b2a5-1c9e-4a7b-8f2d-5e9a3b7c1f4d", name: "d3f8b2a5-1c9e-4a7b-8f2d-5e9a3b7c1f4d", description: "Clusters system logs, audit trails, and performance data nodes", threadType: "record_management", dataNodeTypes: ["system_logs", "audit_trails", "performance_data"], nodeCount: 320 },
+      { sourceCode: "STC", threadId: "f9e2c7b4-6a8d-4f1e-9c3b-7a5d2f8e1c4b", name: "f9e2c7b4-6a8d-4f1e-9c3b-7a5d2f8e1c4b", description: "Clusters data stores, backup systems, and archival data nodes", threadType: "repository_management", dataNodeTypes: ["data_stores", "backup_systems", "archival_data"], nodeCount: 89 },
       
       // CPT Threads  
-      { sourceCode: "CPT", threadId: "config_files", name: "Configuration Files Thread", description: "Clusters configuration templates and deployment config data nodes", threadType: "file_management", dataNodeTypes: ["config_templates", "environment_configs", "deployment_configs"], nodeCount: 67 },
-      { sourceCode: "CPT", threadId: "settings_mgmt", name: "Settings Management Thread", description: "Clusters user settings, system settings, and feature flag data nodes", threadType: "settings_management", dataNodeTypes: ["user_settings", "system_settings", "feature_flags"], nodeCount: 234 },
-      { sourceCode: "CPT", threadId: "policy_mgmt", name: "Policy Management Thread", description: "Clusters access policies, security policies, and compliance rule data nodes", threadType: "policy_management", dataNodeTypes: ["access_policies", "security_policies", "compliance_rules"], nodeCount: 145 },
+      { sourceCode: "CPT", threadId: "a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c", name: "a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c", description: "Clusters configuration templates and deployment config data nodes", threadType: "file_management", dataNodeTypes: ["config_templates", "environment_configs", "deployment_configs"], nodeCount: 67 },
+      { sourceCode: "CPT", threadId: "c8b5e2f1-9a4d-4e7b-8c1f-3a6d9b2e5f8a", name: "c8b5e2f1-9a4d-4e7b-8c1f-3a6d9b2e5f8a", description: "Clusters user settings, system settings, and feature flag data nodes", threadType: "settings_management", dataNodeTypes: ["user_settings", "system_settings", "feature_flags"], nodeCount: 234 },
+      { sourceCode: "CPT", threadId: "e4a7b1f8-2d9c-4f5e-a8b1-6c9f2a5d8b3e", name: "e4a7b1f8-2d9c-4f5e-a8b1-6c9f2a5d8b3e", description: "Clusters access policies, security policies, and compliance rule data nodes", threadType: "policy_management", dataNodeTypes: ["access_policies", "security_policies", "compliance_rules"], nodeCount: 145 },
       
       // TMC Threads
-      { sourceCode: "TMC", threadId: "tx_processing", name: "Transaction Processing Thread", description: "Clusters transaction processing and workflow management data nodes", threadType: "transaction_processing", dataNodeTypes: ["active_transactions", "workflow_states", "processing_queue"], nodeCount: 1250 },
-      { sourceCode: "TMC", threadId: "work_items", name: "Work Items Thread", description: "Clusters work items, task assignments, and completion tracking data nodes", threadType: "work_item_management", dataNodeTypes: ["work_items", "task_assignments", "completion_status"], nodeCount: 890 },
-      { sourceCode: "TMC", threadId: "audit_logs", name: "Audit Logs Thread", description: "Clusters audit trails, compliance logs, and transaction history data nodes", threadType: "audit_management", dataNodeTypes: ["audit_trails", "compliance_logs", "transaction_history"], nodeCount: 567 }
+      { sourceCode: "TMC", threadId: "f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d", name: "f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d", description: "Clusters transaction processing and workflow management data nodes", threadType: "transaction_processing", dataNodeTypes: ["active_transactions", "workflow_states", "processing_queue"], nodeCount: 1250 },
+      { sourceCode: "TMC", threadId: "b2e8f5a1-7c4d-4f9e-b5a8-2d7c1f4e8b5a", name: "b2e8f5a1-7c4d-4f9e-b5a8-2d7c1f4e8b5a", description: "Clusters work items, task assignments, and completion tracking data nodes", threadType: "work_item_management", dataNodeTypes: ["work_items", "task_assignments", "completion_status"], nodeCount: 890 },
+      { sourceCode: "TMC", threadId: "d5f1b8c4-9a3e-4c7f-a1b8-5e9c4a7d1f8b", name: "d5f1b8c4-9a3e-4c7f-a1b8-5e9c4a7d1f8b", description: "Clusters audit trails, compliance logs, and transaction history data nodes", threadType: "audit_management", dataNodeTypes: ["audit_trails", "compliance_logs", "transaction_history"], nodeCount: 567 }
     ];
 
     defaultThreads.forEach(thread => this.createThread(thread));

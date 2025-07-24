@@ -187,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             csWorkItemDetails: {
               csWorkItemType: "IMPORT",
               qName: "STC_yy.STC_yy",
-              tid: "486h5fj86fj7ref8644f79j56"
+              tid: "b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e"
             },
             csWorkItemProcessInfo: {
               csWorkItemProcessDetail: "Import completed successfully",
@@ -201,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             csWorkItemDetails: {
               csWorkItemType: "EXPORT",
               qName: "CPT_config.CPT_config",
-              tid: "abc123def456ghi789"
+              tid: "a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c"
             },
             csWorkItemProcessInfo: {
               csWorkItemProcessDetail: "Configuration export in progress",
@@ -215,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             csWorkItemDetails: {
               csWorkItemType: "SYNC",
               qName: "SLC_service.SLC_service",
-              tid: "xyz789abc123def456"
+              tid: "e7f4a9b2-1d8c-4e5a-9f2b-7c4d1a8e5f9c"
             },
             csWorkItemProcessInfo: {
               csWorkItemProcessDetail: "Service synchronization failed - timeout",
@@ -229,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             csWorkItemDetails: {
               csWorkItemType: "VALIDATE",
               qName: "TMC_transaction.TMC_transaction", 
-              tid: "validate123trans456"
+              tid: "f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d"
             },
             csWorkItemProcessInfo: {
               csWorkItemProcessDetail: "Transaction validation completed",
@@ -243,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             csWorkItemDetails: {
               csWorkItemType: "AUTHENTICATION",
               qName: "CAS_auth.CAS_auth",
-              tid: "auth789secure123"
+              tid: "c3a8f5d1-9b4e-4c7a-8f1d-5b9e2a7c4f8d"
             },
             csWorkItemProcessInfo: {
               csWorkItemProcessDetail: "Authentication token refresh completed",
@@ -257,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             csWorkItemDetails: {
               csWorkItemType: "NETWORK_CHECK",
               qName: "NVL_network.NVL_network",
-              tid: "network456check789"
+              tid: "9e3f7a2d-5c8b-4f1e-a7d3-8b5c2f9e7a1d"
             },
             csWorkItemProcessInfo: {
               csWorkItemProcessDetail: "Network validation completed successfully",
