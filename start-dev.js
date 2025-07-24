@@ -8,16 +8,16 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Set environment variable
-process.env.NODE_ENV = 'development';
+// Environment is now controlled by config.yaml
+// process.env.NODE_ENV = 'development'; // Removed - using config.yaml app.environment
 
 // Start the development server
 const serverPath = join(__dirname, 'server', 'index.ts');
 const child = spawn('npx', ['tsx', serverPath], {
   stdio: 'inherit',
   env: {
-    ...process.env,
-    NODE_ENV: 'development'
+    ...process.env
+    // NODE_ENV: 'development' // Removed - using config.yaml app.environment
   }
 });
 

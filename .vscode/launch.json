@@ -7,7 +7,6 @@
       "request": "launch",
       "program": "${workspaceFolder}/server/index.ts",
       "env": {
-        "NODE_ENV": "development"
       },
       "envFile": "${workspaceFolder}/.env",
       "runtimeExecutable": "tsx",
@@ -56,7 +55,6 @@
       "request": "launch",
       "program": "${workspaceFolder}/server/index.ts",
       "env": {
-        "NODE_ENV": "development",
         "DEBUG": "*"
       },
       "envFile": "${workspaceFolder}/.env",
@@ -76,7 +74,6 @@
       "request": "launch",
       "program": "${workspaceFolder}/server/index.ts",
       "env": {
-        "NODE_ENV": "development",
         "DEBUG_DB": "true"
       },
       "envFile": "${workspaceFolder}/.env",
@@ -94,7 +91,6 @@
       "request": "launch",
       "program": "${workspaceFolder}/server/services/openai.ts",
       "env": {
-        "NODE_ENV": "development",
         "DEBUG_AI": "true"
       },
       "envFile": "${workspaceFolder}/.env",
@@ -112,7 +108,6 @@
       "request": "launch",
       "program": "${workspaceFolder}/server/services/janusgraph.ts",
       "env": {
-        "NODE_ENV": "development",
         "DEBUG_GRAPH": "true"
       },
       "envFile": "${workspaceFolder}/.env",
@@ -130,7 +125,6 @@
       "request": "launch",
       "program": "${workspaceFolder}/dist/server.js",
       "env": {
-        "NODE_ENV": "production"
       },
       "envFile": "${workspaceFolder}/.env",
       "skipFiles": [
