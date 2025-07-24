@@ -2,9 +2,11 @@
 
 ## Overview
 
-This is a full-stack web application designed to monitor and manage multiple "Sources of Truth" (data integration points) in an enterprise environment. The system provides real-time monitoring, performance analytics, bulletins management, and AI-powered insights through an LLM chat interface.
+This is a full-stack web application designed to monitor and manage multiple "Sources of Truth" (data integration points) in an enterprise environment. The system provides real-time monitoring, performance analytics, bulletins management, AI-powered insights through an LLM chat interface, and government-level knowledge retention with intelligent node relationship detection.
 
-All configurations are now managed through YAML files for easy deployment and environment management.
+The system automatically captures important information from conversations, including node relationships like "node xyz is related to dbx" and attribute matching patterns with 90% similarity detection. All data is stored locally for government-level security compliance with comprehensive audit trails.
+
+All configurations are managed through YAML files and environment variables for easy deployment and environment management.
 
 ## User Preferences
 
@@ -160,9 +162,12 @@ The system monitors six main Sources of Truth, each containing multiple threads 
 1. **Dashboard**: Real-time metrics, performance charts, system health overview
 2. **Source Monitoring**: Individual source pages with detailed analytics
 3. **Bulletins System**: Announcements and updates with priority levels
-4. **Knowledge Base**: Documentation and troubleshooting resources
-5. **LLM Chat**: AI-powered analysis and insights using OpenAI GPT-4o
+4. **Knowledge Base**: Documentation and troubleshooting resources with relationship discovery
+5. **LLM Chat**: AI-powered analysis and insights using OpenAI GPT-4o with environment control
 6. **Transaction Tracking**: Real-time transaction monitoring and logging
+7. **Knowledge Retention**: Government-level secure local data storage with audit trails
+8. **Node Relationship Detection**: Automatic capture of data correlations and attribute matching
+9. **Pattern Recognition**: 90% similarity detection for attributes with different names but same values
 
 ### Performance Monitoring
 - Response time tracking

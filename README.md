@@ -1,17 +1,20 @@
-# Integration Dashboard
+# Integration Dashboard System
 
-A comprehensive enterprise integration monitoring system featuring six Division Teams (STC, CPT, SLC, TMC, CAS, NVL). Each division team contains multiple specialized teams that cluster data nodes by type, providing hierarchical organization with AI-powered analysis and graph database integration.
+A comprehensive enterprise integration monitoring system featuring six Division Teams (STC, CPT, SLC, TMC, CAS, NVL) with government-level knowledge retention and intelligent node relationship detection. Each division team contains multiple specialized threads that cluster data nodes by type, providing hierarchical organization with AI-powered analysis, graph database integration, and automatic pattern recognition.
 
 ## Features
 
 - **Real-time Monitoring**: Live dashboard with performance metrics and health status
-- **AI-Powered Analysis**: OpenAI GPT-4o integration for intelligent data insights
-- **Graph Database**: JanusGraph integration for complex relationship mapping
+- **AI-Powered Analysis**: OpenAI GPT-4o integration with environment-controlled chat modes
+- **Government Knowledge Retention**: Secure local data storage for confidential environments with comprehensive audit trails
+- **Node Relationship Detection**: Automatic capture of data correlations like "node xyz is related to dbx" with 90% similarity analysis
+- **Attribute Matching Intelligence**: Pattern recognition for attributes with different names but same values
+- **Graph Database**: JanusGraph integration for complex relationship mapping and similarity analysis
 - **External Work Items**: Integration with external transaction endpoints for real-time work item tracking
 - **Transaction Tracking**: Real-time transaction monitoring with detailed modal views
 - **Custom Brand Theme**: Professional theme with configurable brand colors
 - **Bulletin System**: Centralized announcements and update management
-- **Knowledge Base**: Integrated documentation and troubleshooting resources
+- **Knowledge Base**: Integrated documentation with relationship discovery and pattern storage
 - **WebSocket Support**: Live updates without page refresh
 
 ## Quick Start
@@ -40,6 +43,7 @@ The application will be available at `http://localhost:5000` with in-memory stor
 
 📖 **[Complete No-Database Setup Guide](NO_DATABASE_SETUP.md)**  
 🔗 **[External Work Items Integration](EXTERNAL_INTEGRATION_GUIDE.md)**  
+🛡️ **[Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)**  
 🪟 **[Windows Setup Guide](WINDOWS_SETUP.md)**
 
 ### Option 2: With PostgreSQL Database
@@ -85,11 +89,11 @@ EXTERNAL_API_KEY=your_external_api_key_here
 # AI Features (required for LLM chat functionality)
 OPENAI_API_KEY=your_openai_api_key_here
 
+# AI Chat Control (optional - defaults to false for security)
+AI_CHAT_ENABLED=true
+
 # JanusGraph Configuration (optional - for graph database features)
 JANUSGRAPH_GRAPHQL_URL=http://localhost:8182/graphql
-
-# AI Features (optional but recommended)
-OPENAI_API_KEY=your_openai_api_key_here
 
 # Development Settings (optional)
 NODE_ENV=development
@@ -281,15 +285,22 @@ integration-dashboard/
 The backend provides these REST endpoints:
 
 ```
-GET    /api/sources           # List all integration sources
-GET    /api/sources/:code     # Get specific source details
-GET    /api/dashboard/stats   # Dashboard statistics
-GET    /api/transactions      # Transaction history
-GET    /api/chat/messages     # Chat history
-POST   /api/chat/messages     # Send chat message
-GET    /api/bulletins         # System bulletins
-POST   /api/bulletins         # Create bulletin
-GET    /api/janusgraph/health # Graph database health
+GET    /api/sources                      # List all integration sources
+GET    /api/sources/:code                # Get specific source details
+GET    /api/dashboard/stats              # Dashboard statistics
+GET    /api/transactions                 # Transaction history
+GET    /api/chat/messages                # Chat history
+POST   /api/chat/messages                # Send chat message
+GET    /api/chat/ai-status               # AI system status and configuration
+POST   /api/chat/analyze-and-store       # Analyze chat for knowledge retention
+GET    /api/bulletins                    # System bulletins
+POST   /api/bulletins                    # Create bulletin
+GET    /api/janusgraph/health            # Graph database health
+GET    /api/knowledge/search             # Search knowledge base
+POST   /api/knowledge                    # Store knowledge entry
+GET    /api/knowledge/stats              # Knowledge retention statistics
+POST   /api/knowledge/node-relationship  # Store node relationship
+GET    /api/knowledge/node-relationships # Search node relationships
 ```
 
 ## Technology Stack
@@ -441,6 +452,7 @@ npm start
 - **IntelliJ Users**: See [IntelliJ Setup Guide](SETUP_GUIDE_INTELLIJ.md)  
 - **Eclipse Users**: See [Eclipse Setup Guide](SETUP_GUIDE_ECLIPSE.md)
 - **Debugging**: See [Debug Guide](DEBUG_GUIDE.md)
+- **Knowledge Retention**: See [Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)
 - **Production**: See [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)
 
 ## License
