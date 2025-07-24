@@ -165,6 +165,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New endpoint for listing work items
+  app.get("/api/listitems/:count", async (req, res) => {
+    try {
+      const { count } = req.params;
+      const numCount = parseInt(count);
+      
+      if (isNaN(numCount) || numCount <= 0) {
+        return res.status(400).json({ error: "Count must be a positive number" });
+      }
+
+      // Mock data structure based on the provided example
+      // In a real implementation, this would fetch from your actual data source
+      const mockWorkItems = [
+        {
+          csWorkItemDetails: {
+            csWorkItemType: "IMPORT",
+            qName: "STC_yy.STC_yy",
+            tid: "486h5fj86fj7ref8644f79j56"
+          },
+          csWorkItemProcessInfo: {
+            csWorkItemProcessDetail: "Import completed successfully",
+            csWorkItemProcessSatus: "COMPLETED"
+          },
+          createDate: Date.now() - 300000, // 5 minutes ago
+          id: "675h-5hyt-6th7",
+          lastModified: Date.now() - 240000 // 4 minutes ago
+        },
+        {
+          csWorkItemDetails: {
+            csWorkItemType: "EXPORT",
+            qName: "CPT_config.CPT_config",
+            tid: "abc123def456ghi789"
+          },
+          csWorkItemProcessInfo: {
+            csWorkItemProcessDetail: "Configuration export in progress",
+            csWorkItemProcessSatus: "STARTED"
+          },
+          createDate: Date.now() - 600000, // 10 minutes ago
+          id: "789a-bcde-fgh1",
+          lastModified: Date.now() - 120000 // 2 minutes ago
+        },
+        {
+          csWorkItemDetails: {
+            csWorkItemType: "SYNC",
+            qName: "SLC_service.SLC_service",
+            tid: "xyz789abc123def456"
+          },
+          csWorkItemProcessInfo: {
+            csWorkItemProcessDetail: "Service synchronization failed - timeout",
+            csWorkItemProcessSatus: "FAILED"
+          },
+          createDate: Date.now() - 900000, // 15 minutes ago
+          id: "def4-56gh-789i",
+          lastModified: Date.now() - 60000 // 1 minute ago
+        },
+        {
+          csWorkItemDetails: {
+            csWorkItemType: "VALIDATE",
+            qName: "TMC_transaction.TMC_transaction", 
+            tid: "validate123trans456"
+          },
+          csWorkItemProcessInfo: {
+            csWorkItemProcessDetail: "Transaction validation completed",
+            csWorkItemProcessSatus: "COMPLETED"
+          },
+          createDate: Date.now() - 1200000, // 20 minutes ago
+          id: "ghi7-89jk-lmn0",
+          lastModified: Date.now() - 900000 // 15 minutes ago
+        },
+        {
+          csWorkItemDetails: {
+            csWorkItemType: "AUTHENTICATION",
+            qName: "CAS_auth.CAS_auth",
+            tid: "auth789secure123"
+          },
+          csWorkItemProcessInfo: {
+            csWorkItemProcessDetail: "Authentication token refresh completed",
+            csWorkItemProcessSatus: "COMPLETED"
+          },
+          createDate: Date.now() - 1800000, // 30 minutes ago
+          id: "jkl0-12mn-345o",
+          lastModified: Date.now() - 1500000 // 25 minutes ago
+        },
+        {
+          csWorkItemDetails: {
+            csWorkItemType: "NETWORK_CHECK",
+            qName: "NVL_network.NVL_network",
+            tid: "network456check789"
+          },
+          csWorkItemProcessInfo: {
+            csWorkItemProcessDetail: "Network validation completed successfully",
+            csWorkItemProcessSatus: "COMPLETED"
+          },
+          createDate: Date.now() - 2400000, // 40 minutes ago
+          id: "mno3-45pq-678r",
+          lastModified: Date.now() - 2100000 // 35 minutes ago
+        }
+      ];
+
+      // Return only the requested count
+      const items = mockWorkItems.slice(0, numCount);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching list items:", error);
+      res.status(500).json({ error: "Failed to fetch list items" });
+    }
+  });
+
+  // Endpoint to get transaction details by ID
+  app.get("/api/transactions/:id/details", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Mock transaction detail data
+      // In a real implementation, this would fetch from your actual data source
+      const mockDetails = {
+        id,
+        tid: "486h5fj86fj7ref8644f79j56",
+        csWorkItemProcessDetail: "Import completed successfully with 1,234 records processed. Average processing time: 2.3ms per record.",
+        additionalInfo: {
+          recordsProcessed: 1234,
+          avgProcessingTime: "2.3ms",
+          memoryUsage: "45MB",
+          startTime: Date.now() - 300000,
+          endTime: Date.now() - 240000
+        }
+      };
+      
+      res.json(mockDetails);
+    } catch (error) {
+      console.error("Error fetching transaction details:", error);
+      res.status(500).json({ error: "Failed to fetch transaction details" });
+    }
+  });
+
   // Bulletins API Routes
   app.get("/api/bulletins", async (req, res) => {
     try {

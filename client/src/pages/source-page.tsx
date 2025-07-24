@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LLMChat } from "@/components/chat/llm-chat";
 import { PerformanceChart } from "@/components/charts/performance-chart";
@@ -17,9 +18,26 @@ import {
   TrendingUp,
   Activity,
   Clock,
-  Server
+  Server,
+  Eye
 } from "lucide-react";
-import type { Source, Transaction, KnowledgeLink, PerformanceMetric } from "@shared/schema";
+import type { Source, KnowledgeLink, PerformanceMetric } from "@shared/schema";
+
+// Work Item interface based on the provided structure
+interface WorkItem {
+  csWorkItemDetails: {
+    csWorkItemType: string;
+    qName: string;
+    tid: string;
+  };
+  csWorkItemProcessInfo: {
+    csWorkItemProcessDetail: string;
+    csWorkItemProcessSatus: string;
+  };
+  createDate: number;
+  id: string;
+  lastModified: number;
+}
 
 const sourceIcons = {
   STC: Database,
@@ -48,11 +66,22 @@ export default function SourcePage() {
     enabled: !!code,
   });
 
-  const { data: transactions = [] } = useQuery<Transaction[]>({
-    queryKey: ["/api/transactions", code],
+  // New work items endpoint that fetches the latest 100 items and filters by source
+  const { data: workItems = [] } = useQuery({
+    queryKey: ["/api/listitems", code],
     queryFn: async () => {
-      const response = await fetch(`/api/transactions?sourceCode=${code}&limit=20`);
-      return response.json();
+      const response = await fetch("/api/listitems/100");
+      const allItems = await response.json();
+      
+      if (!code) return [];
+      
+      // Filter items by source based on qName prefix
+      const sourceItems = allItems.filter((item: any) => 
+        item.csWorkItemDetails.qName.startsWith(`${code}_`)
+      );
+      
+      // Return only last 10 items
+      return sourceItems.slice(-10);
     },
     enabled: !!code,
   });
@@ -99,15 +128,15 @@ export default function SourcePage() {
   };
 
   const handleExport = () => {
-    // Generate CSV export of transactions
+    // Generate CSV export of work items
     const csv = [
       ['Transaction ID', 'Type', 'Status', 'Timestamp', 'Duration'].join(','),
-      ...transactions.map(t => [
-        t.transactionId,
-        t.type,
-        t.status,
-        new Date(t.createdAt).toISOString(),
-        t.duration || ''
+      ...workItems.map((item: WorkItem) => [
+        item.id,
+        item.csWorkItemDetails.csWorkItemType,
+        item.csWorkItemProcessInfo.csWorkItemProcessSatus,
+        new Date(item.createDate).toISOString(),
+        `${Math.round((item.lastModified - item.createDate) / 1000)}s`
       ].join(','))
     ].join('\n');
 
@@ -255,18 +284,94 @@ export default function SourcePage() {
             </CardContent>
           </Card>
 
-          {/* Transactions Table */}
+          {/* Work Items Table */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Recent Transactions</CardTitle>
+                <CardTitle>Recent Work Items</CardTitle>
                 <Button variant="link" size="sm" onClick={handleExport}>
                   Export CSV
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <DataTable data={transactions} />
+              {workItems.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No recent transactions found</p>
+                  <p className="text-sm">There haven't been any transactions in a while</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {workItems.map((item: WorkItem) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="link" className="p-0 h-auto text-brand-orange hover:text-brand-dark font-mono">
+                                    {item.id}
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Transaction Details</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <label className="text-sm font-medium text-muted-foreground">Transaction ID (TID)</label>
+                                      <p className="font-mono text-sm mt-1">{item.csWorkItemDetails.tid}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-muted-foreground">Process Details</label>
+                                      <p className="text-sm mt-1">{item.csWorkItemProcessInfo.csWorkItemProcessDetail}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <label className="text-sm font-medium text-muted-foreground">Type</label>
+                                        <p className="text-sm mt-1">{item.csWorkItemDetails.csWorkItemType}</p>
+                                      </div>
+                                      <div>
+                                        <label className="text-sm font-medium text-muted-foreground">Status</label>
+                                        <p className="text-sm mt-1">{item.csWorkItemProcessInfo.csWorkItemProcessSatus}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              <Badge variant="outline" className="text-xs">
+                                {item.csWorkItemDetails.csWorkItemType}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(item.createDate).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <Badge 
+                              variant={
+                                item.csWorkItemProcessInfo.csWorkItemProcessSatus === 'COMPLETED' ? 'default' :
+                                item.csWorkItemProcessInfo.csWorkItemProcessSatus === 'FAILED' ? 'destructive' :
+                                'secondary'
+                              }
+                            >
+                              {item.csWorkItemProcessInfo.csWorkItemProcessSatus}
+                            </Badge>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {Math.round((item.lastModified - item.createDate) / 1000)}s duration
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
