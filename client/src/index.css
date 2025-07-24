@@ -3,63 +3,70 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  /* Brand Colors:
+     #fee1c2 - Light cream (36, 47%, 94%)
+     #caae8f - Medium tan (29, 37%, 69%)
+     #694628 - Dark brown (20, 43%, 20%)
+     #fcb567 - Orange (34, 97%, 69%)
+     #27150c - Dark brown (20, 47%, 11%)
+  */
+  --background: hsl(0, 0%, 100%); /* Pure white background */
+  --foreground: hsl(20, 47%, 11%); /* #27150c - Dark brown text */
+  --muted: hsl(36, 47%, 94%); /* #fee1c2 - Light cream for muted areas */
+  --muted-foreground: hsl(20, 43%, 20%); /* #694628 - Dark brown for muted text */
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
+  --popover-foreground: hsl(20, 47%, 11%);
+  --card: hsl(0, 0%, 100%); /* White cards */
+  --card-foreground: hsl(20, 47%, 11%);
+  --border: hsl(29, 37%, 69%); /* #caae8f - Medium tan borders */
+  --input: hsl(36, 47%, 94%); /* #fee1c2 - Light cream inputs */
+  --primary: hsl(34, 97%, 69%); /* #fcb567 - Orange primary */
+  --primary-foreground: hsl(0, 0%, 100%); /* White text on orange */
+  --secondary: hsl(36, 47%, 94%); /* #fee1c2 - Light cream secondary */
+  --secondary-foreground: hsl(20, 47%, 11%); /* #27150c - Dark brown text */
+  --accent: hsl(34, 97%, 69%); /* #fcb567 - Orange accent */
+  --accent-foreground: hsl(0, 0%, 100%); /* White text on orange */
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
+  --ring: hsl(34, 97%, 69%); /* #fcb567 - Orange focus ring */
   --radius: 0.5rem;
   
-  /* GitHub-style colors */
-  --github-blue: hsl(203, 89%, 53%);
-  --github-purple: hsl(262, 52%, 47%);
-  --github-gray-light: hsl(210, 16%, 97%);
-  --github-gray-dark: hsl(220, 14%, 18%);
-  --github-gray-medium: hsl(213, 13%, 40%);
+  /* Brand-themed colors */
+  --brand-orange: hsl(34, 97%, 69%); /* #fcb567 */
+  --brand-cream: hsl(36, 47%, 94%); /* #fee1c2 */
+  --brand-tan: hsl(29, 37%, 69%); /* #caae8f */
+  --brand-brown: hsl(20, 43%, 20%); /* #694628 */
+  --brand-dark: hsl(20, 47%, 11%); /* #27150c */
 }
 
 .dark {
-  --background: hsl(240, 10%, 3.9%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
+  --background: hsl(20, 47%, 11%); /* #27150c - Dark brown background */
+  --foreground: hsl(36, 47%, 94%); /* #fee1c2 - Light cream text */
+  --muted: hsl(20, 43%, 20%); /* #694628 - Dark brown muted areas */
+  --muted-foreground: hsl(29, 37%, 69%); /* #caae8f - Medium tan muted text */
+  --popover: hsl(20, 43%, 15%); /* Slightly lighter than background */
+  --popover-foreground: hsl(36, 47%, 94%);
+  --card: hsl(20, 43%, 15%); /* Slightly lighter than background */
+  --card-foreground: hsl(36, 47%, 94%);
+  --border: hsl(20, 43%, 20%); /* #694628 - Dark brown borders */
+  --input: hsl(20, 43%, 20%); /* #694628 - Dark brown inputs */
+  --primary: hsl(34, 97%, 69%); /* #fcb567 - Orange primary */
+  --primary-foreground: hsl(20, 47%, 11%); /* #27150c - Dark text on orange */
+  --secondary: hsl(20, 43%, 20%); /* #694628 - Dark brown secondary */
+  --secondary-foreground: hsl(36, 47%, 94%); /* #fee1c2 - Light cream text */
+  --accent: hsl(34, 97%, 69%); /* #fcb567 - Orange accent */
+  --accent-foreground: hsl(20, 47%, 11%); /* #27150c - Dark text on orange */
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  --ring: hsl(34, 97%, 69%); /* #fcb567 - Orange focus ring */
   --radius: 0.5rem;
   
-  /* GitHub-style colors for dark mode */
-  --github-blue: hsl(212, 92%, 61%);
-  --github-purple: hsl(267, 56%, 67%);
-  --github-gray-light: hsl(220, 13%, 18%);
-  --github-gray-dark: hsl(0, 0%, 98%);
-  --github-gray-medium: hsl(215, 12%, 68%);
+  /* Brand-themed colors for dark mode */
+  --brand-orange: hsl(34, 97%, 69%); /* #fcb567 */
+  --brand-cream: hsl(36, 47%, 94%); /* #fee1c2 */
+  --brand-tan: hsl(29, 37%, 69%); /* #caae8f */
+  --brand-brown: hsl(20, 43%, 20%); /* #694628 */
+  --brand-dark: hsl(20, 47%, 11%); /* #27150c */
 }
 
 @layer base {
@@ -94,33 +101,33 @@
 }
 
 @layer components {
-  /* GitHub-style components */
-  .github-btn-primary {
-    @apply bg-[hsl(var(--github-blue))] text-white hover:bg-[hsl(var(--github-blue))]/90 transition-colors;
+  /* Brand-styled components */
+  .brand-btn-primary {
+    @apply bg-[hsl(var(--brand-orange))] text-white hover:bg-[hsl(var(--brand-orange))]/90 transition-colors shadow-sm;
   }
 
-  .github-btn-secondary {
-    @apply border border-border bg-background hover:bg-muted transition-colors;
+  .brand-btn-secondary {
+    @apply border border-[hsl(var(--brand-tan))] bg-background hover:bg-[hsl(var(--brand-cream))] transition-colors;
   }
 
-  .github-nav-item {
+  .brand-nav-item {
     @apply px-3 py-2 rounded-md text-sm font-medium transition-colors;
   }
 
-  .github-nav-item-active {
-    @apply bg-[hsl(var(--github-blue))] text-white;
+  .brand-nav-item-active {
+    @apply bg-[hsl(var(--brand-orange))] text-white shadow-sm;
   }
 
-  .github-nav-item-inactive {
-    @apply text-[hsl(var(--github-gray-medium))] hover:text-foreground hover:bg-muted;
+  .brand-nav-item-inactive {
+    @apply text-[hsl(var(--brand-brown))] hover:text-foreground hover:bg-[hsl(var(--brand-cream))];
   }
 
-  .github-card {
-    @apply bg-card border border-border rounded-lg shadow-sm;
+  .brand-card {
+    @apply bg-card border border-[hsl(var(--brand-tan))]/50 rounded-lg shadow-sm hover:shadow-md transition-shadow;
   }
 
-  .github-sidebar {
-    @apply bg-card border-r border-border;
+  .brand-sidebar {
+    @apply bg-card border-r border-[hsl(var(--brand-tan))]/50;
   }
 
   /* Status indicators */
@@ -206,39 +213,59 @@
 }
 
 @layer utilities {
-  /* Text utilities */
-  .text-github-blue {
-    color: hsl(var(--github-blue));
+  /* Brand text utilities */
+  .text-brand-orange {
+    color: hsl(var(--brand-orange));
   }
 
-  .text-github-purple {
-    color: hsl(var(--github-purple));
+  .text-brand-cream {
+    color: hsl(var(--brand-cream));
   }
 
-  .text-github-gray-medium {
-    color: hsl(var(--github-gray-medium));
+  .text-brand-tan {
+    color: hsl(var(--brand-tan));
   }
 
-  .text-github-gray-dark {
-    color: hsl(var(--github-gray-dark));
+  .text-brand-brown {
+    color: hsl(var(--brand-brown));
   }
 
-  /* Background utilities */
-  .bg-github-blue {
-    background-color: hsl(var(--github-blue));
+  .text-brand-dark {
+    color: hsl(var(--brand-dark));
   }
 
-  .bg-github-purple {
-    background-color: hsl(var(--github-purple));
+  /* Brand background utilities */
+  .bg-brand-orange {
+    background-color: hsl(var(--brand-orange));
   }
 
-  .bg-github-gray-light {
-    background-color: hsl(var(--github-gray-light));
+  .bg-brand-cream {
+    background-color: hsl(var(--brand-cream));
   }
 
-  /* Border utilities */
-  .border-github-blue {
-    border-color: hsl(var(--github-blue));
+  .bg-brand-tan {
+    background-color: hsl(var(--brand-tan));
+  }
+
+  .bg-brand-brown {
+    background-color: hsl(var(--brand-brown));
+  }
+
+  .bg-brand-dark {
+    background-color: hsl(var(--brand-dark));
+  }
+
+  /* Brand border utilities */
+  .border-brand-orange {
+    border-color: hsl(var(--brand-orange));
+  }
+
+  .border-brand-tan {
+    border-color: hsl(var(--brand-tan));
+  }
+
+  .border-brand-brown {
+    border-color: hsl(var(--brand-brown));
   }
 
   /* Animation utilities */

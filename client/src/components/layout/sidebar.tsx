@@ -122,8 +122,8 @@ export function Sidebar() {
                   variant={isActive(item.href) ? "default" : "ghost"}
                   className={`w-full justify-start ${
                     isActive(item.href) 
-                      ? "github-btn-primary" 
-                      : "github-nav-item-inactive"
+                      ? "brand-nav-item-active" 
+                      : "brand-nav-item-inactive"
                   }`}
                   onClick={() => setIsMobileOpen(false)}
                 >
@@ -136,7 +136,7 @@ export function Sidebar() {
           
           {/* Sources of Truth */}
           <div className="mt-6">
-            <h3 className="px-3 py-2 text-xs font-semibold text-github-gray-medium dark:text-muted-foreground uppercase tracking-wider">
+            <h3 className="px-3 py-2 text-xs font-semibold text-brand-brown dark:text-muted-foreground uppercase tracking-wider">
               Sources of Truth
             </h3>
             <div className="mt-2 space-y-1">
@@ -148,8 +148,8 @@ export function Sidebar() {
                       variant={isActive(source.href) ? "default" : "ghost"}
                       className={`w-full justify-start text-left ${
                         isActive(source.href) 
-                          ? "github-btn-primary" 
-                          : "github-nav-item-inactive"
+                          ? "brand-nav-item-active" 
+                          : "brand-nav-item-inactive"
                       }`}
                       onClick={() => setIsMobileOpen(false)}
                     >
@@ -198,7 +198,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="p-4 border-t border-border">
-        <div className="flex items-center justify-between text-xs text-github-gray-medium dark:text-muted-foreground">
+        <div className="flex items-center justify-between text-xs text-brand-brown dark:text-muted-foreground">
           <span>v2.4.1</span>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full pulse-dot" />
@@ -231,7 +231,7 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        github-sidebar w-64 flex flex-col shadow-sm
+        brand-sidebar w-64 flex flex-col shadow-sm
         sidebar-mobile
         ${isMobileOpen ? '' : 'sidebar-mobile-closed'}
       `}>

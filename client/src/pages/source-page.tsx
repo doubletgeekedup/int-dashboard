@@ -166,10 +166,10 @@ export default function SourcePage() {
           <IconComponent className="w-6 h-6 text-white" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-github-gray-dark dark:text-foreground">
+          <h1 className="text-2xl font-bold text-brand-dark dark:text-foreground">
             {source.code} - {source.name}
           </h1>
-          <p className="text-github-gray-medium dark:text-muted-foreground">
+          <p className="text-brand-brown dark:text-muted-foreground">
             {source.description}
           </p>
         </div>

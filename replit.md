@@ -12,6 +12,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 24, 2025 - Custom Brand Theme Implementation**
+- Implemented complete custom brand theme using specified colors: #fee1c2, #caae8f, #694628, #fcb567, #27150c
+- Updated all CSS variables to use brand colors while maintaining white and modern design
+- Created brand-specific component classes (brand-btn-primary, brand-nav-item-active, etc.)
+- Replaced all GitHub-style classes throughout the application with brand theme equivalents
+- Added custom logo using brand colors #fcb567 and #27150c as specified
+- Updated dashboard statistics cards with brand color scheme
+- Enhanced visual consistency across all components and pages
+
 **July 24, 2025 - JanusGraph GraphQL Integration**
 - Added full GraphQL support for JanusGraph database connectivity
 - Created GraphQLStorage implementation with complete CRUD operations

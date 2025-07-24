@@ -63,10 +63,20 @@ export function Header({ onToggleSidebar }: HeaderProps = {}) {
             <Menu className="w-4 h-4" />
           </Button>
           
-          <div className="flex items-center space-x-2">
-            <h2 className="text-xl font-semibold text-github-gray-dark dark:text-foreground">
-              Integration Dashboard
-            </h2>
+          <div className="flex items-center space-x-3">
+            {/* Logo */}
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-brand-orange to-brand-dark rounded-lg flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                  <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#fcb567"/>
+                  <path d="M2 17L12 22L22 17" stroke="#27150c" strokeWidth="2" fill="none"/>
+                  <path d="M2 12L12 17L22 12" stroke="#27150c" strokeWidth="2" fill="none"/>
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-brand-dark dark:text-foreground">
+                Integration Dashboard
+              </h2>
+            </div>
             
             {/* Connection Status */}
             <div className="flex items-center space-x-2 text-sm">

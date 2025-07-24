@@ -63,10 +63,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-github-gray-dark dark:text-foreground">
+          <h1 className="text-3xl font-bold text-brand-dark dark:text-foreground">
             Dashboard Overview
           </h1>
-          <p className="text-github-gray-medium dark:text-muted-foreground">
+          <p className="text-brand-brown dark:text-muted-foreground">
             Integration hub for all development team sources of truth
           </p>
         </div>
@@ -88,21 +88,21 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-github-gray-medium dark:text-muted-foreground">
+                <p className="text-sm font-medium text-brand-brown dark:text-muted-foreground">
                   Total Integrations
                 </p>
-                <p className="text-3xl font-bold text-github-gray-dark dark:text-foreground">
+                <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
                   {stats?.totalIntegrations || 0}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                <ChartGantt className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="w-12 h-12 bg-brand-cream dark:bg-brand-brown rounded-lg flex items-center justify-center">
+                <ChartGantt className="w-6 h-6 text-brand-orange dark:text-brand-orange" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
               <span className="text-green-600 font-medium">+12%</span>
-              <span className="text-github-gray-medium dark:text-muted-foreground ml-2">
+              <span className="text-brand-brown dark:text-muted-foreground ml-2">
                 from last month
               </span>
             </div>
@@ -113,10 +113,10 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-github-gray-medium dark:text-muted-foreground">
+                <p className="text-sm font-medium text-brand-brown dark:text-muted-foreground">
                   Active Sources
                 </p>
-                <p className="text-3xl font-bold text-github-gray-dark dark:text-foreground">
+                <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
                   {stats?.activeSources || 0}
                 </p>
               </div>
@@ -126,7 +126,7 @@ export default function Dashboard() {
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-green-600 font-medium">100%</span>
-              <span className="text-github-gray-medium dark:text-muted-foreground ml-2">
+              <span className="text-brand-brown dark:text-muted-foreground ml-2">
                 uptime
               </span>
             </div>
@@ -137,21 +137,21 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-github-gray-medium dark:text-muted-foreground">
+                <p className="text-sm font-medium text-brand-brown dark:text-muted-foreground">
                   Data Points
                 </p>
-                <p className="text-3xl font-bold text-github-gray-dark dark:text-foreground">
+                <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
                   {stats?.dataPoints || "0"}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                <Database className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              <div className="w-12 h-12 bg-brand-cream dark:bg-brand-brown rounded-lg flex items-center justify-center">
+                <Database className="w-6 h-6 text-brand-orange dark:text-brand-orange" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
               <span className="text-green-600 font-medium">+5.2%</span>
-              <span className="text-github-gray-medium dark:text-muted-foreground ml-2">
+              <span className="text-brand-brown dark:text-muted-foreground ml-2">
                 this week
               </span>
             </div>
@@ -162,20 +162,20 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-github-gray-medium dark:text-muted-foreground">
+                <p className="text-sm font-medium text-brand-brown dark:text-muted-foreground">
                   Query Response
                 </p>
-                <p className="text-3xl font-bold text-github-gray-dark dark:text-foreground">
+                <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
                   {stats?.avgResponseTime || "0ms"}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+              <div className="w-12 h-12 bg-brand-cream dark:bg-brand-brown rounded-lg flex items-center justify-center">
+                <Clock className="w-6 h-6 text-brand-orange dark:text-brand-orange" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-green-600 font-medium">-8ms</span>
-              <span className="text-github-gray-medium dark:text-muted-foreground ml-2">
+              <span className="text-brand-brown dark:text-muted-foreground ml-2">
                 from average
               </span>
             </div>

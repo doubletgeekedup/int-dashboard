@@ -29,7 +29,7 @@ function AppLayout() {
   useWebSocket();
 
   return (
-    <div className="flex min-h-screen bg-github-gray-light dark:bg-background">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main className="flex-1 overflow-auto lg:ml-0">
         <Header />
