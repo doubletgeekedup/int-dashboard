@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -32,10 +32,14 @@ export function MiniAssistant({
   className = ""
 }: MiniAssistantProps) {
   const [input, setInput] = useState("");
-  const [useAI, setUseAI] = useState(false); // Default to non-AI for quick queries
   const [lastResponse, setLastResponse] = useState<string | null>(null);
   const [sessionId] = useState(() => `mini_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`);
   const { toast } = useToast();
+
+  // Get AI status from server
+  const { data: aiStatus } = useQuery({
+    queryKey: ["/api/chat/ai-status"],
+  });
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -44,7 +48,6 @@ export function MiniAssistant({
         body: {
           message,
           sessionId,
-          useAI,
           sourceCode,
           context
         }
@@ -53,7 +56,7 @@ export function MiniAssistant({
     onSuccess: (response: ChatResponse) => {
       setLastResponse(response.message.response);
       
-      if (useAI && response.insights?.length) {
+      if (response.aiPowered && response.insights?.length) {
         toast({
           title: "Quick Analysis",
           description: response.insights[0] || "Analysis completed",
@@ -81,7 +84,7 @@ export function MiniAssistant({
     <Card className={`p-4 ${className}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          {useAI ? (
+          {aiStatus?.available ? (
             <Lightbulb className="h-4 w-4 text-brand-primary" />
           ) : (
             <Zap className="h-4 w-4 text-brand-secondary" />
@@ -91,15 +94,12 @@ export function MiniAssistant({
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <Label htmlFor="mini-ai-toggle" className="text-xs text-brand-text-muted">
-            {useAI ? "AI" : "Direct"}
-          </Label>
-          <Switch
-            id="mini-ai-toggle"
-            checked={useAI}
-            onCheckedChange={setUseAI}
-            className="brand-switch scale-75"
-          />
+          <div className={`w-2 h-2 rounded-full ${
+            aiStatus?.available ? 'bg-green-400' : 'bg-yellow-400'
+          }`} />
+          <span className="text-xs text-brand-text-muted">
+            {aiStatus?.available ? "AI Ready" : "Direct Mode"}
+          </span>
         </div>
       </div>
 
@@ -129,14 +129,14 @@ export function MiniAssistant({
               <div className="h-1 w-1 bg-brand-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
               <div className="h-1 w-1 bg-brand-primary rounded-full animate-bounce"></div>
             </div>
-            {useAI ? "AI analyzing..." : "Processing..."}
+            {aiStatus?.available ? "AI analyzing..." : "Processing..."}
           </div>
         )}
 
         {lastResponse && !chatMutation.isPending && (
           <div className="bg-brand-surface rounded p-3">
             <div className="text-xs text-brand-text-muted mb-1">
-              {useAI ? "AI Response:" : "Direct Response:"}
+              {aiStatus?.available ? "AI Response:" : "Direct Response:"}
             </div>
             <div className="text-sm text-brand-text whitespace-pre-wrap max-h-20 overflow-y-auto">
               {lastResponse}

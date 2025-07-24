@@ -19,6 +19,23 @@ import {
 } from "lucide-react";
 import type { DashboardStats, Source, Transaction } from "@shared/schema";
 
+function AIStatusIndicator() {
+  const { data: aiStatus } = useQuery({
+    queryKey: ["/api/chat/ai-status"],
+  });
+
+  return (
+    <div className="flex items-center space-x-2 text-sm">
+      <div className={`w-2 h-2 rounded-full ${
+        aiStatus?.available ? 'bg-green-400' : 'bg-yellow-400'
+      }`} />
+      <span className={aiStatus?.available ? 'text-green-600' : 'text-yellow-600'}>
+        {aiStatus?.available ? "AI Ready" : "Direct Mode"}
+      </span>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
@@ -305,10 +322,7 @@ export default function Dashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>AI Assistant</CardTitle>
-                <div className="flex items-center space-x-2 text-sm text-green-600">
-                  <div className="w-2 h-2 bg-green-400 rounded-full" />
-                  <span>Azure GPT Ready</span>
-                </div>
+                <AIStatusIndicator />
               </div>
             </CardHeader>
             <CardContent>

@@ -424,9 +424,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/chat/ai-status", async (req, res) => {
+    try {
+      const aiEnabled = configManager.isAIChatEnabled();
+      const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+      
+      res.json({
+        enabled: aiEnabled,
+        available: aiEnabled && hasOpenAIKey,
+        hasApiKey: hasOpenAIKey
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get AI status" });
+    }
+  });
+
   app.post("/api/chat/analyze", async (req, res) => {
     try {
-      const { message, sourceCode, sessionId, useAI = false } = req.body;
+      const { message, sourceCode, sessionId } = req.body;
       
       if (!message || !sessionId) {
         return res.status(400).json({ error: "Message and sessionId are required" });
@@ -435,7 +450,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let chatResponse: string;
       let analysisResult: any = null;
 
-      if (useAI && configManager.getOpenAIConfig().features.chat_analysis) {
+      // Determine AI usage based on environment variable
+      const aiEnabled = configManager.isAIChatEnabled();
+      
+      if (aiEnabled && configManager.getOpenAIConfig().features.chat_analysis) {
         // AI-powered response
         try {
           // Get context data if sourceCode is provided
@@ -497,7 +515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const responseData: any = {
         message: chatMessage,
-        aiPowered: useAI && !!analysisResult
+        aiPowered: aiEnabled && !!analysisResult
       };
 
       if (analysisResult) {

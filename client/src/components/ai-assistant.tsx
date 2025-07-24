@@ -44,11 +44,15 @@ export function AIAssistant({
 }: AIAssistantProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [useAI, setUseAI] = useState(true);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Get AI status from server
+  const { data: aiStatus } = useQuery({
+    queryKey: ["/api/chat/ai-status"],
+  });
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -57,7 +61,6 @@ export function AIAssistant({
         body: {
           message,
           sessionId,
-          useAI,
           sourceCode,
           context
         }
@@ -75,7 +78,7 @@ export function AIAssistant({
       }, 100);
 
       // Show insights/recommendations if available (AI mode)
-      if (useAI && (response.insights?.length || response.recommendations?.length)) {
+      if (response.aiPowered && (response.insights?.length || response.recommendations?.length)) {
         toast({
           title: "Analysis Complete",
           description: response.summary || "AI analysis completed successfully",
@@ -112,15 +115,12 @@ export function AIAssistant({
             <h3 className="font-semibold text-brand-text">{title}</h3>
           </div>
           <div className="flex items-center space-x-2">
-            <Label htmlFor="ai-toggle" className="text-sm text-brand-text-muted">
-              {useAI ? "AI Mode" : "Direct Mode"}
-            </Label>
-            <Switch
-              id="ai-toggle"
-              checked={useAI}
-              onCheckedChange={setUseAI}
-              className="brand-switch"
-            />
+            <div className={`w-2 h-2 rounded-full ${
+              aiStatus?.available ? 'bg-green-400' : 'bg-yellow-400'
+            }`} />
+            <span className="text-sm text-brand-text-muted">
+              {aiStatus?.available ? "AI Ready" : "Direct Mode"}
+            </span>
           </div>
         </div>
         {sourceCode && (
@@ -136,7 +136,7 @@ export function AIAssistant({
             <div className="text-center text-brand-text-muted py-8">
               <Bot className="h-12 w-12 mx-auto mb-4 text-brand-primary" />
               <p className="text-sm">
-                {useAI 
+                {aiStatus?.available 
                   ? "AI assistant ready to help with analysis and insights"
                   : "Direct mode for quick commands and data queries"
                 }
@@ -173,7 +173,7 @@ export function AIAssistant({
                   </div>
                   <div className="text-xs text-brand-text-muted mt-1">
                     {formatTimestamp(message.timestamp)} • 
-                    {useAI ? " AI Mode" : " Direct Mode"}
+                    {aiStatus?.available ? " AI Mode" : " Direct Mode"}
                   </div>
                 </div>
               </div>
@@ -192,7 +192,7 @@ export function AIAssistant({
                     <div className="h-2 w-2 bg-brand-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                     <div className="h-2 w-2 bg-brand-primary rounded-full animate-bounce"></div>
                   </div>
-                  {useAI ? "AI analyzing..." : "Processing..."}
+                  {aiStatus?.available ? "AI analyzing..." : "Processing..."}
                 </div>
               </div>
             </div>
@@ -224,7 +224,7 @@ export function AIAssistant({
           </Button>
         </div>
         <div className="text-xs text-brand-text-muted mt-2">
-          {useAI ? (
+          {aiStatus?.available ? (
             <>Press Enter to send • Shift+Enter for new line • AI powered analysis</>
           ) : (
             <>Press Enter to send • Shift+Enter for new line • Direct database queries</>

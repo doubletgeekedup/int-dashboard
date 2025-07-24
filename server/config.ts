@@ -193,9 +193,15 @@ class ConfigManager {
         return this.config.azure_openai.enabled;
       case 'janusgraph':
         return this.config.janusgraph.enabled;
+      case 'ai_chat':
+        return process.env.AI_CHAT_ENABLED === 'true';
       default:
         return false;
     }
+  }
+
+  public isAIChatEnabled(): boolean {
+    return process.env.AI_CHAT_ENABLED === 'true';
   }
 }
 
