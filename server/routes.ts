@@ -66,16 +66,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If JanusGraph has data, calculate stats from it
       if (sourcesQuery.data !== undefined || transactionsQuery.data !== undefined) {
-        const sourceCount = sourcesQuery.data || 0;
-        const transactionCount = transactionsQuery.data || 0;
-        const threadCount = threadsQuery.data || 0;
+        // Extract actual numbers from JanusGraph query results
+        const sourceCount = Array.isArray(sourcesQuery.data) ? sourcesQuery.data[0] : (sourcesQuery.data || 0);
+        const transactionCount = Array.isArray(transactionsQuery.data) ? transactionsQuery.data[0] : (transactionsQuery.data || 0);
+        const threadCount = Array.isArray(threadsQuery.data) ? threadsQuery.data[0] : (threadsQuery.data || 0);
         
         const stats = {
           totalIntegrations: sourceCount,
           activeSources: sourceCount, // Assume all sources are active from JanusGraph
-          totalTransactions: transactionCount,
-          totalThreads: threadCount,
-          avgResponseTime: 150, // Default value, could be calculated from JanusGraph data
+          dataPoints: `${threadCount} threads`, // Add missing dataPoints field
+          avgResponseTime: "150ms", // Default value, could be calculated from JanusGraph data
           systemUptime: "99.9%", // Default value, could be calculated from JanusGraph data
           lastUpdateTime: new Date()
         };

@@ -166,7 +166,7 @@ export default function Dashboard() {
                   Data Points
                 </p>
                 <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
-                  {stats?.dataPoints || "0"}
+                  {stats?.dataPoints || "0 threads"}
                 </p>
               </div>
               <div className="w-12 h-12 bg-brand-cream dark:bg-brand-brown rounded-lg flex items-center justify-center">

@@ -163,6 +163,8 @@ export type DashboardStats = {
   activeSources: number;
   dataPoints: string;
   avgResponseTime: string;
+  systemUptime?: string;
+  lastUpdateTime?: Date;
 };
 
 export type SourceStats = {
