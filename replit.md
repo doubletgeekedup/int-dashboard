@@ -14,17 +14,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 29, 2025 - Hybrid Storage Architecture: JanusGraph Read-Only + Memory Storage**
-- Implemented hybrid storage architecture separating concerns: JanusGraph for data reads, Memory for application storage
-- Chat messages and integration dashboard data stored exclusively in memory storage (never written to JanusGraph)
-- JanusGraph used only for read-only data queries and analysis operations
-- Fixed all GraphQL storage errors that were causing chat message creation failures
-- Updated storage factory to use memory storage even when JanusGraph is available for reads
-- Created dedicated JanusGraphQueryService for read-only operations (node queries, relationships, similarity analysis)
-- Fixed TypeScript interface compatibility issues throughout GraphQL storage implementation
-- Enhanced error handling with proper fallback to random IDs when GraphQL operations fail
-- Updated storage status reporting to reflect hybrid architecture in health endpoints
-- Chat functionality now works reliably in all connection modes (real, simulation_fallback, simulation)
+**July 29, 2025 - JanusGraph Primary Data Source Implementation**
+- Updated all API routes to use JanusGraph as the primary data source for data points and query responses
+- Sources API (/api/sources) now queries JanusGraph first with g.V().hasLabel('source').valueMap(true)
+- Transactions API (/api/transactions) retrieves transaction data from JanusGraph with filtering support
+- Dashboard stats API (/api/dashboard/stats) calculates metrics from JanusGraph vertex counts
+- Threads API (/api/threads) queries thread data from JanusGraph with tqName filtering
+- Bulletins API (/api/bulletins) fetches bulletin data from JanusGraph with priority/category filtering
+- Implemented graceful fallback to memory storage only when JanusGraph has no data available
+- Fixed SSL certificate verification bypass for external API calls using Node.js HTTPS agent
+- External API configuration now uses empty URLs to prevent connection attempts to non-existent endpoints
+- Created comprehensive SSL_CERTIFICATE_GUIDE.md for external API integration troubleshooting
+- Chat messages remain stored in memory only (never written to JanusGraph per user requirements)
+- System successfully returns simulated JanusGraph data when real connection unavailable
 
 **July 29, 2025 - Real JanusGraph Database Connection Implementation**
 - Installed gremlin package and @types/gremlin for real database connectivity

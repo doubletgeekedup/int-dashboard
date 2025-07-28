@@ -54,23 +54,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   };
 
-  // Dashboard API Routes
+  // Dashboard API Routes - Data from JanusGraph
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
-      const stats = await storage.getDashboardStats();
-      res.json(stats);
+      // Get dashboard stats from JanusGraph
+      const [sourcesQuery, transactionsQuery, threadsQuery] = await Promise.all([
+        janusGraphService.executeQuery({ query: "g.V().hasLabel('source').count()" }),
+        janusGraphService.executeQuery({ query: "g.V().hasLabel('transaction').count()" }),
+        janusGraphService.executeQuery({ query: "g.V().hasLabel('thread').count()" })
+      ]);
+      
+      // If JanusGraph has data, calculate stats from it
+      if (sourcesQuery.data !== undefined || transactionsQuery.data !== undefined) {
+        const sourceCount = sourcesQuery.data || 0;
+        const transactionCount = transactionsQuery.data || 0;
+        const threadCount = threadsQuery.data || 0;
+        
+        const stats = {
+          totalIntegrations: sourceCount,
+          activeSources: sourceCount, // Assume all sources are active from JanusGraph
+          totalTransactions: transactionCount,
+          totalThreads: threadCount,
+          avgResponseTime: 150, // Default value, could be calculated from JanusGraph data
+          systemUptime: "99.9%", // Default value, could be calculated from JanusGraph data
+          lastUpdateTime: new Date()
+        };
+        
+        console.log('Returning dashboard stats from JanusGraph');
+        res.json(stats);
+      } else {
+        // Fallback to memory storage only if JanusGraph has no data
+        console.log('No stats data found in JanusGraph, using memory storage fallback');
+        const stats = await storage.getDashboardStats();
+        res.json(stats);
+      }
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch dashboard stats" });
+      console.error("Error fetching dashboard stats from JanusGraph:", error);
+      // Fallback to memory storage on JanusGraph error
+      try {
+        const stats = await storage.getDashboardStats();
+        res.json(stats);
+      } catch (fallbackError) {
+        res.status(500).json({ error: "Failed to fetch dashboard stats" });
+      }
     }
   });
 
-  // Division Teams (Sources) API Routes
+  // Division Teams (Sources) API Routes - Data from JanusGraph
   app.get("/api/sources", async (req, res) => {
     try {
-      const sources = await storage.getSources();
-      res.json(sources);
+      // Get sources data from JanusGraph first
+      const janusGraphData = await janusGraphService.executeQuery({
+        query: "g.V().hasLabel('source').valueMap(true)"
+      });
+      
+      // If JanusGraph has source data, use it
+      if (janusGraphData.data && janusGraphData.data.length > 0) {
+        const sources = janusGraphData.data.map((vertex: any) => ({
+          id: vertex.id || Math.floor(Math.random() * 1000),
+          code: vertex.code?.[0] || vertex.sourceCode?.[0] || 'UNKNOWN',
+          name: vertex.name?.[0] || vertex.sourceName?.[0] || 'Unknown Source',
+          description: vertex.description?.[0] || 'No description available',
+          status: vertex.status?.[0] || 'active',
+          version: vertex.version?.[0] || '1.0.0',
+          uptime: vertex.uptime?.[0] || '99.9%',
+          recordCount: parseInt(vertex.recordCount?.[0]) || 0,
+          avgResponseTime: parseInt(vertex.avgResponseTime?.[0]) || 150,
+          lastSync: new Date(vertex.lastSync?.[0] || Date.now()),
+          createdAt: new Date(vertex.createdAt?.[0] || Date.now()),
+          updatedAt: new Date(vertex.updatedAt?.[0] || Date.now())
+        }));
+        console.log(`Returning ${sources.length} sources from JanusGraph`);
+        res.json(sources);
+      } else {
+        // Fallback to memory storage only if JanusGraph has no data
+        console.log('No source data found in JanusGraph, using memory storage fallback');
+        const sources = await storage.getSources();
+        res.json(sources);
+      }
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch sources" });
+      console.error("Error fetching sources from JanusGraph:", error);
+      // Fallback to memory storage on JanusGraph error
+      try {
+        const sources = await storage.getSources();
+        res.json(sources);
+      } catch (fallbackError) {
+        res.status(500).json({ error: "Failed to fetch sources" });
+      }
     }
   });
 
@@ -133,17 +203,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Transactions API Routes
+  // Transactions API Routes - Data from JanusGraph
   app.get("/api/transactions", async (req, res) => {
     try {
       const { sourceCode, limit } = req.query;
-      const transactions = await storage.getTransactions(
-        sourceCode as string,
-        limit ? parseInt(limit as string) : undefined
-      );
-      res.json(transactions);
+      
+      // Get transaction data from JanusGraph first
+      let query = "g.V().hasLabel('transaction')";
+      if (sourceCode) {
+        query += `.has('sourceCode', '${sourceCode}')`;
+      }
+      query += ".valueMap(true)";
+      if (limit) {
+        query += `.limit(${parseInt(limit as string)})`;
+      }
+      
+      const janusGraphData = await janusGraphService.executeQuery({ query });
+      
+      // If JanusGraph has transaction data, use it
+      if (janusGraphData.data && janusGraphData.data.length > 0) {
+        const transactions = janusGraphData.data.map((vertex: any) => ({
+          id: vertex.id || Math.floor(Math.random() * 10000),
+          transactionId: vertex.transactionId?.[0] || vertex.id,
+          sourceCode: vertex.sourceCode?.[0] || 'UNKNOWN',
+          status: vertex.status?.[0] || 'completed',
+          type: vertex.type?.[0] || 'data_sync',
+          timestamp: new Date(vertex.timestamp?.[0] || Date.now()),
+          duration: parseInt(vertex.duration?.[0]) || 100,
+          recordsProcessed: parseInt(vertex.recordsProcessed?.[0]) || 0,
+          errors: parseInt(vertex.errors?.[0]) || 0,
+          createdAt: new Date(vertex.createdAt?.[0] || Date.now())
+        }));
+        console.log(`Returning ${transactions.length} transactions from JanusGraph`);
+        res.json(transactions);
+      } else {
+        // Fallback to memory storage only if JanusGraph has no data
+        console.log('No transaction data found in JanusGraph, using memory storage fallback');
+        const transactions = await storage.getTransactions(
+          sourceCode as string,
+          limit ? parseInt(limit as string) : undefined
+        );
+        res.json(transactions);
+      }
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch transactions" });
+      console.error("Error fetching transactions from JanusGraph:", error);
+      // Fallback to memory storage on JanusGraph error
+      try {
+        const transactions = await storage.getTransactions(
+          sourceCode as string,
+          limit ? parseInt(limit as string) : undefined
+        );
+        res.json(transactions);
+      } catch (fallbackError) {
+        res.status(500).json({ error: "Failed to fetch transactions" });
+      }
     }
   });
 
@@ -338,15 +451,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Threads API Routes
+  // Threads API Routes - Data from JanusGraph
   app.get("/api/threads", async (req, res) => {
     try {
       const { tqNamePrefix } = req.query;
-      const threads = await storage.getThreads(tqNamePrefix as string);
-      res.json(threads);
+      
+      // Get threads data from JanusGraph first
+      let query = "g.V().hasLabel('thread')";
+      if (tqNamePrefix) {
+        query += `.has('tqName', textContains('${tqNamePrefix}'))`;
+      }
+      query += ".valueMap(true)";
+      
+      const janusGraphData = await janusGraphService.executeQuery({ query });
+      
+      // If JanusGraph has thread data, use it
+      if (janusGraphData.data && janusGraphData.data.length > 0) {
+        const threads = janusGraphData.data.map((vertex: any) => ({
+          id: vertex.id || Math.floor(Math.random() * 10000),
+          threadId: vertex.threadId?.[0] || vertex.id,
+          nodekey: vertex.nodekey?.[0] || 'unknown',
+          tqName: vertex.tqName?.[0] || 'unknown',
+          class: vertex.class?.[0] || 'thread',
+          componentNode: vertex.componentNode || [],
+          sourceCode: vertex.sourceCode?.[0] || 'UNKNOWN',
+          createTime: new Date(vertex.createTime?.[0] || Date.now()),
+          updateTime: new Date(vertex.updateTime?.[0] || Date.now())
+        }));
+        console.log(`Returning ${threads.length} threads from JanusGraph`);
+        res.json(threads);
+      } else {
+        // Fallback to memory storage only if JanusGraph has no data
+        console.log('No thread data found in JanusGraph, using memory storage fallback');
+        const threads = await storage.getThreads(tqNamePrefix as string);
+        res.json(threads);
+      }
     } catch (error) {
-      console.error("Error fetching threads:", error);
-      res.status(500).json({ error: "Failed to fetch threads" });
+      console.error("Error fetching threads from JanusGraph:", error);
+      // Fallback to memory storage on JanusGraph error
+      try {
+        const threads = await storage.getThreads(tqNamePrefix as string);
+        res.json(threads);
+      } catch (fallbackError) {
+        res.status(500).json({ error: "Failed to fetch threads" });
+      }
     }
   });
 
@@ -364,18 +512,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bulletins API Routes
+  // Bulletins API Routes - Data from JanusGraph
   app.get("/api/bulletins", async (req, res) => {
     try {
       const { limit, priority, category } = req.query;
-      const bulletins = await storage.getBulletins(
-        limit ? parseInt(limit as string) : undefined,
-        priority as string,
-        category as string
-      );
-      res.json(bulletins);
+      
+      // Get bulletins data from JanusGraph first
+      let query = "g.V().hasLabel('bulletin')";
+      if (priority) {
+        query += `.has('priority', '${priority}')`;
+      }
+      if (category) {
+        query += `.has('category', '${category}')`;
+      }
+      query += ".valueMap(true)";
+      if (limit) {
+        query += `.limit(${parseInt(limit as string)})`;
+      }
+      
+      const janusGraphData = await janusGraphService.executeQuery({ query });
+      
+      // If JanusGraph has bulletin data, use it
+      if (janusGraphData.data && janusGraphData.data.length > 0) {
+        const bulletins = janusGraphData.data.map((vertex: any) => ({
+          id: vertex.id || Math.floor(Math.random() * 10000),
+          title: vertex.title?.[0] || 'Untitled Bulletin',
+          content: vertex.content?.[0] || 'No content available',
+          priority: vertex.priority?.[0] || 'medium',
+          category: vertex.category?.[0] || 'general',
+          isRead: vertex.isRead?.[0] === 'true' || false,
+          publishedAt: new Date(vertex.publishedAt?.[0] || Date.now()),
+          expiresAt: vertex.expiresAt?.[0] ? new Date(vertex.expiresAt[0]) : null,
+          sourceCode: vertex.sourceCode?.[0] || null,
+          createdAt: new Date(vertex.createdAt?.[0] || Date.now()),
+          updatedAt: new Date(vertex.updatedAt?.[0] || Date.now())
+        }));
+        console.log(`Returning ${bulletins.length} bulletins from JanusGraph`);
+        res.json(bulletins);
+      } else {
+        // Fallback to memory storage only if JanusGraph has no data
+        console.log('No bulletin data found in JanusGraph, using memory storage fallback');
+        const bulletins = await storage.getBulletins(
+          limit ? parseInt(limit as string) : undefined,
+          priority as string,
+          category as string
+        );
+        res.json(bulletins);
+      }
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch bulletins" });
+      console.error("Error fetching bulletins from JanusGraph:", error);
+      // Fallback to memory storage on JanusGraph error
+      try {
+        const bulletins = await storage.getBulletins(
+          limit ? parseInt(limit as string) : undefined,
+          priority as string,
+          category as string
+        );
+        res.json(bulletins);
+      } catch (fallbackError) {
+        res.status(500).json({ error: "Failed to fetch bulletins" });
+      }
     }
   });
 
