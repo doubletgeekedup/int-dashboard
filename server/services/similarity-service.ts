@@ -277,14 +277,15 @@ export class SimilarityService {
         return null;
       }
 
+      const https = await import('https');
       const response = await fetch(schemaUrl, {
         headers: {
           // No API key needed - URLs only
           'Content-Type': 'application/json'
         },
-        // Disable SSL certificate verification for external APIs
-        // @ts-ignore - Node.js specific option
-        agent: schemaUrl.startsWith('https:') ? new (await import('https')).Agent({
+        // Disable SSL certificate verification for external APIs to handle self-signed certificates
+        // @ts-ignore - Node.js specific option for bypassing SSL verification
+        agent: schemaUrl.startsWith('https:') ? new https.Agent({
           rejectUnauthorized: false
         }) : undefined
       });

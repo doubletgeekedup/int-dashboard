@@ -279,15 +279,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const externalUrl = `${externalEndpoint}/${count}`;
       console.log(`Fetching work items from: ${externalUrl}`);
       
+      const https = await import('https');
       const response = await fetch(externalUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           // No API key needed - URLs only
         },
-        // Disable SSL certificate verification for external APIs
-        // @ts-ignore - Node.js specific option
-        agent: externalUrl.startsWith('https:') ? new (await import('https')).Agent({
+        // Disable SSL certificate verification for external APIs to handle self-signed certificates
+        // @ts-ignore - Node.js specific option for bypassing SSL verification
+        agent: externalUrl.startsWith('https:') ? new https.Agent({
           rejectUnauthorized: false
         }) : undefined
       });
