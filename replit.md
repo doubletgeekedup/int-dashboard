@@ -69,7 +69,7 @@ Preferred communication style: Simple, everyday language.
 - Improved storage factory to use configuration-based database URL detection
 - All server services now consistently use ConfigManager for environment-agnostic configuration
 - Updated console logging to reference config.yaml instead of environment variables for clarity
-- Note: package.json scripts may reference NODE_ENV but application ignores it in favor of config.yaml
+- Note: package.json scripts still contain NODE_ENV (cannot be modified for safety) but application completely ignores it in favor of config.yaml
 - Simplified external services to use URL-only configuration (no API keys) as string values
 - Updated external service fetch operations to remove all authentication headers
 - Added SSL insecure support for external APIs with certificate verification bypass

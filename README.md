@@ -92,6 +92,7 @@ AI_CHAT_ENABLED=true
 JANUSGRAPH_GRAPHQL_URL=http://localhost:8182/graphql
 
 # Development Settings (optional) - controlled by config.yaml
+# Note: Environment is controlled by config.yaml app.environment, not NODE_ENV
 PORT=5000
 HOST=0.0.0.0
 
