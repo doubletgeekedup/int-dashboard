@@ -36,12 +36,12 @@ interface GraphData {
 }
 
 const sources = [
-  { code: "STC", name: "System Truth Cache" },
-  { code: "CPT", name: "Configuration Processing Tool" },
-  { code: "SLC", name: "Service Layer Coordinator" },
-  { code: "TMC", name: "Transaction Management Center" },
-  { code: "CAS", name: "Central Authentication Service" },
-  { code: "NVL", name: "Network Validation Layer" }
+  { code: "SCR", name: "Source Code Repository" },
+  { code: "Capital", name: "Capital Management Tool" },
+  { code: "Slicwave", name: "Service Layer Coordinator" },
+  { code: "Teamcenter", name: "Transaction Management Center" },
+  { code: "CAAS", name: "Central Authentication Service" },
+  { code: "Navrel", name: "Network Validation Layer" }
 ];
 
 export default function GremlinVisualizer() {

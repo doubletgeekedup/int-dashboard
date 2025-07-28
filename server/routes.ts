@@ -946,36 +946,36 @@ async function simulateGremlinTraversal(sourceCode: string, nodeId: string) {
 
 function getNodeTypeBySource(sourceCode: string): string {
   const types = {
-    STC: "cache_entry",
-    CPT: "config_file",
-    SLC: "service_endpoint",
-    TMC: "transaction",
-    CAS: "auth_token",
-    NVL: "network_rule"
+    SCR: "SCR_mb",
+    Capital: "PAExchange_mb", 
+    Slicwave: "service_endpoint",
+    Teamcenter: "TeamcenterEbomPart_mb",
+    CAAS: "auth_token",
+    Navrel: "network_rule"
   };
   return types[sourceCode as keyof typeof types] || "unknown";
 }
 
 function getParentNodeType(sourceCode: string): string {
   const types = {
-    STC: "cache_pool",
-    CPT: "config_template",
-    SLC: "service_cluster",
-    TMC: "transaction_batch",
-    CAS: "auth_policy",
-    NVL: "network_zone"
+    SCR: "SCR_repository",
+    Capital: "PAExchange_template",
+    Slicwave: "service_cluster", 
+    Teamcenter: "Teamcenter_HWVerification_mb",
+    CAAS: "auth_policy",
+    Navrel: "network_zone"
   };
   return types[sourceCode as keyof typeof types] || "parent";
 }
 
 function getChildNodeType(sourceCode: string): string {
   const types = {
-    STC: "cache_item",
-    CPT: "config_value",
-    SLC: "service_instance",
-    TMC: "transaction_step",
-    CAS: "permission",
-    NVL: "network_check"
+    SCR: "SCR_item",
+    Capital: "PAExchange_config",
+    Slicwave: "service_instance",
+    Teamcenter: "TeamcenterEbomPart_item", 
+    CAAS: "permission",
+    Navrel: "network_check"
   };
   return types[sourceCode as keyof typeof types] || "child";
 }

@@ -14,21 +14,39 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 24, 2025 - Gremlin Node Visualizer Implementation with Visual Connections**
-- Created comprehensive Gremlin visualizer interface for each Source of Truth
-- Built interactive node relationship visualization showing one level up and down connections
-- Added dynamic source selection and node ID input with real-time graph generation
-- Implemented simulated Gremlin traversal with realistic graph data based on source types
-- Created API endpoint /api/gremlin/visualize/:sourceCode/:nodeId for graph data retrieval
-- Added visual indicators for different node types and relationship levels (up/center/down)
-- Enhanced sidebar navigation with Gremlin Visualizer menu item using GitBranch icon
-- Built comprehensive graph data display with node properties, edges, and relationship summaries
-- Implemented source-specific node typing (cache_entry, config_file, service_endpoint, etc.)
-- Added responsive card-based layout with color-coded node levels and relationship visualization
-- **NEW**: Added visual connection lines showing parent-to-child relationships with arrows
-- **NEW**: Implemented "+more" popup dialog for nodes with extensive properties
-- **NEW**: Created expandable property viewer with formatted JSON display and search capabilities
-- **NEW**: Enhanced visual layout with connection arrows, animated target node indicator, and hierarchical flow display
+**July 28, 2025 - Complete Source Code & Thread Migration + Enhanced Gremlin Visualizer**
+- **Source Code Updates**: Updated all source codes and names throughout system:
+  - STC → SCR (System Truth Cache → Source Code Repository)
+  - CPT → Capital (Configuration Processing Tool → Capital Management Tool)
+  - CAS → CAAS (Central Authentication Service → CAAS)
+  - NVL → Navrel (Network Validation Layer → Navrel)
+  - TMC → Teamcenter (Transaction Management Center → Teamcenter)
+  - SLC → Slicwave (Service Layer Coordinator → Slicwave)
+- **Thread QName Updates**: Modified thread types with new qnames:
+  - STC_yy.STC_yy → SCR_mb.SCR_mb
+  - CPT_ → PAExchange_mb
+  - TMC now has two types: TeamcenterEbomPart_mb and Teamcenter_HWVerification_mb
+- **New Impact Assessment Page**: Added dedicated page for items with qname containing "ImpactAssessment"
+  - Filters by impact level (LOW/MEDIUM/HIGH/CRITICAL) and source
+  - Detailed item view with properties, affected systems, and metadata
+  - Search functionality across qnames and descriptions
+- **Enhanced Gremlin Visualizer with One-Click Exploration**:
+  - Created comprehensive Gremlin visualizer interface for each Source of Truth
+  - Built interactive node relationship visualization showing one level up and down connections
+  - Added dynamic source selection and node ID input with real-time graph generation
+  - Implemented simulated Gremlin traversal with realistic graph data based on source types
+  - Created API endpoint /api/gremlin/visualize/:sourceCode/:nodeId for graph data retrieval
+  - Added visual indicators for different node types and relationship levels (up/center/down)
+  - Enhanced sidebar navigation with Gremlin Visualizer menu item using GitBranch icon
+  - Built comprehensive graph data display with node properties, edges, and relationship summaries
+  - Implemented source-specific node typing (SCR_mb, PAExchange_mb, TeamcenterEbomPart_mb, etc.)
+  - Added responsive card-based layout with color-coded node levels and relationship visualization
+  - **NEW**: One-click depth exploration - click any parent or child node to navigate to its graph view
+  - **NEW**: Properties popup dialog - click "+more" to view all node properties in detailed popup
+  - **NEW**: Visual node connections with arrows showing parent-to-center-to-child relationships
+  - **NEW**: Exploration history tracking with breadcrumb navigation and one-click history navigation
+  - **NEW**: Interactive node hover effects with scaling, shadows, and cursor pointer for clickable nodes
+  - **NEW**: Enhanced user experience with exploration hints, clickable visual cues, and seamless graph traversal
 
 **July 24, 2025 - Complete Config.yaml Migration & NODE_ENV Removal**
 - Migrated entire system from environment variables to config.yaml-based configuration

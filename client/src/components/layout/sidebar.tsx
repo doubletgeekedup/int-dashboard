@@ -13,6 +13,7 @@ import {
   Megaphone,
   Book,
   GitBranch,
+  AlertTriangle,
   Menu,
   X
 } from "lucide-react";
@@ -27,44 +28,44 @@ const navigation = [
 
 const sourcesOfTruth = [
   {
-    name: "STC - System Truth Cache",
-    code: "STC",
-    href: "/source/STC",
+    name: "SCR - Source Code Repository",
+    code: "SCR",
+    href: "/source/SCR",
     icon: Database,
     description: "Primary data repository and caching layer",
   },
   {
-    name: "CPT - Configuration Processing Tool",
-    code: "CPT", 
-    href: "/source/CPT",
+    name: "Capital - Capital Management Tool",
+    code: "Capital", 
+    href: "/source/Capital",
     icon: Settings,
     description: "Configuration management and processing",
   },
   {
-    name: "SLC - Service Layer Coordinator",
-    code: "SLC",
-    href: "/source/SLC", 
+    name: "Slicwave - Service Layer Coordinator",
+    code: "Slicwave",
+    href: "/source/Slicwave", 
     icon: Layers,
     description: "Service orchestration and coordination",
   },
   {
-    name: "TMC - Transaction Management Center",
-    code: "TMC",
-    href: "/source/TMC",
+    name: "Teamcenter - Transaction Management Center",
+    code: "Teamcenter",
+    href: "/source/Teamcenter",
     icon: ArrowRightLeft,
     description: "Transaction monitoring and management",
   },
   {
-    name: "CAS - Central Authentication Service",
-    code: "CAS",
-    href: "/source/CAS",
+    name: "CAAS - Central Authentication Service",
+    code: "CAAS",
+    href: "/source/CAAS",
     icon: Shield,
     description: "Authentication and authorization management",
   },
   {
-    name: "NVL - Network Validation Layer",
-    code: "NVL",
-    href: "/source/NVL",
+    name: "Navrel - Network Validation Layer",
+    code: "Navrel",
+    href: "/source/Navrel",
     icon: Network,
     description: "Network validation and monitoring",
   },
@@ -85,6 +86,11 @@ const resources = [
     name: "Gremlin Visualizer",
     href: "/gremlin-visualizer",
     icon: GitBranch,
+  },
+  {
+    name: "Impact Assessment",
+    href: "/impact-assessment",
+    icon: AlertTriangle,
   },
 ];
 

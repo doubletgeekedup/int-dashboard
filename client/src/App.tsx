@@ -9,6 +9,7 @@ import SourcePage from "@/pages/source-page";
 import Bulletins from "@/pages/bulletins";
 import KnowledgeBase from "@/pages/knowledge-base";
 import GremlinVisualizer from "@/pages/gremlin-visualizer";
+import ImpactAssessment from "@/pages/impact-assessment";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { useWebSocket } from "@/hooks/use-websocket";
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/bulletins" component={Bulletins} />
       <Route path="/knowledge-base" component={KnowledgeBase} />
       <Route path="/gremlin-visualizer" component={GremlinVisualizer} />
+      <Route path="/impact-assessment" component={ImpactAssessment} />
       <Route component={NotFound} />
     </Switch>
   );

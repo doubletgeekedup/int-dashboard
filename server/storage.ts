@@ -72,8 +72,8 @@ export class MemStorage implements IStorage {
     // Initialize default sources
     const defaultSources: InsertSource[] = [
       {
-        code: "STC",
-        name: "System Truth Cache",
+        code: "SCR",
+        name: "Source Code Repository",
         description: "Division team managing system operations through specialized teams",
         status: "active",
         version: "2.4.1",
@@ -87,8 +87,8 @@ export class MemStorage implements IStorage {
         config: { database: "janusgraph", traversal: "g", teams: ["cache_mgmt", "sys_records", "data_repos"] }
       },
       {
-        code: "CPT",
-        name: "Configuration Processing Tool",
+        code: "Capital",
+        name: "Capital Management Tool",
         description: "Division team managing configuration operations through specialized teams",
         status: "active",
         version: "1.8.3",
@@ -102,7 +102,7 @@ export class MemStorage implements IStorage {
         config: { timeout: 5000, retries: 3, teams: ["config_files", "settings_mgmt", "policy_mgmt"] }
       },
       {
-        code: "SLC",
+        code: "Slicwave",
         name: "Service Layer Coordinator",
         description: "Division team managing service operations through specialized teams",
         status: "syncing",
@@ -117,7 +117,7 @@ export class MemStorage implements IStorage {
         config: { maxConcurrency: 100, teams: ["orchestration", "endpoints", "coordination"] }
       },
       {
-        code: "TMC",
+        code: "Teamcenter",
         name: "Transaction Management Center",
         description: "Division team managing transaction operations through specialized teams",
         status: "active",
@@ -132,7 +132,7 @@ export class MemStorage implements IStorage {
         config: { database: "transactions", traversal: "tx", teams: ["processing", "monitoring", "audit", "work_items"] }
       },
       {
-        code: "CAS",
+        code: "CAAS",
         name: "Central Authentication Service",
         description: "Division team managing authentication operations through specialized teams",
         status: "active",
@@ -147,7 +147,7 @@ export class MemStorage implements IStorage {
         config: { tokenExpiry: 3600, refreshEnabled: true, teams: ["credentials", "permissions", "roles", "tokens"] }
       },
       {
-        code: "NVL",
+        code: "Navrel",
         name: "Network Validation Layer",
         description: "Division team managing network operations through specialized teams",
         status: "active",
@@ -194,7 +194,7 @@ export class MemStorage implements IStorage {
             class: "tQuery",
             id: "858",
             type: "tQuery",
-            tqName: "STC_yy.STC_yy"
+            tqName: "SCR_mb.SCR_mb"
           }
         }],
         createTime: currentTime,
@@ -203,7 +203,7 @@ export class MemStorage implements IStorage {
       // CPT Thread
       {
         nodekey: "Thread@id@a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c",
-        tqName: "CPT_config.CPT_config",
+        tqName: "PAExchange_mb",
         class: "Thread",
         threadId: "a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c",
         componentNode: [{
@@ -226,7 +226,7 @@ export class MemStorage implements IStorage {
             class: "tQuery",
             id: "859",
             type: "tQuery",
-            tqName: "CPT_config.CPT_config"
+            tqName: "PAExchange_mb"
           }
         }],
         createTime: currentTime,
@@ -235,7 +235,7 @@ export class MemStorage implements IStorage {
       // TMC Thread
       {
         nodekey: "Thread@id@f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d",
-        tqName: "TMC_transaction.TMC_transaction",
+        tqName: "TeamcenterEbomPart_mb",
         class: "Thread",
         threadId: "f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d",
         componentNode: [{
@@ -258,7 +258,39 @@ export class MemStorage implements IStorage {
             class: "tQuery",
             id: "860",
             type: "tQuery",
-            tqName: "TMC_transaction.TMC_transaction"
+            tqName: "TeamcenterEbomPart_mb"
+          }
+        }],
+        createTime: currentTime,
+        updateTime: currentTime
+      },
+      // Second TMC Thread with HWVerification type
+      {
+        nodekey: "Thread@id@e8b5c3f7-2a4d-4c9b-8f1e-5a2b9c6f3e8d",
+        tqName: "Teamcenter_HWVerification_mb",
+        class: "Thread",
+        threadId: "e8b5c3f7-2a4d-4c9b-8f1e-5a2b9c6f3e8d",
+        componentNode: [{
+          nodekey: "cNode@id@660",
+          isDefault: true,
+          node: [{
+            nodeKey: "HW@id@937",
+            id: "937",
+            type: "HW",
+            class: "HW",
+            description: "Hardware Verification",
+            functionName: "Hardware Verification Processor",
+            hasCC: []
+          }],
+          class: "cNode",
+          type: "cNode",
+          id: "660",
+          tQuery: {
+            nodeKey: "tQuery@id@861",
+            class: "tQuery",
+            id: "861",
+            type: "tQuery",
+            tqName: "Teamcenter_HWVerification_mb"
           }
         }],
         createTime: currentTime,
@@ -271,8 +303,8 @@ export class MemStorage implements IStorage {
     // Initialize default knowledge links
     const defaultKnowledgeLinks: InsertKnowledgeLink[] = [
       {
-        sourceCode: "STC",
-        title: "STC Documentation",
+        sourceCode: "SCR",
+        title: "SCR Documentation",
         description: "Setup and configuration guide",
         url: "https://docs.example.com/stc",
         category: "documentation",
