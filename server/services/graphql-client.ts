@@ -407,6 +407,16 @@ export class GraphQLJanusClient {
   }
 
   async createChatMessage(messageData: any) {
+    if (!this.isConnected) {
+      // Return mock data that matches expected format for simulation mode
+      return {
+        addVertex: {
+          id: Math.floor(Math.random() * 10000).toString(),
+          properties: messageData
+        }
+      };
+    }
+
     const mutation = `
       mutation CreateChatMessage($properties: ChatMessageInput!) {
         addVertex(label: "ChatMessage", properties: $properties) {
