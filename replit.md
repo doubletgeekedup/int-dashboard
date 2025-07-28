@@ -26,10 +26,7 @@ Preferred communication style: Simple, everyday language.
   - STC_yy.STC_yy → SCR_mb.SCR_mb
   - CPT_ → PAExchange_mb
   - TMC now has two types: TeamcenterEbomPart_mb and Teamcenter_HWVerification_mb
-- **New Impact Assessment Page**: Added dedicated page for items with qname containing "ImpactAssessment"
-  - Filters by impact level (LOW/MEDIUM/HIGH/CRITICAL) and source
-  - Detailed item view with properties, affected systems, and metadata
-  - Search functionality across qnames and descriptions
+
 - **Enhanced Gremlin Visualizer with One-Click Exploration**:
   - Created comprehensive Gremlin visualizer interface for each Source of Truth
   - Built interactive node relationship visualization showing one level up and down connections

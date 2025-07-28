@@ -13,7 +13,6 @@ import {
   Megaphone,
   Book,
   GitBranch,
-  AlertTriangle,
   Menu,
   X
 } from "lucide-react";
@@ -86,11 +85,6 @@ const resources = [
     name: "Gremlin Visualizer",
     href: "/gremlin-visualizer",
     icon: GitBranch,
-  },
-  {
-    name: "Impact Assessment",
-    href: "/impact-assessment",
-    icon: AlertTriangle,
   },
 ];
 
