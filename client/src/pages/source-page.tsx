@@ -245,7 +245,7 @@ export default function SourcePage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm font-medium">
-              {source.recordCount.toLocaleString()} Records
+              {((source as any).threadCount || source.recordCount || (source as any).teamCount || 0).toLocaleString()} {(source as any).threadCount ? 'Threads' : 'Records'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">+5.2% this week</p>
           </CardContent>
@@ -253,7 +253,7 @@ export default function SourcePage() {
         
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-medium">{source.avgResponseTime}ms avg</p>
+            <p className="text-sm font-medium">{source.avgResponseTime || 0}ms avg</p>
             <p className="text-xs text-muted-foreground mt-1">Response time</p>
           </CardContent>
         </Card>
