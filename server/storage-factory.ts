@@ -13,8 +13,7 @@ export function initializeStorage(): IStorage {
   const config = configManager.getJanusGraphConfig();
   const databaseConfig = configManager.getDatabaseConfig();
   const databaseUrl = databaseConfig.url;
-  // Build GraphQL URL from host and port configuration
-  const janusGraphUrl = `http://${config.connection.host}:${config.connection.port}/graphql`;
+  const janusGraphUrl = config.connection.url.replace('ws://', 'http://').replace('/gremlin', '/graphql');
   
   // Check if useRemote is enabled in config
   if (config.enabled && config.useRemote) {
@@ -66,8 +65,7 @@ export function getStorageInfo(): {
   const config = configManager.getJanusGraphConfig();
   const databaseConfig = configManager.getDatabaseConfig();
   const databaseUrl = databaseConfig.url;
-  // Build GraphQL URL from host and port configuration  
-  const janusGraphUrl = `http://${config.connection.host}:${config.connection.port}/graphql`;
+  const janusGraphUrl = config.connection.url.replace('ws://', 'http://').replace('/gremlin', '/graphql');
   
   if (!config.useRemote) {
     return {
