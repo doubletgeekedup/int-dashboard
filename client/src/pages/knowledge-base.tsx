@@ -73,8 +73,8 @@ interface KnowledgeStats {
 
 export default function KnowledgeBasePage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedPriority, setSelectedPriority] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedPriority, setSelectedPriority] = useState('all');
   const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof knowledgeSchema>>({
@@ -107,8 +107,8 @@ export default function KnowledgeBasePage() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('q', searchQuery);
-      if (selectedCategory) params.append('category', selectedCategory);
-      if (selectedPriority) params.append('priority', selectedPriority);
+      if (selectedCategory && selectedCategory !== 'all') params.append('category', selectedCategory);
+      if (selectedPriority && selectedPriority !== 'all') params.append('priority', selectedPriority);
       
       return apiRequest(`/api/knowledge/search?${params.toString()}`);
     }
@@ -250,7 +250,7 @@ export default function KnowledgeBasePage() {
                       <SelectValue placeholder="Filter by category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
                       <SelectItem value="general">General</SelectItem>
                       <SelectItem value="system">System</SelectItem>
                       <SelectItem value="security">Security</SelectItem>
@@ -263,7 +263,7 @@ export default function KnowledgeBasePage() {
                       <SelectValue placeholder="Filter by priority" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Priorities</SelectItem>
+                      <SelectItem value="all">All Priorities</SelectItem>
                       <SelectItem value="low">Low</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">High</SelectItem>
