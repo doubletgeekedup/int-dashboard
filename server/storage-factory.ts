@@ -17,11 +17,12 @@ export function initializeStorage(): IStorage {
   
   // Check if useRemote is enabled in config
   if (config.enabled && config.useRemote) {
-    // Priority: JanusGraph GraphQL > PostgreSQL when useRemote is true
+    // Use JanusGraph for read-only data queries, but store chat and integration data in memory
     if (janusGraphUrl) {
-      console.log('🗄️  Using JanusGraph GraphQL storage (useRemote: true)');
-      console.log(`   GraphQL endpoint: ${janusGraphUrl}`);
-      storage = new GraphQLStorage();
+      console.log('🗄️  Using hybrid storage: JanusGraph for reads, Memory for chat/integration data');
+      console.log(`   JanusGraph endpoint: ${janusGraphUrl} (read-only)`);
+      console.log('   Chat messages and integration data stored in memory');
+      storage = new MemStorage();
       return storage;
     }
     
@@ -76,9 +77,9 @@ export function getStorageInfo(): {
   
   if (janusGraphUrl) {
     return {
-      type: 'graphql',
+      type: 'memory',
       status: 'connected',
-      message: `JanusGraph GraphQL connected to ${janusGraphUrl} (useRemote: true)`
+      message: `Hybrid storage: JanusGraph read-only (${janusGraphUrl}) + Memory for chat/integration data`
     };
   }
   

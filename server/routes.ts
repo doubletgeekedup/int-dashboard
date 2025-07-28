@@ -501,7 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         chatResponse = nonAIResponse.response;
       }
 
-      // Store chat message
+      // Store chat message in memory storage
       const chatMessage = await storage.createChatMessage({
         sourceCode: sourceCode || null,
         message,

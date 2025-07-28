@@ -14,6 +14,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 29, 2025 - Hybrid Storage Architecture: JanusGraph Read-Only + Memory Storage**
+- Implemented hybrid storage architecture separating concerns: JanusGraph for data reads, Memory for application storage
+- Chat messages and integration dashboard data stored exclusively in memory storage (never written to JanusGraph)
+- JanusGraph used only for read-only data queries and analysis operations
+- Fixed all GraphQL storage errors that were causing chat message creation failures
+- Updated storage factory to use memory storage even when JanusGraph is available for reads
+- Created dedicated JanusGraphQueryService for read-only operations (node queries, relationships, similarity analysis)
+- Fixed TypeScript interface compatibility issues throughout GraphQL storage implementation
+- Enhanced error handling with proper fallback to random IDs when GraphQL operations fail
+- Updated storage status reporting to reflect hybrid architecture in health endpoints
+- Chat functionality now works reliably in all connection modes (real, simulation_fallback, simulation)
+
 **July 29, 2025 - Real JanusGraph Database Connection Implementation**
 - Installed gremlin package and @types/gremlin for real database connectivity
 - Updated JanusGraphService to support real Gremlin connections alongside simulation mode
@@ -211,14 +223,14 @@ Preferred communication style: Simple, everyday language.
 - **Build System**: Vite for frontend bundling, esbuild for backend compilation
 
 ### Data Storage Solutions
-- **Primary Database**: JanusGraph with GraphQL interface (preferred for graph operations)
-- **Alternative Database**: PostgreSQL with Neon serverless driver  
-- **Fallback Storage**: In-memory storage for development without database setup
-- **ORM**: Drizzle ORM for type-safe database operations
-- **Graph Database**: JanusGraph integration with GraphQL and Gremlin query support
-- **Schema Management**: Drizzle migrations with shared schema definitions
-- **Session Storage**: PostgreSQL-based session management with connect-pg-simple
-- **Storage Factory**: Automatic selection based on environment configuration
+- **Hybrid Storage Architecture**: JanusGraph for read-only data queries + Memory storage for application data
+- **JanusGraph**: Read-only access for node queries, relationships, and similarity analysis (real or simulation mode)
+- **Memory Storage**: All chat messages, integration dashboard data, sources, transactions, bulletins, threads
+- **Graph Database**: JanusGraph integration with Gremlin query support for data exploration
+- **Chat Storage**: Chat messages never stored in JanusGraph - only in memory for session management
+- **ORM**: Drizzle ORM available for PostgreSQL integration when needed
+- **Session Storage**: In-memory session management with automatic cleanup
+- **Storage Factory**: Automatic hybrid mode selection when JanusGraph is configured
 
 ## Key Components
 
