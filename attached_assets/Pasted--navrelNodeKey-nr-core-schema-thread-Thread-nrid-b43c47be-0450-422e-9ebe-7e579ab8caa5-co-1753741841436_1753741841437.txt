@@ -1,0 +1,45 @@
+{
+  "navrelNodeKey": "nr_core_schema.thread.Thread@nrid@b43c47be-0450-422e-9ebe-7e579ab8caa5",
+  "componentNode": [
+    {
+      "navrelNodeKey": "nr_core_schema.thread.ComponentNode@nrid@1cbf7917-3627-42aa-96d9-0e175eb0dd36",
+      "isDefaultForComposition": true,
+      "node": {
+        "navrelNodeKey": "XM30_Schema.Capital_HarnessDesignProject@nrid@124077ff-6d71-457e-945a-8ebfd230e04b",
+        "endpointId": "UUIDc659a-19030c4e6292-fcc061bf802111838e093536225270",
+        "endpointQName": "XM30_PAExchangeCapitalToCameo_threadcomp",
+        "nodeClass": "XM30_Schema.Capital_HarnessDesignProject",
+        "nodeId": "124077ff-6d71-457e-945a-8ebfd230e04b",
+        "nodeName": "DE_TEST12",
+        "nodeType": "XM30_Schema.Capital_HarnessDesignProject",
+        "searchString": "XM30_Schema.Capital_HarnessDesignProject DE_TEST12"
+      },
+      "nodeClass": "nr_core_schema.thread.ComponentNode",
+      "nodeId": "1cbf7917-3627-42aa-96d9-0e175eb0dd36",
+      "nodeType": "nr_core_schema.thread.ComponentNode",
+      "roleName": "CapitalHarnessDesignProject",
+      "searchString": "nr_core_schema.thread.ComponentNode"
+    }
+  ],
+  "creationTimestamp": {
+    "2025, 7, 8, 18, 29, 36, 391973200"
+  },
+  "endpointId": "d08af991-4f70-42e0-b5c9-203f93cf6888",
+  "endpointQName": "endpointprovider.navrel.NavRelDBJaunsGraphHandler",
+  "nodeClass": "nr_core_schema.thread.Thread",
+  "nodeId": "b43c47be-0450-422e-9ebe-7e579ab8caa5",
+  "nodeType": "nr_core_schema.thread.Thread",
+  "searchString": "nr_core_schema.thread.Thread",
+  "threadCompositionQName": "XM30_PAExchangeCapitalToCameo_threadcomp",
+  "threadQuery": {
+    "navrelNodeKey": "nr_core_schema.query.ThreadQuery@nrid@5275462a-8f34-4bca-8df1-334e8113dafe",
+    "nodeClass": "nr_core_schema.query.ThreadQuery",
+    "nodeId": "5275462a-8f34-4bca-8df1-334e8113dafe",
+    "nodeType": "nr_core_schema.query.ThreadQuery",
+    "searchString": "nr_core_schema.query.ThreadQuery",
+    "threadCompositionQName": "XM30_PAExchangeCapitalToCameo_threadcomp"
+  },
+  "updateTimestamp": {
+    "2025, 7, 8, 18, 29, 36, 297974400"
+  }
+}

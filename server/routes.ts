@@ -125,34 +125,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const sources = [];
       
-      // Query each Source of Truth using custom Gremlin queries with qname filtering
+      // Query each Source of Truth using custom Gremlin queries with qname filtering to get actual nodes
       for (const sot of sourcesOfTruth) {
         try {
-          // Create qname-specific query for each source
-          const query = `g.V().has('qname', containing('${sot.qnamePattern}')).count()`;
+          // Create qname-specific query to get actual node data with properties
+          const query = `g.V().has('qname', containing('${sot.qnamePattern}')).limit(10).valueMap(true)`;
           
           const result = await janusGraphService.executeQuery({ query });
-          const vertexCount = Array.isArray(result.data) ? result.data[0] : (result.data || 0);
+          const nodes = Array.isArray(result.data) ? result.data : [];
+          
+          // Transform JanusGraph nodes to thread structure format
+          const threadNodes = nodes.map((vertex, index) => ({
+            navrelNodeKey: `${sot.qnamePattern}.${vertex.nodeClass?.[0] || 'Node'}@nrid@${vertex.id || `generated-${index}`}`,
+            componentNode: [{
+              navrelNodeKey: `${sot.qnamePattern}.ComponentNode@nrid@${vertex.id || `comp-${index}`}`,
+              isDefaultForComposition: true,
+              node: {
+                navrelNodeKey: vertex.navrelNodeKey?.[0] || `${sot.qnamePattern}.${vertex.nodeClass?.[0] || 'Node'}@nrid@${vertex.nodeId?.[0] || vertex.id}`,
+                endpointId: vertex.endpointId?.[0] || `endpoint-${vertex.id || index}`,
+                endpointQName: vertex.endpointQName?.[0] || vertex.qname?.[0] || `${sot.qnamePattern}_endpoint`,
+                nodeClass: vertex.nodeClass?.[0] || `${sot.qnamePattern}_Node`,
+                nodeId: vertex.nodeId?.[0] || vertex.id || `node-${index}`,
+                nodeName: vertex.nodeName?.[0] || vertex.name?.[0] || `${sot.code}_Node_${index}`,
+                nodeType: vertex.nodeType?.[0] || vertex.nodeClass?.[0] || `${sot.qnamePattern}_Type`,
+                searchString: vertex.searchString?.[0] || `${vertex.nodeClass?.[0] || sot.qnamePattern} ${vertex.nodeName?.[0] || vertex.name?.[0] || ''}`
+              },
+              nodeClass: "nr_core_schema.thread.ComponentNode",
+              nodeId: `comp-${vertex.id || index}`,
+              nodeType: "nr_core_schema.thread.ComponentNode",
+              roleName: `${sot.code}Node`,
+              searchString: "nr_core_schema.thread.ComponentNode"
+            }],
+            creationTimestamp: vertex.creationTimestamp?.[0] || new Date().toISOString(),
+            endpointId: vertex.endpointId?.[0] || `endpoint-${vertex.id || index}`,
+            endpointQName: vertex.endpointQName?.[0] || `endpointprovider.${sot.code.toLowerCase()}.Handler`,
+            nodeClass: "nr_core_schema.thread.Thread",
+            nodeId: vertex.nodeId?.[0] || vertex.id || `thread-${index}`,
+            nodeType: "nr_core_schema.thread.Thread",
+            searchString: "nr_core_schema.thread.Thread",
+            threadCompositionQName: vertex.threadCompositionQName?.[0] || vertex.qname?.[0] || `${sot.qnamePattern}_threadcomp`,
+            threadQuery: {
+              navrelNodeKey: `nr_core_schema.query.ThreadQuery@nrid@query-${vertex.id || index}`,
+              nodeClass: "nr_core_schema.query.ThreadQuery",
+              nodeId: `query-${vertex.id || index}`,
+              nodeType: "nr_core_schema.query.ThreadQuery",
+              searchString: "nr_core_schema.query.ThreadQuery",
+              threadCompositionQName: vertex.threadCompositionQName?.[0] || vertex.qname?.[0] || `${sot.qnamePattern}_threadcomp`
+            },
+            updateTimestamp: vertex.updateTimestamp?.[0] || new Date().toISOString()
+          }));
           
           sources.push({
             id: sources.length + 1,
             code: sot.code,
             name: sot.name,
-            description: `${sot.name} - ${vertexCount} vertices with qname pattern '${sot.qnamePattern}'`,
-            status: vertexCount > 0 ? "active" : "inactive",
+            description: `${sot.name} - ${nodes.length} thread nodes with qname pattern '${sot.qnamePattern}'`,
+            status: nodes.length > 0 ? "active" : "inactive",
             version: "1.0.0",
-            uptime: vertexCount > 0 ? "99.9%" : "0%",
-            recordCount: vertexCount,
+            uptime: nodes.length > 0 ? "99.9%" : "0%",
+            recordCount: nodes.length,
             avgResponseTime: 150,
             lastSync: new Date(),
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            // Add the actual thread nodes in the specified format
+            threads: threadNodes
           });
           
-          console.log(`${sot.code}: Found ${vertexCount} vertices with qname containing '${sot.qnamePattern}'`);
+          console.log(`${sot.code}: Found ${nodes.length} thread nodes with qname containing '${sot.qnamePattern}'`);
         } catch (error) {
           console.error(`Error querying ${sot.code} with qname pattern ${sot.qnamePattern}:`, error);
-          // Add source with 0 count on error
+          // Add source with empty threads on error
           sources.push({
             id: sources.length + 1,
             code: sot.code,
@@ -165,7 +208,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             avgResponseTime: 0,
             lastSync: new Date(),
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            threads: []
           });
         }
       }
@@ -186,14 +230,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/sources/:code", async (req, res) => {
     try {
-      const source = await storage.getSource(req.params.code);
-      if (!source) {
+      const sourceCode = req.params.code.toUpperCase();
+      
+      // Get the corresponding qname pattern for this source
+      const qnamePatterns = {
+        "SCR": "SCR_mb",
+        "CAPITAL": "PAExchange_mb", 
+        "SLICWAVE": "SLC_",
+        "TEAMCENTER": "Teamcenter",
+        "CAAS": "CAS_",
+        "NAVREL": "NVL_"
+      };
+      
+      const pattern = qnamePatterns[sourceCode];
+      if (!pattern) {
         return res.status(404).json({ error: "Source not found" });
       }
       
-      const stats = await storage.getSourceStats(req.params.code);
-      res.json({ ...source, stats });
+      // Query for this specific source's thread nodes
+      const query = `g.V().has('qname', containing('${pattern}')).limit(10).valueMap(true)`;
+      const result = await janusGraphService.executeQuery({ query });
+      const nodes = Array.isArray(result.data) ? result.data : [];
+      
+      // Transform to thread structure
+      const threads = nodes.map((vertex, index) => ({
+        navrelNodeKey: `${pattern}.${vertex.nodeClass?.[0] || 'Node'}@nrid@${vertex.id || `generated-${index}`}`,
+        componentNode: [{
+          navrelNodeKey: `${pattern}.ComponentNode@nrid@${vertex.id || `comp-${index}`}`,
+          isDefaultForComposition: true,
+          node: {
+            navrelNodeKey: vertex.navrelNodeKey?.[0] || `${pattern}.${vertex.nodeClass?.[0] || 'Node'}@nrid@${vertex.nodeId?.[0] || vertex.id}`,
+            endpointId: vertex.endpointId?.[0] || `endpoint-${vertex.id || index}`,
+            endpointQName: vertex.endpointQName?.[0] || vertex.qname?.[0] || `${pattern}_endpoint`,
+            nodeClass: vertex.nodeClass?.[0] || `${pattern}_Node`,
+            nodeId: vertex.nodeId?.[0] || vertex.id || `node-${index}`,
+            nodeName: vertex.nodeName?.[0] || vertex.name?.[0] || `${sourceCode}_Node_${index}`,
+            nodeType: vertex.nodeType?.[0] || vertex.nodeClass?.[0] || `${pattern}_Type`,
+            searchString: vertex.searchString?.[0] || `${vertex.nodeClass?.[0] || pattern} ${vertex.nodeName?.[0] || vertex.name?.[0] || ''}`
+          },
+          nodeClass: "nr_core_schema.thread.ComponentNode",
+          nodeId: `comp-${vertex.id || index}`,
+          nodeType: "nr_core_schema.thread.ComponentNode", 
+          roleName: `${sourceCode}Node`,
+          searchString: "nr_core_schema.thread.ComponentNode"
+        }],
+        creationTimestamp: vertex.creationTimestamp?.[0] || new Date().toISOString(),
+        endpointId: vertex.endpointId?.[0] || `endpoint-${vertex.id || index}`,
+        endpointQName: vertex.endpointQName?.[0] || `endpointprovider.${sourceCode.toLowerCase()}.Handler`,
+        nodeClass: "nr_core_schema.thread.Thread",
+        nodeId: vertex.nodeId?.[0] || vertex.id || `thread-${index}`,
+        nodeType: "nr_core_schema.thread.Thread",
+        searchString: "nr_core_schema.thread.Thread",
+        threadCompositionQName: vertex.threadCompositionQName?.[0] || vertex.qname?.[0] || `${pattern}_threadcomp`,
+        threadQuery: {
+          navrelNodeKey: `nr_core_schema.query.ThreadQuery@nrid@query-${vertex.id || index}`,
+          nodeClass: "nr_core_schema.query.ThreadQuery",
+          nodeId: `query-${vertex.id || index}`,
+          nodeType: "nr_core_schema.query.ThreadQuery",
+          searchString: "nr_core_schema.query.ThreadQuery",
+          threadCompositionQName: vertex.threadCompositionQName?.[0] || vertex.qname?.[0] || `${pattern}_threadcomp`
+        },
+        updateTimestamp: vertex.updateTimestamp?.[0] || new Date().toISOString()
+      }));
+      
+      const sourceInfo = {
+        code: sourceCode,
+        name: sourceCode === "SCR" ? "Source Code Repository" : 
+              sourceCode === "CAPITAL" ? "Capital Management Tool" :
+              sourceCode === "SLICWAVE" ? "Slicwave" :
+              sourceCode === "TEAMCENTER" ? "Teamcenter" :
+              sourceCode === "CAAS" ? "CAAS" : "Navrel",
+        qnamePattern: pattern,
+        threadCount: threads.length,
+        threads: threads
+      };
+      
+      res.json(sourceInfo);
     } catch (error) {
+      console.error(`Error fetching source ${req.params.code}:`, error);
       res.status(500).json({ error: "Failed to fetch source" });
     }
   });

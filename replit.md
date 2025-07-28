@@ -14,10 +14,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 29, 2025 - QName-Based Sources of Truth Implementation + TinkerPop Connection Configuration**
-- Updated Sources of Truth to use custom Gremlin queries with qname filtering for accurate data retrieval
-- Sources API (/api/sources) now queries specific vertex counts using qname patterns: SCR_mb, PAExchange_mb, SLC_, Teamcenter, CAS_, NVL_
-- Each source (SCR, Capital, Slicwave, Teamcenter, CAAS, Navrel) uses targeted qname-based vertex counting
+**July 29, 2025 - Thread Structure Implementation with QName-Based Node Retrieval**
+- Updated Sources of Truth to return actual thread nodes in complex nested structure format
+- Sources API (/api/sources) now retrieves vertex data using qname patterns and transforms to thread structure
+- Each source returns threads array with navrelNodeKey, componentNode, threadQuery, and full node metadata
+- Thread nodes include proper navrelNodeKey format: "pattern.NodeClass@nrid@uuid" structure
+- ComponentNode arrays contain nested node objects with endpointId, nodeClass, nodeName, searchString
+- ThreadQuery objects properly structured with threadCompositionQName and node metadata
 - Dashboard stats API (/api/dashboard/stats) calculates metrics from qname-filtered vertex counts across all sources
 - Transactions API (/api/transactions) retrieves transaction data from JanusGraph with filtering support
 - Threads API (/api/threads) queries thread data from JanusGraph with tqName filtering
