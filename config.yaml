@@ -29,10 +29,13 @@ janusgraph:
   enabled: true
   useRemote: true  # Set to true to use actual JanusGraph database, false for in-memory storage
   connection:
-    url: "ws://localhost:8182/gremlin"
+    host: "localhost"  # JanusGraph server host
+    port: 8182         # JanusGraph server port
+    serializer: "GraphSONV3d0"  # Serializer type: GraphSONV3d0, GraphSONV2d0, GraphBinaryV1d0
     timeout: 30000
     ping_interval: 30000
     max_retries: 3
+    path: "/gremlin"   # WebSocket path
   database:
     name: "janusgraph"
     traversal_source: "g"

@@ -33,10 +33,13 @@ interface JanusGraphConfig {
   enabled: boolean;
   useRemote: boolean;
   connection: {
-    url: string;
+    host: string;
+    port: number;
+    serializer: string;
     timeout: number;
     ping_interval: number;
     max_retries: number;
+    path: string;
   };
   database: {
     name: string;

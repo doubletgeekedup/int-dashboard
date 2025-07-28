@@ -34,7 +34,10 @@ export class JanusGraphService {
         return false;
       }
 
-      console.log(`Attempting to connect to JanusGraph at ${this.config.connection.url}`);
+      // Build connection URL from host, port, and path
+      const protocol = 'ws'; // WebSocket protocol
+      const connectionUrl = `${protocol}://${this.config.connection.host}:${this.config.connection.port}${this.config.connection.path}`;
+      console.log(`Attempting to connect to JanusGraph at ${connectionUrl}`);
       
       // Check if useRemote is enabled for real JanusGraph connection
       if (this.config.useRemote) {
@@ -43,8 +46,17 @@ export class JanusGraphService {
           const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
           const Graph = gremlin.structure.Graph;
           
-          this.connection = new DriverRemoteConnection(this.config.connection.url, {
-            mimeType: 'application/vnd.gremlin-v3.0+json',
+          // Map serializer names to mime types
+          const serializerMimeTypes: Record<string, string> = {
+            'GraphSONV3d0': 'application/vnd.gremlin-v3.0+json',
+            'GraphSONV2d0': 'application/vnd.gremlin-v2.0+json', 
+            'GraphBinaryV1d0': 'application/vnd.gremlin-v1.0+gryo'
+          };
+          
+          const mimeType = serializerMimeTypes[this.config.connection.serializer] || 'application/vnd.gremlin-v3.0+json';
+          
+          this.connection = new DriverRemoteConnection(connectionUrl, {
+            mimeType: mimeType,
             pingEnabled: true,
             pingInterval: this.config.connection.ping_interval || 30000,
             pongTimeout: this.config.connection.timeout || 30000,

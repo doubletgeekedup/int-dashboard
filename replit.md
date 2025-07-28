@@ -14,19 +14,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 29, 2025 - JanusGraph Primary Data Source Implementation**
-- Updated all API routes to use JanusGraph as the primary data source for data points and query responses
-- Sources API (/api/sources) now queries JanusGraph first with g.V().hasLabel('source').valueMap(true)
-- Transactions API (/api/transactions) retrieves transaction data from JanusGraph with filtering support
-- Dashboard stats API (/api/dashboard/stats) calculates metrics from JanusGraph vertex counts
-- Threads API (/api/threads) queries thread data from JanusGraph with tqName filtering
-- Bulletins API (/api/bulletins) fetches bulletin data from JanusGraph with priority/category filtering
-- Implemented graceful fallback to memory storage only when JanusGraph has no data available
-- Fixed SSL certificate verification bypass for external API calls using Node.js HTTPS agent
-- External API configuration now uses empty URLs to prevent connection attempts to non-existent endpoints
-- Created comprehensive SSL_CERTIFICATE_GUIDE.md for external API integration troubleshooting
-- Chat messages remain stored in memory only (never written to JanusGraph per user requirements)
-- System successfully returns simulated JanusGraph data when real connection unavailable
+**July 29, 2025 - JanusGraph Flexible Connection Configuration**
+- Updated JanusGraph configuration to accept host, port, and serializer parameters for flexible deployment
+- Modified config.yaml to use separate host, port, serializer, and path fields instead of single URL
+- Added support for three serializer types: GraphSONV3d0 (default), GraphSONV2d0, and GraphBinaryV1d0
+- Updated JanusGraphService to dynamically build WebSocket URLs from host:port:path configuration
+- Fixed TypeScript errors with proper type definitions for serializer mapping
+- Updated storage factory to construct GraphQL URLs from new host/port configuration
+- Created comprehensive JANUSGRAPH_CONNECTION_GUIDE.md with configuration examples and troubleshooting
+- All API routes continue to use JanusGraph as primary data source with memory storage fallback
+- System automatically maps serializer names to appropriate MIME types for Gremlin connections
+- Enhanced connection flexibility for various JanusGraph server deployments and environments
 
 **July 29, 2025 - Real JanusGraph Database Connection Implementation**
 - Installed gremlin package and @types/gremlin for real database connectivity
