@@ -296,7 +296,6 @@ Create a `.env` file in your project root:
 ```env
 DATABASE_URL=postgresql://dashboard_user:your_password@localhost:5432/integration_dashboard
 OPENAI_API_KEY=your_openai_api_key_here
-NODE_ENV=development
 ```
 
 ## Step 6: IntelliJ Configuration

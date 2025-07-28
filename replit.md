@@ -14,6 +14,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 29, 2025 - Complete NODE_ENV Removal**
+- Removed all remaining NODE_ENV references throughout entire codebase
+- Updated DEBUG_GUIDE.md to use configManager.getAppConfig().environment instead of process.env.NODE_ENV
+- Cleaned up PRODUCTION_DEPLOYMENT_GUIDE.md to remove NODE_ENV from environment examples  
+- Updated README.md to indicate NODE_ENV is controlled by config.yaml
+- Modified SETUP_GUIDE_INTELLIJ.md to remove NODE_ENV from environment setup
+- Ensured all documentation consistently references config.yaml app.environment property
+- Application now fully uses config.yaml for environment control with no NODE_ENV dependencies
+
 **July 28, 2025 - Complete Source Code & Thread Migration + Enhanced Gremlin Visualizer**
 - **Source Code Updates**: Updated all source codes and names throughout system:
   - STC → SCR (System Truth Cache → Source Code Repository)
@@ -60,7 +69,7 @@ Preferred communication style: Simple, everyday language.
 - Improved storage factory to use configuration-based database URL detection
 - All server services now consistently use ConfigManager for environment-agnostic configuration
 - Updated console logging to reference config.yaml instead of environment variables for clarity
-- Note: package.json scripts still use NODE_ENV (can't be modified) but application ignores it in favor of config.yaml
+- Note: package.json scripts may reference NODE_ENV but application ignores it in favor of config.yaml
 - Simplified external services to use URL-only configuration (no API keys) as string values
 - Updated external service fetch operations to remove all authentication headers
 - Added SSL insecure support for external APIs with certificate verification bypass

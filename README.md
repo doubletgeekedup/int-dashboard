@@ -91,8 +91,7 @@ AI_CHAT_ENABLED=true
 # JanusGraph Configuration (optional - for graph database features)
 JANUSGRAPH_GRAPHQL_URL=http://localhost:8182/graphql
 
-# Development Settings (optional)
-NODE_ENV=development
+# Development Settings (optional) - controlled by config.yaml
 PORT=5000
 HOST=0.0.0.0
 

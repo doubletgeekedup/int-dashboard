@@ -39,7 +39,6 @@ Create a secure `.env` file for production:
 
 ```env
 # Application Configuration
-NODE_ENV=production
 PORT=5000
 HOST=0.0.0.0
 
@@ -71,7 +70,7 @@ Remove development-specific dependencies from `package.json`:
   "description": "Enterprise Integration Dashboard for monitoring Sources of Truth",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev": "tsx server/index.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "esbuild server/index.ts --bundle --platform=node --target=node18 --outfile=dist/server.js --external:@neondatabase/serverless",
@@ -127,8 +126,7 @@ export default defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(), // REMOVE
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined // REMOVE ENTIRE CONDITION
+    // Remove Replit-specific conditional logic
       ? [
           await import("@replit/vite-plugin-cartographer").then((m) => // REMOVE
             m.cartographer(),
@@ -226,7 +224,6 @@ REPL_OWNER=
 
 #### B. Production Environment Variables (.env.production)
 ```bash
-NODE_ENV=production
 DATABASE_URL=postgresql://username:password@your-db-host:5432/database_name
 OPENAI_API_KEY=your_openai_api_key
 PORT=5000
@@ -313,7 +310,7 @@ export const config = {
   app: {
     port: parseInt(process.env.PORT || '5000'),
     host: process.env.HOST || '0.0.0.0',
-    environment: process.env.NODE_ENV || 'development',
+    environment: 'production', // Set directly in production
     sessionSecret: process.env.SESSION_SECRET || 'fallback-dev-secret-change-in-production',
   },
   database: {

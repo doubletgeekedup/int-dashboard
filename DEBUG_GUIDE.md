@@ -237,7 +237,8 @@ Add variables to Watch panel:
 
 ### Development Environment
 ```typescript
-if (process.env.NODE_ENV === 'development') {
+import { configManager } from './config';
+if (configManager.getAppConfig().environment === 'development') {
   console.log('Debug info:', data);
 }
 ```
