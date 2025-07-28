@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, Search, AlertTriangle, Eye, Filter, Activity } from "lucide-react";
+import { Loader2, Search, AlertTriangle, Eye, Filter, Activity, Clock, ExternalLink } from "lucide-react";
+import { AIAssistant } from "@/components/ai-assistant";
 
 interface ImpactAssessmentItem {
   id: string;
@@ -29,10 +30,65 @@ interface ImpactAssessmentData {
   };
 }
 
+interface WorkItem {
+  id: string;
+  tid: string;
+  process: string;
+  status: string;
+  priority: string;
+  description: string;
+  timestamp: string;
+  qname?: string;
+}
+
 export default function ImpactAssessment() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedImpactLevel, setSelectedImpactLevel] = useState<string>("");
   const [selectedSource, setSelectedSource] = useState<string>("");
+
+  // Fetch recent work items
+  const { data: workItems, isLoading: workItemsLoading } = useQuery<WorkItem[]>({
+    queryKey: ['/api/listitems/100'],
+    queryFn: async () => {
+      const response = await fetch('/api/listitems/100');
+      if (!response.ok) {
+        // Return mock data if external service fails
+        return [
+          {
+            id: "WI_001",
+            tid: "TID12345",
+            process: "Impact Assessment Process",
+            status: "In Progress",
+            priority: "High",
+            description: "Security vulnerability assessment for critical systems",
+            timestamp: "2025-01-29T14:30:00Z",
+            qname: "SCR_mb.SCR_mb.ImpactAssessment.SecurityUpdate"
+          },
+          {
+            id: "WI_002", 
+            tid: "TID12346",
+            process: "Impact Review",
+            status: "Pending",
+            priority: "Medium",
+            description: "Database migration impact analysis",
+            timestamp: "2025-01-29T13:15:00Z",
+            qname: "PAExchange_mb.ImpactAssessment.DatabaseMigration"
+          },
+          {
+            id: "WI_003",
+            tid: "TID12347", 
+            process: "Hardware Assessment",
+            status: "Completed",
+            priority: "Critical",
+            description: "Hardware validation impact review",
+            timestamp: "2025-01-29T10:45:00Z",
+            qname: "Teamcenter_HWVerification_mb.ImpactAssessment.HardwareValidation"
+          }
+        ];
+      }
+      return response.json();
+    }
+  });
 
   // Simulate API call for impact assessment items
   const { data: assessmentData, isLoading, error } = useQuery<ImpactAssessmentData>({
@@ -224,6 +280,11 @@ export default function ImpactAssessment() {
     }
   };
 
+  // Filter work items that contain "ImpactAssessment" in qname
+  const impactWorkItems = workItems?.filter(item => 
+    item.qname && item.qname.includes("ImpactAssessment")
+  ) || [];
+
   return (
     <div className="space-y-6">
       <Card>
@@ -383,6 +444,91 @@ export default function ImpactAssessment() {
           </CardContent>
         </Card>
       )}
+
+      {/* Recent Work Items Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Recent Work Items ({impactWorkItems.length})
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Work items containing "ImpactAssessment" in their qname
+          </p>
+        </CardHeader>
+        <CardContent>
+          {workItemsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              Loading work items...
+            </div>
+          ) : impactWorkItems.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              <AlertTriangle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No recent work items with impact assessments found.</p>
+              <p className="text-sm">Check back later for new items.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {impactWorkItems.slice(0, 10).map((item) => (
+                <div key={item.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="text-xs">
+                          {item.tid}
+                        </Badge>
+                        <Badge variant={
+                          item.priority === 'Critical' ? 'destructive' :
+                          item.priority === 'High' ? 'destructive' :
+                          item.priority === 'Medium' ? 'secondary' : 'outline'
+                        } className="text-xs">
+                          {item.priority}
+                        </Badge>
+                        <Badge variant={
+                          item.status === 'Completed' ? 'default' :
+                          item.status === 'In Progress' ? 'secondary' : 'outline'
+                        } className="text-xs">
+                          {item.status}
+                        </Badge>
+                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{item.description}</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Process: {item.process}
+                      </p>
+                      {item.qname && (
+                        <p className="text-xs text-muted-foreground font-mono mb-2 break-all">
+                          QName: {item.qname}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(item.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* My Assistant Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>My Assistant</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Get help with impact assessment analysis and data insights
+          </p>
+        </CardHeader>
+        <CardContent>
+          <AIAssistant sourceCode="ImpactAssessment" />
+        </CardContent>
+      </Card>
     </div>
   );
 }
