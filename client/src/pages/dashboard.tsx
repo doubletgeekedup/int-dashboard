@@ -117,7 +117,7 @@ export default function Dashboard() {
                   Total Integrations
                 </p>
                 <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
-                  {stats?.totalIntegrations || 0}
+                  {String(stats?.totalIntegrations || 0)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-brand-cream dark:bg-brand-brown rounded-lg flex items-center justify-center">
@@ -142,7 +142,7 @@ export default function Dashboard() {
                   Active Sources
                 </p>
                 <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
-                  {stats?.activeSources || 0}
+                  {String(stats?.activeSources || 0)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
@@ -166,7 +166,7 @@ export default function Dashboard() {
                   Data Points
                 </p>
                 <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
-                  {stats?.dataPoints || "0 threads"}
+                  {String(stats?.dataPoints || "0 threads")}
                 </p>
               </div>
               <div className="w-12 h-12 bg-brand-cream dark:bg-brand-brown rounded-lg flex items-center justify-center">
@@ -191,7 +191,7 @@ export default function Dashboard() {
                   Query Response
                 </p>
                 <p className="text-3xl font-bold text-brand-dark dark:text-foreground">
-                  {stats?.avgResponseTime || "0ms"}
+                  {String(stats?.avgResponseTime || "0ms")}
                 </p>
               </div>
               <div className="w-12 h-12 bg-brand-cream dark:bg-brand-brown rounded-lg flex items-center justify-center">
@@ -231,10 +231,10 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <h4 className="font-medium text-github-gray-dark dark:text-foreground">
-                          {source.code} - {source.name}
+                          {String(source.code)} - {String(source.name)}
                         </h4>
                         <p className="text-sm text-github-gray-medium dark:text-muted-foreground">
-                          {source.description}
+                          {String(source.description)}
                         </p>
                       </div>
                     </div>
@@ -245,7 +245,7 @@ export default function Dashboard() {
                           source.status === 'syncing' ? 'bg-yellow-400' : 'bg-red-400'
                         }`} />
                         <Badge variant={source.status === 'active' ? 'default' : 'secondary'}>
-                          {source.status}
+                          {String(source.status)}
                         </Badge>
                       </div>
                       <span className="text-sm text-github-gray-medium dark:text-muted-foreground">
@@ -344,15 +344,15 @@ export default function Dashboard() {
                 <div className="w-2 h-2 bg-github-blue rounded-full flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm text-github-gray-dark dark:text-foreground">
-                    <span className="font-medium">{activity.sourceCode} Integration</span>{" "}
-                    {activity.type} - {activity.transactionId}
+                    <span className="font-medium">{String(activity.sourceCode)} Integration</span>{" "}
+                    {String(activity.type)} - {String(activity.transactionId)}
                   </p>
                   <p className="text-xs text-github-gray-medium dark:text-muted-foreground mt-1">
                     {activity.createdAt ? new Date(activity.createdAt).toLocaleString() : '--'}
                   </p>
                 </div>
                 <Badge variant={activity.status === 'success' ? 'default' : 'secondary'}>
-                  {activity.status}
+                  {String(activity.status)}
                 </Badge>
               </div>
             ))}
