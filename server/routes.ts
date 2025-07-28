@@ -595,17 +595,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/janusgraph/health", async (req, res) => {
     try {
       const isHealthy = await janusGraphService.performHealthCheck();
+      const vertexCount = await janusGraphService.getVertexCount();
+      const edgeCount = await janusGraphService.getEdgeCount();
       const schemaInfo = await janusGraphService.getSchemaInfo();
       
       res.json({
         healthy: isHealthy,
         connected: schemaInfo.connected,
-        schema: schemaInfo
+        connectionMode: janusGraphService.getConnectionMode(),
+        realConnection: janusGraphService.isUsingRealConnection(),
+        schema: {
+          vertexLabels: schemaInfo.vertexLabels,
+          edgeLabels: schemaInfo.edgeLabels,
+          vertexCount,
+          edgeCount
+        }
       });
     } catch (error) {
       res.status(500).json({ 
         healthy: false, 
-        connected: false, 
+        connected: false,
+        connectionMode: 'error',
+        realConnection: false,
         error: "JanusGraph health check failed" 
       });
     }
