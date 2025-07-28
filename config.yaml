@@ -29,9 +29,9 @@ janusgraph:
   enabled: true
   useRemote: true  # Set to true to use actual JanusGraph database, false for in-memory storage
   connection:
-    url: "ws://10.21.23.105:43563/gremlin"  # Your JanusGraph server
+    url: "ws://10.21.23.105:43563"  # Try without /gremlin path
     # Alternative URLs to try if above doesn't work:
-    # url: "ws://10.21.23.105:43563"  # Without /gremlin path
+    # url: "ws://10.21.23.105:43563/gremlin"  # With /gremlin path
     # url: "http://10.21.23.105:43563"  # HTTP instead of WebSocket
     timeout: 60000  # Increased timeout for initial connection
     ping_interval: 30000

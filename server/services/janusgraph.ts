@@ -43,29 +43,51 @@ export class JanusGraphService {
           const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
           const Graph = gremlin.structure.Graph;
           
-          // Enhanced TinkerPop Gremlin driver configuration for JanusGraph
-          this.connection = new DriverRemoteConnection(this.config.connection.url, {
-            mimeType: 'application/vnd.gremlin-v3.0+json',
-            pingEnabled: true,
-            pingInterval: this.config.connection.ping_interval || 30000,
-            pongTimeout: this.config.connection.timeout || 30000,
-            maxRetries: this.config.connection.max_retries || 3,
-            // Additional TinkerPop configuration
-            enableUserAgentOnConnect: false,
-            headers: {
-              'Content-Type': 'application/json'
+          // Try multiple connection approaches for TinkerPop compatibility
+          const connectionOptions = [
+            {
+              url: this.config.connection.url,
+              options: {
+                mimeType: 'application/vnd.gremlin-v3.0+json',
+                pingEnabled: true,
+                pingInterval: this.config.connection.ping_interval || 30000,
+                pongTimeout: this.config.connection.timeout || 30000,
+                maxRetries: this.config.connection.max_retries || 3,
+              }
             },
-            // Connection pool settings for JanusGraph
-            poolSettings: {
-              maxSize: 8,
-              maxInProcessPerConnection: 4,
-              maxSimultaneousUsagePerConnection: 16,
-              maxWaitForConnection: 30000,
-              maxContentLength: 65536,
-              reconnectInternal: 1000,
-              keepAliveInterval: 30000
+            {
+              url: this.config.connection.url,
+              options: {
+                mimeType: 'application/vnd.gremlin-v2.0+json',
+                pingEnabled: false,
+                maxRetries: 1,
+              }
+            },
+            {
+              url: this.config.connection.url.replace('/gremlin', ''),
+              options: {
+                mimeType: 'application/vnd.gremlin-v3.0+json',
+                pingEnabled: true,
+                maxRetries: 1,
+              }
             }
-          });
+          ];
+
+          let connectionError = null;
+          for (const { url, options } of connectionOptions) {
+            try {
+              console.log(`Trying connection to: ${url}`);
+              this.connection = new DriverRemoteConnection(url, options);
+              break;
+            } catch (error: any) {
+              connectionError = error;
+              console.log(`Connection attempt failed for ${url}:`, error.message);
+            }
+          }
+
+          if (!this.connection) {
+            throw connectionError || new Error('All connection attempts failed');
+          }
 
           this.client = new Graph().traversal().withRemote(this.connection);
           this.g = this.client;

@@ -14,7 +14,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 29, 2025 - JanusGraph Primary Data Source Implementation**
+**July 29, 2025 - JanusGraph Primary Data Source Implementation + TinkerPop Connection Configuration**
 - Updated all API routes to use JanusGraph as the primary data source for data points and query responses
 - Sources API (/api/sources) now queries JanusGraph first with g.V().hasLabel('source').valueMap(true)
 - Transactions API (/api/transactions) retrieves transaction data from JanusGraph with filtering support
@@ -22,11 +22,16 @@ Preferred communication style: Simple, everyday language.
 - Threads API (/api/threads) queries thread data from JanusGraph with tqName filtering
 - Bulletins API (/api/bulletins) fetches bulletin data from JanusGraph with priority/category filtering
 - Implemented graceful fallback to memory storage only when JanusGraph has no data available
+- Enhanced TinkerPop Gremlin driver configuration with multiple connection approaches for user's JanusGraph server at 10.21.23.105:43563
+- Added comprehensive connection troubleshooting with alternative URLs, protocols, and mime types
+- Created JANUSGRAPH_CONNECTION_TROUBLESHOOTING.md guide for TinkerPop driver connection issues
+- Updated config.yaml to use user's actual JanusGraph server URL (10.21.23.105:43563)
 - Fixed SSL certificate verification bypass for external API calls using Node.js HTTPS agent
 - External API configuration now uses empty URLs to prevent connection attempts to non-existent endpoints
 - Created comprehensive SSL_CERTIFICATE_GUIDE.md for external API integration troubleshooting
 - Chat messages remain stored in memory only (never written to JanusGraph per user requirements)
 - System successfully returns simulated JanusGraph data when real connection unavailable
+- Node.js version configured at 20.19.3 (latest 20.x available) for TinkerPop compatibility
 
 **July 29, 2025 - Real JanusGraph Database Connection Implementation**
 - Installed gremlin package and @types/gremlin for real database connectivity
