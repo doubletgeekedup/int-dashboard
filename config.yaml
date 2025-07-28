@@ -29,17 +29,19 @@ janusgraph:
   enabled: true
   useRemote: true  # Set to true to use actual JanusGraph database, false for in-memory storage
   connection:
-    url: "ws://10.21.23.105:43563"  # Try without /gremlin path
-    # Alternative URLs to try if above doesn't work:
-    # url: "ws://10.21.23.105:43563/gremlin"  # With /gremlin path
-    # url: "http://10.21.23.105:43563"  # HTTP instead of WebSocket
+    url: "ws://10.21.23.105:43563/gremlin"  # TinkerPop server with /gremlin endpoint
+    # TinkerPop server hosting JanusGraph - standard Gremlin Server configuration
+    # Alternative URLs if needed:
+    # url: "ws://10.21.23.105:43563"  # Without /gremlin path
+    # url: "wss://10.21.23.105:43563/gremlin"  # SSL if required
     timeout: 60000  # Increased timeout for initial connection
     ping_interval: 30000
     max_retries: 5  # Increased retries for connection stability
     connection_timeout: 10000  # Additional timeout setting
   database:
     name: "janusgraph"
-    traversal_source: "g"
+    traversal_source: "g"  # Standard traversal source for TinkerPop server
+    processor: ""  # Default processor for TinkerPop
   features:
     health_check: true
     schema_introspection: true

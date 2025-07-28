@@ -22,9 +22,9 @@ Preferred communication style: Simple, everyday language.
 - Threads API (/api/threads) queries thread data from JanusGraph with tqName filtering
 - Bulletins API (/api/bulletins) fetches bulletin data from JanusGraph with priority/category filtering
 - Implemented graceful fallback to memory storage only when JanusGraph has no data available
-- Enhanced TinkerPop Gremlin driver configuration with multiple connection approaches for user's JanusGraph server at 10.21.23.105:43563
+- Enhanced TinkerPop Gremlin driver configuration for user's TinkerPop server hosting JanusGraph at 10.21.23.105:43563
 - Added comprehensive connection troubleshooting with alternative URLs, protocols, and mime types
-- Created JANUSGRAPH_CONNECTION_TROUBLESHOOTING.md guide for TinkerPop driver connection issues
+- Created JANUSGRAPH_CONNECTION_TROUBLESHOOTING.md and TINKERPOP_SERVER_TROUBLESHOOTING.md guides for TinkerPop server connection issues
 - Updated config.yaml to use user's actual JanusGraph server URL (10.21.23.105:43563)
 - Fixed SSL certificate verification bypass for external API calls using Node.js HTTPS agent
 - External API configuration now uses empty URLs to prevent connection attempts to non-existent endpoints
