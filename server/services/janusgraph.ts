@@ -43,12 +43,28 @@ export class JanusGraphService {
           const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
           const Graph = gremlin.structure.Graph;
           
+          // Enhanced TinkerPop Gremlin driver configuration for JanusGraph
           this.connection = new DriverRemoteConnection(this.config.connection.url, {
             mimeType: 'application/vnd.gremlin-v3.0+json',
             pingEnabled: true,
             pingInterval: this.config.connection.ping_interval || 30000,
             pongTimeout: this.config.connection.timeout || 30000,
             maxRetries: this.config.connection.max_retries || 3,
+            // Additional TinkerPop configuration
+            enableUserAgentOnConnect: false,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            // Connection pool settings for JanusGraph
+            poolSettings: {
+              maxSize: 8,
+              maxInProcessPerConnection: 4,
+              maxSimultaneousUsagePerConnection: 16,
+              maxWaitForConnection: 30000,
+              maxContentLength: 65536,
+              reconnectInternal: 1000,
+              keepAliveInterval: 30000
+            }
           });
 
           this.client = new Graph().traversal().withRemote(this.connection);

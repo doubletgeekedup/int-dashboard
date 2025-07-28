@@ -24,15 +24,19 @@ azure_openai:
   deployment_name: "${AZURE_OPENAI_DEPLOYMENT}"
   api_version: "2024-02-01"
 
-# JanusGraph Configuration
+# JanusGraph Configuration - TinkerPop Gremlin Driver Compatible
 janusgraph:
   enabled: true
   useRemote: true  # Set to true to use actual JanusGraph database, false for in-memory storage
   connection:
-    url: "ws://localhost:8182/gremlin"
-    timeout: 30000
+    url: "ws://localhost:8182/gremlin"  # Change to your JanusGraph server URL
+    # Alternative URLs to try:
+    # url: "ws://your-server:8182/gremlin"
+    # url: "wss://your-server:8182/gremlin"  # For SSL connections
+    timeout: 60000  # Increased timeout for initial connection
     ping_interval: 30000
-    max_retries: 3
+    max_retries: 5  # Increased retries for connection stability
+    connection_timeout: 10000  # Additional timeout setting
   database:
     name: "janusgraph"
     traversal_source: "g"
