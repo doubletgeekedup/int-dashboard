@@ -14,11 +14,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 29, 2025 - JanusGraph Primary Data Source Implementation + TinkerPop Connection Configuration**
-- Updated all API routes to use JanusGraph as the primary data source for data points and query responses
-- Sources API (/api/sources) now queries JanusGraph first with g.V().hasLabel('source').valueMap(true)
+**July 29, 2025 - QName-Based Sources of Truth Implementation + TinkerPop Connection Configuration**
+- Updated Sources of Truth to use custom Gremlin queries with qname filtering for accurate data retrieval
+- Sources API (/api/sources) now queries specific vertex counts using qname patterns: SCR_mb, PAExchange_mb, SLC_, Teamcenter, CAS_, NVL_
+- Each source (SCR, Capital, Slicwave, Teamcenter, CAAS, Navrel) uses targeted qname-based vertex counting
+- Dashboard stats API (/api/dashboard/stats) calculates metrics from qname-filtered vertex counts across all sources
 - Transactions API (/api/transactions) retrieves transaction data from JanusGraph with filtering support
-- Dashboard stats API (/api/dashboard/stats) calculates metrics from JanusGraph vertex counts
 - Threads API (/api/threads) queries thread data from JanusGraph with tqName filtering
 - Bulletins API (/api/bulletins) fetches bulletin data from JanusGraph with priority/category filtering
 - Implemented graceful fallback to memory storage only when JanusGraph has no data available

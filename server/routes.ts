@@ -57,26 +57,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard API Routes - Data from JanusGraph
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
-      // Get dashboard stats from JanusGraph
-      const [sourcesQuery, transactionsQuery, threadsQuery] = await Promise.all([
-        janusGraphService.executeQuery({ query: "g.V().hasLabel('source').count()" }),
+      // Get dashboard stats from JanusGraph using qname-based filtering
+      const qnamePatterns = ["SCR_mb", "PAExchange_mb", "SLC_", "Teamcenter", "CAS_", "NVL_"];
+      const [sourceCounts, transactionsQuery, threadsQuery] = await Promise.all([
+        Promise.all(qnamePatterns.map(pattern => 
+          janusGraphService.executeQuery({ query: `g.V().has('qname', containing('${pattern}')).count()` })
+        )),
         janusGraphService.executeQuery({ query: "g.V().hasLabel('transaction').count()" }),
         janusGraphService.executeQuery({ query: "g.V().hasLabel('thread').count()" })
       ]);
       
       // If JanusGraph has data, calculate stats from it
-      if (sourcesQuery.data !== undefined || transactionsQuery.data !== undefined) {
-        // Extract actual numbers from JanusGraph query results
-        const sourceCount = Array.isArray(sourcesQuery.data) ? sourcesQuery.data[0] : (sourcesQuery.data || 0);
+      if (sourceCounts.length > 0 || transactionsQuery.data !== undefined) {
+        // Calculate total vertices across all qname patterns
+        const totalVertices = sourceCounts.reduce((total, result) => {
+          const count = Array.isArray(result.data) ? result.data[0] : (result.data || 0);
+          return total + count;
+        }, 0);
+        const activeSourcesCount = sourceCounts.filter(result => {
+          const count = Array.isArray(result.data) ? result.data[0] : (result.data || 0);
+          return count > 0;
+        }).length;
         const transactionCount = Array.isArray(transactionsQuery.data) ? transactionsQuery.data[0] : (transactionsQuery.data || 0);
         const threadCount = Array.isArray(threadsQuery.data) ? threadsQuery.data[0] : (threadsQuery.data || 0);
         
         const stats = {
-          totalIntegrations: sourceCount,
-          activeSources: sourceCount, // Assume all sources are active from JanusGraph
-          dataPoints: `${threadCount} threads`, // Add missing dataPoints field
-          avgResponseTime: "150ms", // Default value, could be calculated from JanusGraph data
-          systemUptime: "99.9%", // Default value, could be calculated from JanusGraph data
+          totalIntegrations: totalVertices,
+          activeSources: activeSourcesCount,
+          dataPoints: `${totalVertices} vertices across ${qnamePatterns.length} sources`,
+          avgResponseTime: "150ms",
+          systemUptime: "99.9%",
           lastUpdateTime: new Date()
         };
         
@@ -100,41 +110,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Division Teams (Sources) API Routes - Data from JanusGraph
+  // Sources of Truth API Routes - Data from JanusGraph with qname filtering
   app.get("/api/sources", async (req, res) => {
     try {
-      // Get sources data from JanusGraph first
-      const janusGraphData = await janusGraphService.executeQuery({
-        query: "g.V().hasLabel('source').valueMap(true)"
-      });
+      // Define the Sources of Truth with their qname patterns
+      const sourcesOfTruth = [
+        { code: "SCR", name: "Source Code Repository", qnamePattern: "SCR_mb" },
+        { code: "Capital", name: "Capital Management Tool", qnamePattern: "PAExchange_mb" },
+        { code: "Slicwave", name: "Slicwave", qnamePattern: "SLC_" },
+        { code: "Teamcenter", name: "Teamcenter", qnamePattern: "Teamcenter" },
+        { code: "CAAS", name: "CAAS", qnamePattern: "CAS_" },
+        { code: "Navrel", name: "Navrel", qnamePattern: "NVL_" }
+      ];
+
+      const sources = [];
       
-      // If JanusGraph has source data, use it
-      if (janusGraphData.data && janusGraphData.data.length > 0) {
-        const sources = janusGraphData.data.map((vertex: any) => ({
-          id: vertex.id || Math.floor(Math.random() * 1000),
-          code: vertex.code?.[0] || vertex.sourceCode?.[0] || 'UNKNOWN',
-          name: vertex.name?.[0] || vertex.sourceName?.[0] || 'Unknown Source',
-          description: vertex.description?.[0] || 'No description available',
-          status: vertex.status?.[0] || 'active',
-          version: vertex.version?.[0] || '1.0.0',
-          uptime: vertex.uptime?.[0] || '99.9%',
-          recordCount: parseInt(vertex.recordCount?.[0]) || 0,
-          avgResponseTime: parseInt(vertex.avgResponseTime?.[0]) || 150,
-          lastSync: new Date(vertex.lastSync?.[0] || Date.now()),
-          createdAt: new Date(vertex.createdAt?.[0] || Date.now()),
-          updatedAt: new Date(vertex.updatedAt?.[0] || Date.now())
-        }));
-        console.log(`Returning ${sources.length} sources from JanusGraph`);
-        res.json(sources);
-      } else {
-        // Fallback to memory storage only if JanusGraph has no data
-        console.log('No source data found in JanusGraph, using memory storage fallback');
-        const sources = await storage.getSources();
-        res.json(sources);
+      // Query each Source of Truth using custom Gremlin queries with qname filtering
+      for (const sot of sourcesOfTruth) {
+        try {
+          // Create qname-specific query for each source
+          const query = `g.V().has('qname', containing('${sot.qnamePattern}')).count()`;
+          
+          const result = await janusGraphService.executeQuery({ query });
+          const vertexCount = Array.isArray(result.data) ? result.data[0] : (result.data || 0);
+          
+          sources.push({
+            id: sources.length + 1,
+            code: sot.code,
+            name: sot.name,
+            description: `${sot.name} - ${vertexCount} vertices with qname pattern '${sot.qnamePattern}'`,
+            status: vertexCount > 0 ? "active" : "inactive",
+            version: "1.0.0",
+            uptime: vertexCount > 0 ? "99.9%" : "0%",
+            recordCount: vertexCount,
+            avgResponseTime: 150,
+            lastSync: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+          
+          console.log(`${sot.code}: Found ${vertexCount} vertices with qname containing '${sot.qnamePattern}'`);
+        } catch (error) {
+          console.error(`Error querying ${sot.code} with qname pattern ${sot.qnamePattern}:`, error);
+          // Add source with 0 count on error
+          sources.push({
+            id: sources.length + 1,
+            code: sot.code,
+            name: sot.name,
+            description: `${sot.name} - No data (connection error)`,
+            status: "error",
+            version: "1.0.0",
+            uptime: "0%",
+            recordCount: 0,
+            avgResponseTime: 0,
+            lastSync: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
       }
+      
+      console.log(`Returning ${sources.length} sources with qname-based filtering`);
+      res.json(sources);
     } catch (error) {
-      console.error("Error fetching sources from JanusGraph:", error);
-      // Fallback to memory storage on JanusGraph error
+      console.error("Error fetching sources with qname filtering:", error);
+      // Fallback to memory storage on complete failure
       try {
         const sources = await storage.getSources();
         res.json(sources);
