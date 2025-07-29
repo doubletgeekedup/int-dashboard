@@ -203,10 +203,11 @@ export default function SourcePage() {
       // Refresh work items
       queryClient.invalidateQueries({ queryKey: ["/api/listitems", code] });
     },
-    onError: () => {
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to create WorkItem. Please try again.";
       toast({
         title: "Creation Failed",
-        description: "Failed to create WorkItem. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

@@ -605,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // WorkItems API Routes
+  // WorkItems API Routes - Calls external API
   app.post("/api/workitems", async (req, res) => {
     try {
       const { sourceCode, projectName, workItemType, priority } = req.body;
@@ -614,35 +614,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "sourceCode and projectName are required" });
       }
 
-      // Create a new WorkItem
-      const workItem = {
-        id: `wi-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        csWorkItemDetails: {
-          csWorkItemType: workItemType || `${sourceCode}_TASK`,
-          qName: `${sourceCode}_${projectName.replace(/\s+/g, '_').toLowerCase()}`,
-          tid: `${Math.random().toString(36).substr(2, 8)}-${Math.random().toString(36).substr(2, 4)}-${Math.random().toString(36).substr(2, 4)}-${Math.random().toString(36).substr(2, 4)}-${Math.random().toString(36).substr(2, 12)}`
-        },
-        csWorkItemProcessInfo: {
-          csWorkItemProcessDetail: `Created for project: ${projectName}`,
-          csWorkItemProcessSatus: "CREATED"
-        },
-        createDate: Date.now(),
-        lastModified: Date.now(),
-        projectName,
+      // Get external endpoint URL from config
+      const externalConfig = configManager.getExternalConfig();
+      const externalWorkItemsUrl = externalConfig.workitems?.url;
+      
+      if (!externalWorkItemsUrl) {
+        console.error("External WorkItems API URL not configured in config.yaml");
+        return res.status(500).json({ 
+          error: "WorkItem creation service not configured",
+          message: "External API endpoint not available" 
+        });
+      }
+
+      // Prepare payload for external API
+      const workItemPayload = {
         sourceCode,
-        priority: priority || 'medium'
+        projectName,
+        workItemType: workItemType || `${sourceCode}_TASK`,
+        priority: priority || 'medium',
+        qName: `${sourceCode}_${projectName.replace(/\s+/g, '_').toLowerCase()}`,
+        requestedBy: 'integration_dashboard',
+        timestamp: new Date().toISOString()
       };
+
+      console.log(`Calling external WorkItems API: ${externalWorkItemsUrl}`);
+      
+      // Call external API
+      const https = require('https');
+      const response = await fetch(externalWorkItemsUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(workItemPayload),
+        // Disable SSL certificate verification for external APIs
+        agent: externalWorkItemsUrl.startsWith('https:') ? new https.Agent({
+          rejectUnauthorized: false
+        }) : undefined
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`External WorkItems API error (${response.status}): ${errorText}`);
+        return res.status(response.status).json({ 
+          error: "External API error",
+          message: `WorkItem creation failed: ${response.statusText}`,
+          details: errorText
+        });
+      }
+
+      const createdWorkItem = await response.json();
+      
+      console.log(`WorkItem created successfully via external API:`, createdWorkItem.id || 'ID not provided');
 
       // Broadcast new WorkItem creation
       broadcast({
         type: 'workitem_created',
-        data: workItem
+        data: createdWorkItem
       });
 
-      res.status(201).json(workItem);
+      res.status(201).json(createdWorkItem);
+      
     } catch (error) {
-      console.error("Error creating WorkItem:", error);
-      res.status(500).json({ error: "Failed to create WorkItem" });
+      console.error("Error creating WorkItem via external API:", error);
+      res.status(500).json({ 
+        error: "Failed to create WorkItem",
+        message: error.message || "External API call failed"
+      });
     }
   });
 

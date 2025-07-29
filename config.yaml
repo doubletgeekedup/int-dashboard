@@ -137,6 +137,8 @@ database:
 external:
   listitems:
     url: ""  # Set to your actual external service URL, e.g., "https://your-api.com/listitems"
+  workitems:
+    url: ""  # Set to your WorkItem creation API endpoint, e.g., "https://your-api.com/workitems"
   janusgraph_schema:
     url: ""  # Set to your JanusGraph schema endpoint, e.g., "https://your-api.com/janusgraph/schema"
   ssl_insecure: true  # Disable SSL certificate verification for external APIs
