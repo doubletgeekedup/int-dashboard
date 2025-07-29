@@ -277,14 +277,29 @@ export class KnowledgeRetentionService {
    * Get knowledge statistics for government reporting
    */
   async getKnowledgeStats() {
-    const stats = await db.select({
-      total: sql<number>`count(*)`,
-      confidential: sql<number>`count(*) filter (where is_confidential = true)`,
-      byCategory: sql<object>`jsonb_object_agg(category, count(*))`,
-      byPriority: sql<object>`jsonb_object_agg(priority, count(*))`
-    })
-    .from(knowledgeEntries);
+    // Get basic counts
+    const totalResult = await db.select({ count: sql<number>`count(*)` }).from(knowledgeEntries);
+    const confidentialResult = await db.select({ count: sql<number>`count(*)` })
+      .from(knowledgeEntries)
+      .where(eq(knowledgeEntries.isConfidential, true));
 
+    // Get category distribution
+    const categoryStats = await db.select({
+      category: knowledgeEntries.category,
+      count: sql<number>`count(*)`
+    })
+    .from(knowledgeEntries)
+    .groupBy(knowledgeEntries.category);
+
+    // Get priority distribution  
+    const priorityStats = await db.select({
+      priority: knowledgeEntries.priority,
+      count: sql<number>`count(*)`
+    })
+    .from(knowledgeEntries)
+    .groupBy(knowledgeEntries.priority);
+
+    // Get recent activity
     const recentActivity = await db.select({
       date: sql<string>`date_trunc('day', created_at)`,
       count: sql<number>`count(*)`
@@ -294,8 +309,22 @@ export class KnowledgeRetentionService {
     .groupBy(sql`date_trunc('day', created_at)`)
     .orderBy(sql`date_trunc('day', created_at)`);
 
+    // Build response object
+    const byCategory: Record<string, number> = {};
+    categoryStats.forEach(stat => {
+      byCategory[stat.category] = stat.count;
+    });
+
+    const byPriority: Record<string, number> = {};
+    priorityStats.forEach(stat => {
+      byPriority[stat.priority] = stat.count;
+    });
+
     return {
-      ...stats[0],
+      total: totalResult[0]?.count || 0,
+      confidential: confidentialResult[0]?.count || 0,
+      byCategory,
+      byPriority,
       recentActivity
     };
   }

@@ -92,40 +92,48 @@ export default function KnowledgeBasePage() {
   });
 
   // Fetch knowledge statistics
-  const { data: stats } = useQuery<KnowledgeStats>({
+  const { data: stats } = useQuery({
     queryKey: ['/api/knowledge/stats'],
-    queryFn: () => apiRequest('/api/knowledge/stats')
+    queryFn: async () => {
+      const response = await fetch('/api/knowledge/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json() as Promise<KnowledgeStats>;
+    }
   });
 
   // Search knowledge entries
-  const { data: searchResults, isLoading: isSearching } = useQuery<SearchResult>({
+  const { data: searchResults, isLoading: isSearching } = useQuery({
     queryKey: ['/api/knowledge/search', { 
       q: searchQuery, 
       category: selectedCategory, 
       priority: selectedPriority 
     }],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('q', searchQuery);
       if (selectedCategory && selectedCategory !== 'all') params.append('category', selectedCategory);
       if (selectedPriority && selectedPriority !== 'all') params.append('priority', selectedPriority);
       
-      return apiRequest(`/api/knowledge/search?${params.toString()}`);
+      const response = await fetch(`/api/knowledge/search?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to search knowledge');
+      return response.json() as Promise<SearchResult>;
     }
   });
 
   // Add knowledge entry mutation
   const addKnowledgeMutation = useMutation({
-    mutationFn: (data: z.infer<typeof knowledgeSchema>) => {
+    mutationFn: async (data: z.infer<typeof knowledgeSchema>) => {
       const payload = {
         ...data,
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : []
       };
-      return apiRequest('/api/knowledge', {
+      const response = await fetch('/api/knowledge', {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' }
       });
+      if (!response.ok) throw new Error('Failed to add knowledge entry');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/knowledge/search'] });
@@ -557,8 +565,8 @@ export default function KnowledgeBasePage() {
 
                   <div className="text-center py-8 text-muted-foreground">
                     <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Use the chat interface to analyze node relationships.</p>
-                    <p className="text-sm">Discoveries will be automatically captured and stored here.</p>
+                    <p>Node relationships will appear here when discovered through data analysis.</p>
+                    <p className="text-sm">Currently showing empty results - configure DATABASE_URL to enable storage.</p>
                   </div>
                 </div>
               </CardContent>
@@ -574,15 +582,19 @@ export default function KnowledgeBasePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {Object.entries(stats.byCategory).map(([category, count]) => (
-                        <div key={category} className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            {getCategoryIcon(category)}
-                            <span className="capitalize">{category}</span>
+                      {stats.byCategory && Object.keys(stats.byCategory).length > 0 ? (
+                        Object.entries(stats.byCategory).map(([category, count]) => (
+                          <div key={category} className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              {getCategoryIcon(category)}
+                              <span className="capitalize">{category}</span>
+                            </div>
+                            <Badge variant="outline">{String(count)}</Badge>
                           </div>
-                          <Badge variant="outline">{count}</Badge>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-center text-muted-foreground py-4">No categories yet</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -593,15 +605,19 @@ export default function KnowledgeBasePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {Object.entries(stats.byPriority).map(([priority, count]) => (
-                        <div key={priority} className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            {priority === 'critical' && <AlertTriangle className="w-4 h-4 text-red-500" />}
-                            <span className="capitalize">{priority}</span>
+                      {stats.byPriority && Object.keys(stats.byPriority).length > 0 ? (
+                        Object.entries(stats.byPriority).map(([priority, count]) => (
+                          <div key={priority} className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              {priority === 'critical' && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                              <span className="capitalize">{priority}</span>
+                            </div>
+                            <Badge className={getPriorityColor(priority)}>{String(count)}</Badge>
                           </div>
-                          <Badge className={getPriorityColor(priority)}>{count}</Badge>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-center text-muted-foreground py-4">No priorities yet</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
