@@ -41,10 +41,10 @@ npm run dev
 
 The application will be available at `http://localhost:5000` with in-memory storage and sample data.
 
-📖 **[Complete No-Database Setup Guide](NO_DATABASE_SETUP.md)**  
-🔗 **[External API Integration Guide](EXTERNAL_API_INTEGRATION_GUIDE.md)**  
-🛡️ **[Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)**  
-🪟 **[Windows Setup Guide](WINDOWS_SETUP.md)**
+📖 **[Complete No-Database Setup Guide](docs/NO_DATABASE_SETUP.md)**  
+🔗 **[External API Integration Guide](docs/EXTERNAL_API_INTEGRATION_GUIDE.md)**  
+🛡️ **[Government Knowledge Retention Guide](docs/KNOWLEDGE_RETENTION_GUIDE.md)**  
+🪟 **[Windows Setup Guide](docs/WINDOWS_SETUP.md)**
 
 ### Option 2: With PostgreSQL Database
 
@@ -128,7 +128,7 @@ GRANT ALL PRIVILEGES ON DATABASE integration_dashboard TO dashboard_user;
 
 Then add `DATABASE_URL` to your `.env` file.
 
-📖 **[No-Database Setup Guide](NO_DATABASE_SETUP.md)** - Complete instructions for running without PostgreSQL
+📖 **[No-Database Setup Guide](docs/NO_DATABASE_SETUP.md)** - Complete instructions for running without PostgreSQL
 
 ## IDE Setup Guides
 
@@ -143,7 +143,7 @@ code .
 # VS Code will prompt to install recommended extensions
 ```
 
-📖 **[Complete VS Code Setup Guide](SETUP_GUIDE_VSCODE.md)**
+📖 **[Complete VS Code Setup Guide](docs/SETUP_GUIDE_VSCODE.md)**
 - Pre-configured debugging with 8 specialized debug modes
 - Integrated database management with SQLTools
 - Thunder Client for API testing
@@ -158,7 +158,7 @@ idea .
 # Or File → Open → Select project directory
 ```
 
-📖 **[Complete IntelliJ Setup Guide](SETUP_GUIDE_INTELLIJ.md)**
+📖 **[Complete IntelliJ Setup Guide](docs/SETUP_GUIDE_INTELLIJ.md)**
 - Professional debugging with advanced breakpoint management
 - Built-in database tools and SQL console
 - Integrated REST client
@@ -172,7 +172,7 @@ idea .
 # File → Import → General → Existing Projects into Workspace
 ```
 
-📖 **[Complete Eclipse Setup Guide](SETUP_GUIDE_ECLIPSE.md)**
+📖 **[Complete Eclipse Setup Guide](docs/SETUP_GUIDE_ECLIPSE.md)**
 - Wild Web Developer plugin for modern JavaScript/TypeScript
 - Integrated terminal and Git support
 - Database development perspective
@@ -443,12 +443,11 @@ npm start
 
 ## Support
 
-- **VS Code Users**: See [VS Code Setup Guide](SETUP_GUIDE_VSCODE.md)
-- **IntelliJ Users**: See [IntelliJ Setup Guide](SETUP_GUIDE_INTELLIJ.md)  
-- **Eclipse Users**: See [Eclipse Setup Guide](SETUP_GUIDE_ECLIPSE.md)
-- **Debugging**: See [Debug Guide](DEBUG_GUIDE.md)
-- **Knowledge Retention**: See [Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)
-- **Production**: See [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)
+- **VS Code Users**: See [VS Code Setup Guide](docs/SETUP_GUIDE_VSCODE.md)
+- **IntelliJ Users**: See [IntelliJ Setup Guide](docs/SETUP_GUIDE_INTELLIJ.md)  
+- **Eclipse Users**: See [Eclipse Setup Guide](docs/SETUP_GUIDE_ECLIPSE.md)
+- **Knowledge Retention**: See [Government Knowledge Retention Guide](docs/KNOWLEDGE_RETENTION_GUIDE.md)
+- **External APIs**: See [External API Integration Guide](docs/EXTERNAL_API_INTEGRATION_GUIDE.md)
 
 ## License
 
