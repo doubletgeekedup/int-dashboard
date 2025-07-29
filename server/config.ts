@@ -81,6 +81,9 @@ interface ExternalConfig {
   listitems: {
     url: string;
   };
+  workitems: {
+    url: string;
+  };
   janusgraph_schema: {
     url: string;
   };

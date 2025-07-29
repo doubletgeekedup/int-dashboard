@@ -42,6 +42,7 @@ npm run dev
 The application will be available at `http://localhost:5000` with in-memory storage and sample data.
 
 📖 **[Complete No-Database Setup Guide](NO_DATABASE_SETUP.md)**  
+🔗 **[External API Integration Guide](EXTERNAL_API_INTEGRATION_GUIDE.md)**  
 🔗 **[External Work Items Integration](EXTERNAL_INTEGRATION_GUIDE.md)**  
 🛡️ **[Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)**  
 🪟 **[Windows Setup Guide](WINDOWS_SETUP.md)**

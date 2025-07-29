@@ -14,15 +14,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 29, 2025 - Create WorkItem Quick Action Implementation**
-- Added "Create WorkItem" button to Quick Actions panel for all Sources of Truth (ASOT) pages
-- Implemented modal dialog with project dropdown selection (8 predefined projects)
-- Created POST /api/workitems API endpoint for WorkItem creation with proper validation
-- WorkItems include sourceCode, projectName, workItemType, priority, and generated unique IDs
-- Added real-time WebSocket broadcast notification when new WorkItem is created
-- Integrated form validation, loading states, and success/error toast notifications
-- WorkItem structure follows csWorkItemDetails format with qName, tid, and process status
-- Quick Actions now include: Create WorkItem, Refresh Data, Run Diagnostic, View Logs, Export Report
+**July 29, 2025 - External API WorkItem Creation Implementation**
+- Updated WorkItem creation to call external API endpoints instead of local processing
+- Added external.workitems.url configuration to config.yaml for API endpoint management
+- Implemented comprehensive error handling for external API failures with user-friendly messages
+- WorkItem creation now requires external API endpoint configuration (shows helpful error when not configured)
+- Added proper SSL certificate handling and HTTP method support for external APIs
+- Enhanced error reporting to show specific external API response details to users
+- Maintained backward compatibility with existing WorkItem structure and WebSocket notifications
+- Created comprehensive documentation for external API integration requirements
+- Quick Actions panel includes: Create WorkItem (external), Refresh Data, Run Diagnostic, View Logs, Export Report
 
 **July 29, 2025 - Thread Structure Implementation with QName-Based Node Retrieval**
 - Updated Sources of Truth to return actual thread nodes in complex nested structure format

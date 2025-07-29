@@ -242,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "NAVREL": "NVL_"
       };
       
-      const pattern = qnamePatterns[sourceCode];
+      const pattern = qnamePatterns[sourceCode as keyof typeof qnamePatterns];
       if (!pattern) {
         return res.status(404).json({ error: "Source not found" });
       }
@@ -393,6 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Fallback to memory storage only if JanusGraph has no data
         console.log('No transaction data found in JanusGraph, using memory storage fallback');
+        const { sourceCode, limit } = req.query;
         const transactions = await storage.getTransactions(
           sourceCode as string,
           limit ? parseInt(limit as string) : undefined
@@ -403,6 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching transactions from JanusGraph:", error);
       // Fallback to memory storage on JanusGraph error
       try {
+        const { sourceCode, limit } = req.query;
         const transactions = await storage.getTransactions(
           sourceCode as string,
           limit ? parseInt(limit as string) : undefined
@@ -616,7 +618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get external endpoint URL from config
       const externalConfig = configManager.getExternalConfig();
-      const externalWorkItemsUrl = externalConfig.workitems?.url;
+      const externalWorkItemsUrl = externalConfig.workitems.url;
       
       if (!externalWorkItemsUrl) {
         console.error("External WorkItems API URL not configured in config.yaml");
@@ -640,18 +642,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Calling external WorkItems API: ${externalWorkItemsUrl}`);
       
       // Call external API
-      const https = require('https');
       const response = await fetch(externalWorkItemsUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(workItemPayload),
-        // Disable SSL certificate verification for external APIs
-        agent: externalWorkItemsUrl.startsWith('https:') ? new https.Agent({
-          rejectUnauthorized: false
-        }) : undefined
+        body: JSON.stringify(workItemPayload)
       });
 
       if (!response.ok) {
@@ -678,9 +675,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error("Error creating WorkItem via external API:", error);
+      const errorMessage = error instanceof Error ? error.message : "External API call failed";
       res.status(500).json({ 
         error: "Failed to create WorkItem",
-        message: error.message || "External API call failed"
+        message: errorMessage
       });
     }
   });
@@ -717,6 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Fallback to memory storage only if JanusGraph has no data
         console.log('No thread data found in JanusGraph, using memory storage fallback');
+        const { tqNamePrefix } = req.query;
         const threads = await storage.getThreads(tqNamePrefix as string);
         res.json(threads);
       }
@@ -724,6 +723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching threads from JanusGraph:", error);
       // Fallback to memory storage on JanusGraph error
       try {
+        const { tqNamePrefix } = req.query;
         const threads = await storage.getThreads(tqNamePrefix as string);
         res.json(threads);
       } catch (fallbackError) {
