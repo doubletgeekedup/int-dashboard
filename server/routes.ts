@@ -605,6 +605,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // WorkItems API Routes
+  app.post("/api/workitems", async (req, res) => {
+    try {
+      const { sourceCode, projectName, workItemType, priority } = req.body;
+      
+      if (!sourceCode || !projectName) {
+        return res.status(400).json({ error: "sourceCode and projectName are required" });
+      }
+
+      // Create a new WorkItem
+      const workItem = {
+        id: `wi-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        csWorkItemDetails: {
+          csWorkItemType: workItemType || `${sourceCode}_TASK`,
+          qName: `${sourceCode}_${projectName.replace(/\s+/g, '_').toLowerCase()}`,
+          tid: `${Math.random().toString(36).substr(2, 8)}-${Math.random().toString(36).substr(2, 4)}-${Math.random().toString(36).substr(2, 4)}-${Math.random().toString(36).substr(2, 4)}-${Math.random().toString(36).substr(2, 12)}`
+        },
+        csWorkItemProcessInfo: {
+          csWorkItemProcessDetail: `Created for project: ${projectName}`,
+          csWorkItemProcessSatus: "CREATED"
+        },
+        createDate: Date.now(),
+        lastModified: Date.now(),
+        projectName,
+        sourceCode,
+        priority: priority || 'medium'
+      };
+
+      // Broadcast new WorkItem creation
+      broadcast({
+        type: 'workitem_created',
+        data: workItem
+      });
+
+      res.status(201).json(workItem);
+    } catch (error) {
+      console.error("Error creating WorkItem:", error);
+      res.status(500).json({ error: "Failed to create WorkItem" });
+    }
+  });
+
   // Threads API Routes - Data from JanusGraph
   app.get("/api/threads", async (req, res) => {
     try {

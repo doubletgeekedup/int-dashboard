@@ -1,14 +1,17 @@
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { LLMChat } from "@/components/chat/llm-chat";
 import { PerformanceChart } from "@/components/charts/performance-chart";
 import { DataTable } from "@/components/data/data-table";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Database, 
   FolderSync, 
@@ -19,7 +22,8 @@ import {
   Activity,
   Clock,
   Server,
-  Eye
+  Eye,
+  Plus
 } from "lucide-react";
 import type { Source, KnowledgeLink, PerformanceMetric } from "@shared/schema";
 
@@ -60,6 +64,11 @@ const sourceColors = {
 export default function SourcePage() {
   const { code } = useParams<{ code: string }>();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Create WorkItem dialog state
+  const [isCreateWorkItemOpen, setIsCreateWorkItemOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<string>("");
 
   const { data: source, isLoading: sourceLoading } = useQuery<Source & { stats: any }>({
     queryKey: ["/api/sources", code],
@@ -154,6 +163,65 @@ export default function SourcePage() {
       title: `${action} triggered`,
       description: `Running ${action} for ${code}...`,
     });
+  };
+
+  // Available projects for WorkItem creation
+  const projects = [
+    "Project Alpha",
+    "Project Beta", 
+    "Project Gamma",
+    "Integration Suite",
+    "Data Migration",
+    "Security Audit",
+    "Performance Optimization",
+    "System Upgrade"
+  ];
+
+  // Create WorkItem mutation
+  const createWorkItemMutation = useMutation({
+    mutationFn: async (projectName: string) => {
+      return apiRequest('/api/workitems', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sourceCode: code,
+          projectName,
+          workItemType: `${code}_task`,
+          priority: 'medium'
+        }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "WorkItem Created",
+        description: `WorkItem created successfully for project: ${selectedProject}`,
+      });
+      setIsCreateWorkItemOpen(false);
+      setSelectedProject("");
+      // Refresh work items
+      queryClient.invalidateQueries({ queryKey: ["/api/listitems", code] });
+    },
+    onError: () => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create WorkItem. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleCreateWorkItem = () => {
+    if (!selectedProject) {
+      toast({
+        title: "Project Required",
+        description: "Please select a project before creating the WorkItem.",
+        variant: "destructive",
+      });
+      return;
+    }
+    createWorkItemMutation.mutate(selectedProject);
   };
 
   if (sourceLoading) {
@@ -444,6 +512,55 @@ export default function SourcePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
+                {/* Create WorkItem Dialog */}
+                <Dialog open={isCreateWorkItemOpen} onOpenChange={setIsCreateWorkItemOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create WorkItem
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Create WorkItem for {code}</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="project">Project Name</Label>
+                        <Select value={selectedProject} onValueChange={setSelectedProject}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a project" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {projects.map((project) => (
+                              <SelectItem key={project} value={project}>
+                                {project}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setIsCreateWorkItemOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleCreateWorkItem}
+                        disabled={!selectedProject || createWorkItemMutation.isPending}
+                      >
+                        {createWorkItemMutation.isPending ? "Creating..." : "Create WorkItem"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
