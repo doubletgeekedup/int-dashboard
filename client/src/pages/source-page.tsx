@@ -44,21 +44,21 @@ interface WorkItem {
 }
 
 const sourceIcons = {
-  STC: Database,
-  CPT: Server,
-  SLC: Activity,
-  TMC: TrendingUp,
-  CAS: Server,
-  NVL: Activity,
+  SCR: Database,
+  CAPITAL: Server,
+  SLICWAVE: Activity,
+  TEAMCENTER: TrendingUp,
+  CAAS: Server,
+  NAVREL: Activity,
 };
 
 const sourceColors = {
-  STC: "bg-blue-500",
-  CPT: "bg-purple-500", 
-  SLC: "bg-orange-500",
-  TMC: "bg-green-500",
-  CAS: "bg-red-500",
-  NVL: "bg-yellow-500",
+  SCR: "bg-blue-500",
+  CAPITAL: "bg-green-500", 
+  SLICWAVE: "bg-purple-500",
+  TEAMCENTER: "bg-orange-500",
+  CAAS: "bg-red-500",
+  NAVREL: "bg-indigo-500",
 };
 
 export default function SourcePage() {

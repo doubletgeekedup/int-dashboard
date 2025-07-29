@@ -47,32 +47,17 @@ janusgraph:
     schema_introspection: true
     performance_monitoring: true
 
-# Division Teams Configuration
-# Each division team contains multiple teams that cluster data nodes by type
+# Sources Configuration  
 sources:
-  stc:
-    name: "System Truth Cache"
-    description: "Division team managing system operations through specialized teams"
+  scr:
+    name: "Source Code Repository"
+    description: "Source managing system operations"
     type: "janusgraph"
     connection_string: "ws://localhost:8182/gremlin"
-    division_type: "system_operations"
-    teams:
-      - team_code: "cache_mgmt"
-        name: "Cache Management Team"
-        team_type: "cache_management"
-        data_node_types: ["cache_entries", "cache_policies", "cache_metrics"]
-      - team_code: "sys_records"
-        name: "System Records Team" 
-        team_type: "record_management"
-        data_node_types: ["system_logs", "audit_trails", "performance_data"]
-      - team_code: "data_repos"
-        name: "Data Repository Team"
-        team_type: "repository_management"
-        data_node_types: ["data_stores", "backup_systems", "archival_data"]
     health_check_interval: 60
-  cpt:
-    name: "Configuration Processing Tool"
-    description: "Division team managing configuration operations through specialized teams"
+  capital:
+    name: "Capital Management Tool"
+    description: "Source managing configuration operations"
     type: "rest_api"
     endpoint: "http://localhost:3001/api/config"
     division_type: "configuration_mgmt"

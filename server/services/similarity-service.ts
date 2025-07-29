@@ -442,12 +442,12 @@ export class SimilarityService {
    * Extract source code from TQName pattern
    */
   private extractSourceFromTQName(tqName: string): string {
-    if (tqName.startsWith('STC_')) return 'STC';
-    if (tqName.startsWith('CPT_')) return 'CPT';
-    if (tqName.startsWith('TMC_')) return 'TMC';
-    if (tqName.startsWith('SLC_')) return 'SLC';
-    if (tqName.startsWith('CAS_')) return 'CAS';
-    if (tqName.startsWith('NVL_')) return 'NVL';
+    if (tqName.startsWith('SCR_')) return 'SCR';
+    if (tqName.startsWith('PAExchange_')) return 'CAPITAL';
+    if (tqName.startsWith('Teamcenter')) return 'TEAMCENTER';
+    if (tqName.startsWith('SLC_')) return 'SLICWAVE';
+    if (tqName.startsWith('CAS_')) return 'CAAS';
+    if (tqName.startsWith('NVL_')) return 'NAVREL';
     return 'UNKNOWN';
   }
 }

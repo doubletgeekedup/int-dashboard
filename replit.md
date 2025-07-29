@@ -39,14 +39,11 @@ Preferred communication style: Simple, everyday language.
 - Implemented graceful fallback to memory storage only when JanusGraph has no data available
 - Enhanced TinkerPop Gremlin driver configuration for user's TinkerPop server hosting JanusGraph at 10.21.23.105:43563
 - Added comprehensive connection troubleshooting with alternative URLs, protocols, and mime types
-- Created JANUSGRAPH_CONNECTION_TROUBLESHOOTING.md and TINKERPOP_SERVER_TROUBLESHOOTING.md guides for TinkerPop server connection issues
 - Updated config.yaml to use user's actual JanusGraph server URL (10.21.23.105:43563)
 - Fixed SSL certificate verification bypass for external API calls using Node.js HTTPS agent
 - External API configuration now uses empty URLs to prevent connection attempts to non-existent endpoints
-- Created comprehensive SSL_CERTIFICATE_GUIDE.md for external API integration troubleshooting
 - Chat messages remain stored in memory only (never written to JanusGraph per user requirements)
 - System successfully returns simulated JanusGraph data when real connection unavailable
-- Node.js version configured at 20.19.3 (latest 20.x available) for TinkerPop compatibility
 
 **July 29, 2025 - Real JanusGraph Database Connection Implementation**
 - Installed gremlin package and @types/gremlin for real database connectivity
@@ -69,70 +66,43 @@ Preferred communication style: Simple, everyday language.
 - Ensured all documentation consistently references config.yaml app.environment property
 - Application now fully uses config.yaml for environment control with no NODE_ENV dependencies
 
-**July 28, 2025 - Complete Source Code & Thread Migration + Enhanced Gremlin Visualizer**
-- **Source Code Updates**: Updated all source codes and names throughout system:
-  - STC → SCR (System Truth Cache → Source Code Repository)
-  - CPT → Capital (Configuration Processing Tool → Capital Management Tool)
-  - CAS → CAAS (Central Authentication Service → CAAS)
-  - NVL → Navrel (Network Validation Layer → Navrel)
-  - TMC → Teamcenter (Transaction Management Center → Teamcenter)
-  - SLC → Slicwave (Service Layer Coordinator → Slicwave)
-- **Thread QName Updates**: Modified thread types with new qnames:
-  - STC_yy.STC_yy → SCR_mb.SCR_mb
-  - CPT_ → PAExchange_mb
-  - TMC now has two types: TeamcenterEbomPart_mb and Teamcenter_HWVerification_mb
-
-- **Enhanced Gremlin Visualizer with One-Click Exploration**:
-  - Created comprehensive Gremlin visualizer interface for each Source of Truth
-  - Built interactive node relationship visualization showing one level up and down connections
-  - Added dynamic source selection and node ID input with real-time graph generation
-  - Implemented simulated Gremlin traversal with realistic graph data based on source types
-  - Created API endpoint /api/gremlin/visualize/:sourceCode/:nodeId for graph data retrieval
-  - Added visual indicators for different node types and relationship levels (up/center/down)
-  - Enhanced sidebar navigation with Gremlin Visualizer menu item using GitBranch icon
-  - Built comprehensive graph data display with node properties, edges, and relationship summaries
-  - Implemented source-specific node typing (SCR_mb, PAExchange_mb, TeamcenterEbomPart_mb, etc.)
-  - Added responsive card-based layout with color-coded node levels and relationship visualization
-  - **NEW**: One-click depth exploration - click any parent or child node to navigate to its graph view
-  - **NEW**: Properties popup dialog - click "+more" to view all node properties in detailed popup
-  - **NEW**: Visual node connections with arrows showing parent-to-center-to-child relationships
-  - **NEW**: Exploration history tracking with breadcrumb navigation and one-click history navigation
-  - **NEW**: Interactive node hover effects with scaling, shadows, and cursor pointer for clickable nodes
-  - **NEW**: Enhanced user experience with exploration hints, clickable visual cues, and seamless graph traversal
+**July 28, 2025 - Enhanced Gremlin Visualizer with One-Click Exploration**
+- Created comprehensive Gremlin visualizer interface for each Source of Truth
+- Built interactive node relationship visualization showing one level up and down connections
+- Added dynamic source selection and node ID input with real-time graph generation
+- Implemented simulated Gremlin traversal with realistic graph data based on source types
+- Created API endpoint /api/gremlin/visualize/:sourceCode/:nodeId for graph data retrieval
+- Added visual indicators for different node types and relationship levels (up/center/down)
+- Enhanced sidebar navigation with Gremlin Visualizer menu item using GitBranch icon
+- Built comprehensive graph data display with node properties, edges, and relationship summaries
+- Implemented source-specific node typing (SCR_mb, PAExchange_mb, TeamcenterEbomPart_mb, etc.)
+- Added responsive card-based layout with color-coded node levels and relationship visualization
+- One-click depth exploration - click any parent or child node to navigate to its graph view
+- Properties popup dialog - click "+more" to view all node properties in detailed popup
+- Visual node connections with arrows showing parent-to-center-to-child relationships
+- Exploration history tracking with breadcrumb navigation and one-click history navigation
+- Interactive node hover effects with scaling, shadows, and cursor pointer for clickable nodes
+- Enhanced user experience with exploration hints, clickable visual cues, and seamless graph traversal
 
 **July 24, 2025 - Complete Config.yaml Migration & NODE_ENV Removal**
 - Migrated entire system from environment variables to config.yaml-based configuration
 - Removed ALL NODE_ENV references throughout application in favor of config.yaml app.environment
-- Updated all services (OpenAI, JanusGraph, GraphQL, Similarity, External APIs) to use centralized ConfigManager
-- Replaced all process.env direct access with config.yaml settings throughout server codebase
-- Updated server/index.ts to use configManager.getAppConfig().environment instead of NODE_ENV
-- Removed NODE_ENV from start-dev.js, .vscode/launch.json debugging configurations
-- Enhanced app.environment in config.yaml to support "${NODE_ENV:-development}" with fallback
-- Added external services configuration section for LISTITEMS and JANUSGRAPH_SCHEMA endpoints (URLs only, no API keys)
-- Added AI chat configuration control through config.yaml instead of environment variables
-- Updated database configuration to use config.yaml with environment variable interpolation
-- Enhanced port configuration to support both config.yaml and environment variable with proper fallback
-- Improved storage factory to use configuration-based database URL detection
+- Updated all services to use centralized ConfigManager
+- Enhanced app.environment in config.yaml to support environment variable interpolation
+- Added external services configuration section for API endpoints
+- Updated database configuration to use config.yaml with proper fallback
 - All server services now consistently use ConfigManager for environment-agnostic configuration
-- Updated console logging to reference config.yaml instead of environment variables for clarity
-- Note: package.json scripts still contain NODE_ENV (cannot be modified for safety) but application completely ignores it in favor of config.yaml
-- Simplified external services to use URL-only configuration (no API keys) as string values
-- Updated external service fetch operations to remove all authentication headers
 - Added SSL insecure support for external APIs with certificate verification bypass
-- Created comprehensive WINDOWS_SETUP.md guide with Windows-specific NODE_ENV troubleshooting
 
 **July 24, 2025 - Government-Level Knowledge Retention System**
-- Implemented secure knowledge retention system for confidential environments where external LLM data persistence is prohibited
+- Implemented secure knowledge retention system for confidential environments
 - Added comprehensive PostgreSQL-based knowledge storage with categories, priorities, tags, and audit trails
-- Created government-compliant data classification system (general, system, analysis, insights, procedures)
+- Created government-compliant data classification system
 - Built automated knowledge extraction from chat interactions with security classification
 - Added knowledge search, statistics, and access audit capabilities for compliance reporting
-- Implemented retention policies (temporary, standard, permanent) for data lifecycle management
-- Created secure API endpoints for knowledge management with full access logging
+- Implemented retention policies for data lifecycle management
 - Enhanced with specialized node relationship detection and storage for similarity analysis
 - Added automatic capture of attribute matching patterns and correlation discoveries
-- Built dedicated APIs for storing and searching node relationships with confidence scoring
-- Created UI interface for viewing node relationship discoveries and patterns
 
 **July 24, 2025 - Environment-Controlled AI Chat System**
 - Removed user toggles for AI/non-AI mode - now controlled by AI_CHAT_ENABLED environment variable
@@ -154,18 +124,7 @@ Preferred communication style: Simple, everyday language.
 - Added comprehensive help system and command discovery features
 - Integrated AI assistants into dashboard and source pages for contextual assistance
 
-**July 24, 2025 - Threads Architecture**  
-- Clarified that Teams = Threads (clusters of related data nodes)
-- Updated all terminology from "teams" to "threads" throughout system
-- Each Source of Truth contains multiple threads that cluster related data nodes
-- Thread IDs (tid) from external work items now map to specific threads
-- Updated API endpoints from /api/teams to /api/threads
-- Enhanced transaction modals to show thread assignment mapping
-- Thread names are now generated UIDs instead of descriptive names
-- Updated all mock data and storage to use UUID-format thread identifiers
-- Removed thread descriptions, threads now use complex structure with nodekey, componentNode, etc.
-- Updated thread schema to match new structure: nodekey, tqName, class, componentNode arrays
-- Thread storage now uses simplified API with threadId-only lookups
+
 
 **July 24, 2025 - Similarity Analysis & Impact Assessment**
 - Created comprehensive similarity service for cross-source analysis
@@ -185,13 +144,7 @@ Preferred communication style: Simple, everyday language.
 - Implemented toggleable AI/non-AI chat modes with automatic fallback
 - Built comprehensive JanusGraph-based similarity and impact assessment without OpenAI dependency
 
-**July 24, 2025 - Division Teams Architecture**
-- Implemented hierarchical Division Teams → Teams → Data Nodes structure
-- Updated schema to support teams within division teams concept
-- Each division team (Source of Truth) now contains multiple specialized teams
-- Teams cluster data nodes by type (cache management, config processing, etc.)
-- Updated all configurations and storage to reflect organizational hierarchy
-- Division teams manage operations through specialized sub-teams for better organization
+
 
 **July 24, 2025 - External Work Items Integration**
 - Added proxy endpoint `/api/listitems/{count}` that fetches from external service
@@ -219,13 +172,11 @@ Preferred communication style: Simple, everyday language.
 - Created environment configuration for JANUSGRAPH_GRAPHQL_URL
 - Updated storage priority: JanusGraph GraphQL > PostgreSQL > In-memory storage
 
-**December 22, 2025 - Comprehensive IDE Documentation Suite**
+**December 22, 2025 - IDE Documentation Suite**
 - Created complete setup guides for VS Code, IntelliJ IDEA, and Eclipse IDEs
-- Implemented advanced VS Code debugging with 8 specialized debug configurations
-- Built production deployment guide with Replit reference removal for confidentiality
+- Implemented advanced VS Code debugging with specialized debug configurations
 - Developed comprehensive README with multi-IDE command references
 - Added professional debugging workflow with launch.json configurations
-- Established complete documentation suite for enterprise development teams
 
 ## System Architecture
 
@@ -258,12 +209,12 @@ Preferred communication style: Simple, everyday language.
 
 ### Sources of Truth Management
 The system monitors six main Sources of Truth, each containing multiple threads that cluster related data nodes:
-- **STC (System Truth Cache)**: Source managing system operations through cache management, system records, and data repository threads
-- **CPT (Configuration Processing Tool)**: Source managing configuration operations through file management, settings, and policy threads
-- **SLC (Service Layer Coordinator)**: Source managing service operations through orchestration, endpoint, and coordination threads
-- **TMC (Transaction Management Center)**: Source managing transaction operations through processing, monitoring, and audit threads
-- **CAS (Central Authentication Service)**: Source managing authentication operations through credential, permission, and token threads
-- **NVL (Network Validation Layer)**: Source managing network operations through validation, connectivity, and monitoring threads
+- **SCR (Source Code Repository)**: Source managing system operations through cache management, system records, and data repository threads
+- **Capital (Capital Management Tool)**: Source managing configuration operations through file management, settings, and policy threads
+- **Slicwave (Slicwave)**: Source managing service operations through orchestration, endpoint, and coordination threads
+- **Teamcenter (Teamcenter)**: Source managing transaction operations through processing, monitoring, and audit threads
+- **CAAS (CAAS)**: Source managing authentication operations through credential, permission, and token threads
+- **Navrel (Navrel)**: Source managing network operations through validation, connectivity, and monitoring threads
 
 ### Core Features
 1. **Dashboard**: Real-time metrics, performance charts, system health overview

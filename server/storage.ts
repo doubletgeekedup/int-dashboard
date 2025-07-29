@@ -306,25 +306,25 @@ export class MemStorage implements IStorage {
         sourceCode: "SCR",
         title: "SCR Documentation",
         description: "Setup and configuration guide",
-        url: "https://docs.example.com/stc",
+        url: "https://docs.example.com/scr",
         category: "documentation",
         icon: "fas fa-book",
         order: 1
       },
       {
-        sourceCode: "STC",
+        sourceCode: "SCR",
         title: "API Reference",
         description: "REST endpoints and schemas",
-        url: "https://api.example.com/stc/docs",
+        url: "https://api.example.com/scr/docs",
         category: "api-reference",
         icon: "fas fa-code",
         order: 2
       },
       {
-        sourceCode: "STC",
+        sourceCode: "SCR",
         title: "Troubleshooting",
         description: "Common issues and solutions",
-        url: "https://support.example.com/stc",
+        url: "https://support.example.com/scr",
         category: "troubleshooting",
         icon: "fas fa-tools",
         order: 3

@@ -2,7 +2,17 @@
 
 ## System Overview
 
-The Integration Dashboard System is a fully functional enterprise-grade monitoring and management platform for Sources of Truth (ASOT). The system is built with React frontend, Express.js backend, and supports multiple storage backends including JanusGraph, PostgreSQL, and in-memory storage.
+The Integration Dashboard System is a fully functional enterprise-grade monitoring and management platform for Sources of Truth. The system is built with React frontend, Express.js backend, and supports multiple storage backends including JanusGraph, PostgreSQL, and in-memory storage.
+
+## Recent Updates
+
+**Documentation Cleanup (July 29, 2025)**
+- Removed all irrelevant documentation and outdated references
+- Updated all source code mappings to current terminology (SCR, Capital, Slicwave, Teamcenter, CAAS, Navrel)
+- Eliminated obsolete configuration files and guide documents
+- Consolidated and streamlined remaining documentation
+- Fixed all TypeScript LSP diagnostics
+- Updated external API integration documentation
 
 ## Current Functionality Status
 

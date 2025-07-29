@@ -1,6 +1,6 @@
 # Integration Dashboard System
 
-A comprehensive enterprise integration monitoring system featuring six Division Teams (STC, CPT, SLC, TMC, CAS, NVL) with government-level knowledge retention and intelligent node relationship detection. Each division team contains multiple specialized threads that cluster data nodes by type, providing hierarchical organization with AI-powered analysis, graph database integration, and automatic pattern recognition.
+A comprehensive enterprise integration monitoring system featuring six Sources of Truth (SCR, Capital, Slicwave, Teamcenter, CAAS, Navrel) with government-level knowledge retention and intelligent node relationship detection. Each source contains multiple specialized threads that cluster data nodes by type, providing hierarchical organization with AI-powered analysis, graph database integration, and automatic pattern recognition.
 
 ## Features
 
@@ -43,7 +43,6 @@ The application will be available at `http://localhost:5000` with in-memory stor
 
 📖 **[Complete No-Database Setup Guide](NO_DATABASE_SETUP.md)**  
 🔗 **[External API Integration Guide](EXTERNAL_API_INTEGRATION_GUIDE.md)**  
-🔗 **[External Work Items Integration](EXTERNAL_INTEGRATION_GUIDE.md)**  
 🛡️ **[Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)**  
 🪟 **[Windows Setup Guide](WINDOWS_SETUP.md)**
 
