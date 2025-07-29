@@ -47,66 +47,7 @@ janusgraph:
     schema_introspection: true
     performance_monitoring: true
 
-# Sources Configuration  
-sources:
-  scr:
-    name: "Source Code Repository"
-    description: "Source managing system operations"
-    type: "janusgraph"
-    connection_string: "ws://localhost:8182/gremlin"
-    health_check_interval: 60
-  capital:
-    name: "Capital Management Tool"
-    description: "Source managing configuration operations"
-    type: "rest_api"
-    endpoint: "http://localhost:3001/api/config"
-    division_type: "configuration_mgmt"
-    teams:
-      - team_code: "config_files"
-        name: "Configuration Files Team"
-        team_type: "file_management"
-        data_node_types: ["config_templates", "environment_configs", "deployment_configs"]
-      - team_code: "settings_mgmt"
-        name: "Settings Management Team"
-        team_type: "settings_management"
-        data_node_types: ["user_settings", "system_settings", "feature_flags"]
-      - team_code: "policy_mgmt"
-        name: "Policy Management Team"
-        team_type: "policy_management"
-        data_node_types: ["access_policies", "security_policies", "compliance_rules"]
-    health_check_interval: 60
-  slc:
-    name: "Service Layer Coordinator"
-    description: "Central node clustering service orchestration data points"
-    type: "rest_api"
-    endpoint: "http://localhost:3002/api/services"
-    cluster_type: "service_data"
-    data_point_types: ["service_definitions", "endpoints", "orchestration_rules"]
-    health_check_interval: 60
-  tmc:
-    name: "Transaction Management Center"
-    description: "Central node clustering transaction monitoring data points"
-    type: "janusgraph"
-    connection_string: "ws://localhost:8182/gremlin"
-    cluster_type: "transaction_data"
-    data_point_types: ["transactions", "work_items", "processing_states", "audit_logs"]
-    health_check_interval: 60
-  cas:
-    name: "Central Authentication Service"
-    description: "Central node clustering authentication and authorization data points"
-    type: "rest_api"
-    endpoint: "http://localhost:3003/api/auth"
-    cluster_type: "auth_data"
-    data_point_types: ["user_credentials", "permissions", "roles", "access_tokens"]
-    health_check_interval: 60
-  nvl:
-    name: "Network Validation Layer"
-    description: "Central node clustering network validation data points"
-    type: "rest_api"
-    endpoint: "http://localhost:3004/api/network"
-    cluster_type: "network_data"
-    data_point_types: ["network_configs", "validation_rules", "connectivity_tests"]
-    health_check_interval: 60
+
 
 # Database Configuration
 database:

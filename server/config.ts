@@ -49,14 +49,7 @@ interface JanusGraphConfig {
   };
 }
 
-interface SourceConfig {
-  name: string;
-  description: string;
-  type: 'janusgraph' | 'rest_api' | 'database';
-  connection_string?: string;
-  endpoint?: string;
-  health_check_interval: number;
-}
+
 
 interface DatabaseConfig {
   type: string;
@@ -99,7 +92,6 @@ interface Config {
   openai: OpenAIConfig;
   azure_openai: AzureOpenAIConfig;
   janusgraph: JanusGraphConfig;
-  sources: Record<string, SourceConfig>;
   database: DatabaseConfig;
   external: ExternalConfig;
   ai: AIConfig;
@@ -189,13 +181,7 @@ class ConfigManager {
     return this.config.janusgraph;
   }
 
-  public getSourceConfig(sourceCode: string): SourceConfig | undefined {
-    return this.config.sources[sourceCode.toLowerCase()];
-  }
 
-  public getAllSourceConfigs(): Record<string, SourceConfig> {
-    return this.config.sources;
-  }
 
   public getDatabaseConfig(): DatabaseConfig {
     return this.config.database;
@@ -242,4 +228,4 @@ class ConfigManager {
 
 // Export singleton instance
 export const configManager = new ConfigManager();
-export type { Config, AppConfig, OpenAIConfig, JanusGraphConfig, SourceConfig };
+export type { Config, AppConfig, OpenAIConfig, JanusGraphConfig };

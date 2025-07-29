@@ -14,6 +14,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 29, 2025 - Configuration Cleanup**
+- Removed unused sources configuration from config.yaml and server/config.ts
+- Sources are now dynamically generated from JanusGraph qname patterns rather than static configuration
+- Cleaned up SourceConfig interface and related unused methods from ConfigManager
+- Simplified configuration structure by removing redundant static source definitions
+
 **July 29, 2025 - External API WorkItem Creation Implementation**
 - Updated WorkItem creation to call external API endpoints instead of local processing
 - Added external.workitems.url configuration to config.yaml for API endpoint management
