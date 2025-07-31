@@ -1,5 +1,5 @@
 import { MemStorage, IStorage } from './storage';
-import { GraphQLStorage } from './storage/graphql-storage';
+
 import { configManager } from './config';
 
 let storage: IStorage;
