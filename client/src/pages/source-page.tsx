@@ -314,7 +314,7 @@ export default function SourcePage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm font-medium">
-              {((source as any).threadCount || source.recordCount || (source as any).teamCount || 0).toLocaleString()} {(source as any).threadCount ? 'Threads' : 'Records'}
+              {((source as any).threadCount || source.recordCount || 0).toLocaleString()} {(source as any).threadCount ? 'Threads' : 'Records'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">+5.2% this week</p>
           </CardContent>

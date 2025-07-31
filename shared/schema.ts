@@ -2,8 +2,8 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb, real } from 
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Division Teams (Sources of Truth)
-// Each division team contains multiple teams that cluster data nodes by type
+// Sources of Truth
+// Each source contains multiple threads that cluster data nodes by type
 export const sources = pgTable("sources", {
   id: serial("id").primaryKey(),
   code: text("code").notNull().unique(), // STC, CPT, SLC, TMC, CAS, NVL
@@ -18,8 +18,8 @@ export const sources = pgTable("sources", {
   connectionString: text("connection_string"),
   apiEndpoint: text("api_endpoint"),
   isJanusGraph: boolean("is_janus_graph").default(false),
-  divisionType: text("division_type"), // system_operations, configuration_mgmt, service_coordination, etc.
-  teamCount: integer("team_count").default(0), // number of teams in this division
+  operationType: text("operation_type"), // system_operations, configuration_mgmt, service_coordination, etc.
+  threadCount: integer("thread_count").default(0), // number of threads in this source
   config: jsonb("config").default({}),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

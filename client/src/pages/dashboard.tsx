@@ -92,7 +92,7 @@ export default function Dashboard() {
             Dashboard Overview
           </h1>
           <p className="text-brand-brown dark:text-muted-foreground">
-            Integration hub for all development team sources of truth
+            Integration hub for all enterprise sources of truth
           </p>
         </div>
         <div className="flex items-center space-x-3">

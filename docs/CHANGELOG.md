@@ -127,17 +127,17 @@ GET    /api/chat/ai-status               # AI system status and configuration
 - Intelligent node data extraction from user messages for analysis
 - Comprehensive JanusGraph-based similarity without OpenAI dependency
 
-## [1.7.0] - 2025-07-24 - Division Teams Architecture
+## [1.7.0] - 2025-07-24 - Sources of Truth Architecture
 
 ### Implemented
-- **Hierarchical Structure**: Division Teams → Teams → Data Nodes organization
-- Updated schema to support teams within division teams concept
-- Each division team (Source of Truth) now contains multiple specialized teams
-- Teams cluster data nodes by type (cache management, config processing, etc.)
+- **Hierarchical Structure**: Sources → Threads → Data Nodes organization
+- Updated schema to support threads within sources concept
+- Each source of truth now contains multiple specialized threads
+- Threads cluster data nodes by type (cache management, config processing, etc.)
 
 ### Updated
 - All configurations and storage to reflect organizational hierarchy
-- Division teams manage operations through specialized sub-teams
+- Sources manage operations through specialized threads
 - Enhanced organizational structure for better data management
 
 ## [1.6.0] - 2025-07-24 - External Work Items Integration

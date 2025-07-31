@@ -74,7 +74,7 @@ export class MemStorage implements IStorage {
       {
         code: "SCR",
         name: "Source Code Repository",
-        description: "Division team managing system operations through specialized teams",
+        description: "Source managing system operations through cache management, system records, and data repository threads",
         status: "active",
         version: "2.4.1",
         uptime: "99.9%",
@@ -82,14 +82,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 142,
         isJanusGraph: true,
         apiEndpoint: "http://localhost:8182/gremlin",
-        divisionType: "system_operations",
-        teamCount: 3,
-        config: { database: "janusgraph", traversal: "g", teams: ["cache_mgmt", "sys_records", "data_repos"] }
+        operationType: "system_operations",
+        threadCount: 3,
+        config: { database: "janusgraph", traversal: "g", threads: ["cache_mgmt", "sys_records", "data_repos"] }
       },
       {
         code: "Capital",
         name: "Capital Management Tool",
-        description: "Division team managing configuration operations through specialized teams",
+        description: "Source managing configuration operations through file management, settings, and policy threads",
         status: "active",
         version: "1.8.3",
         uptime: "98.7%",
@@ -97,14 +97,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 98,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3001/api/config",
-        divisionType: "configuration_mgmt",
-        teamCount: 3,
-        config: { timeout: 5000, retries: 3, teams: ["config_files", "settings_mgmt", "policy_mgmt"] }
+        operationType: "configuration_mgmt",
+        threadCount: 3,
+        config: { timeout: 5000, retries: 3, threads: ["config_files", "settings_mgmt", "policy_mgmt"] }
       },
       {
         code: "Slicwave",
         name: "Service Layer Coordinator",
-        description: "Division team managing service operations through specialized teams",
+        description: "Source managing service operations through orchestration, endpoint, and coordination threads",
         status: "syncing",
         version: "3.1.0",
         uptime: "99.2%",
@@ -112,14 +112,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 156,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3002/api/services",
-        divisionType: "service_coordination",
-        teamCount: 3,
-        config: { maxConcurrency: 100, teams: ["orchestration", "endpoints", "coordination"] }
+        operationType: "service_coordination",
+        threadCount: 3,
+        config: { maxConcurrency: 100, threads: ["orchestration", "endpoints", "coordination"] }
       },
       {
         code: "Teamcenter",
         name: "Transaction Management Center",
-        description: "Division team managing transaction operations through specialized teams",
+        description: "Source managing transaction operations through processing, monitoring, and audit threads",
         status: "active",
         version: "2.7.2",
         uptime: "99.5%",
@@ -127,14 +127,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 203,
         isJanusGraph: true,
         apiEndpoint: "http://localhost:8182/gremlin",
-        divisionType: "transaction_mgmt",
-        teamCount: 4,
-        config: { database: "transactions", traversal: "tx", teams: ["processing", "monitoring", "audit", "work_items"] }
+        operationType: "transaction_mgmt",
+        threadCount: 4,
+        config: { database: "transactions", traversal: "tx", threads: ["processing", "monitoring", "audit", "work_items"] }
       },
       {
         code: "CAAS",
         name: "Central Authentication Service",
-        description: "Division team managing authentication operations through specialized teams",
+        description: "Source managing authentication operations through credential, permission, and token threads",
         status: "active",
         version: "4.2.1",
         uptime: "99.8%",
@@ -142,14 +142,14 @@ export class MemStorage implements IStorage {
         avgResponseTime: 67,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3003/api/auth",
-        divisionType: "authentication_mgmt",
-        teamCount: 4,
-        config: { tokenExpiry: 3600, refreshEnabled: true, teams: ["credentials", "permissions", "roles", "tokens"] }
+        operationType: "authentication_mgmt",
+        threadCount: 4,
+        config: { tokenExpiry: 3600, refreshEnabled: true, threads: ["credentials", "permissions", "roles", "tokens"] }
       },
       {
         code: "Navrel",
         name: "Network Validation Layer",
-        description: "Division team managing network operations through specialized teams",
+        description: "Source managing network operations through validation, connectivity, and monitoring threads",
         status: "active",
         version: "1.9.4",
         uptime: "98.9%",
@@ -157,9 +157,9 @@ export class MemStorage implements IStorage {
         avgResponseTime: 178,
         isJanusGraph: false,
         apiEndpoint: "http://localhost:3004/api/network",
-        divisionType: "network_operations",
-        teamCount: 3,
-        config: { pingInterval: 30, healthCheckTimeout: 10, teams: ["validation", "connectivity", "monitoring"] }
+        operationType: "network_operations",
+        threadCount: 3,
+        config: { pingInterval: 30, healthCheckTimeout: 10, threads: ["validation", "connectivity", "monitoring"] }
       }
     ];
 
