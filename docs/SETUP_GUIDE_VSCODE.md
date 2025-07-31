@@ -777,11 +777,11 @@ npm run format
 - **Run and Debug**: Ctrl+Shift+D
 - **Extensions**: Ctrl+Shift+X
 
-## Step 13: Team Development
+## Step 13: Collaborative Development
 
 ### 13.1 Shared Settings
 - Commit `.vscode/` folder (except settings.json for personal preferences)
-- Use workspace settings for team-wide configurations
+- Use workspace settings for project-wide configurations
 - Share extensions.json for recommended extensions
 
 ### 13.2 Code Reviews

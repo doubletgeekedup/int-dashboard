@@ -454,7 +454,7 @@ If you have the source code from another location:
 - Configure **Content Assist** for better autocomplete
 
 ### 9.3 Version Control
-1. Right-click project → **Team → Share Project**
+1. Right-click project → **Git → Share Project**
 2. Select **Git** → **Use or create repository in parent folder**
 3. Create `.gitignore`:
 ```
@@ -542,7 +542,7 @@ npm start
 - Set up problem filters for known issues
 - Use **Problems** view to track issues
 
-### 13.3 Team Development
+### 13.3 Collaborative Development
 - Configure Git preferences
 - Set up code review workflows
 - Share Eclipse project settings via version control

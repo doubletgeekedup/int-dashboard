@@ -88,10 +88,10 @@ GET    /api/chat/ai-status               # AI system status and configuration
 ## [1.9.0] - 2025-07-24 - Threads Architecture Update
 
 ### Changed
-- **Terminology Clarification**: Teams = Threads (clusters of related data nodes)
-- Updated all terminology from "teams" to "threads" throughout system
-- Thread IDs (tid) from external work items now map to specific threads
-- API endpoints changed from `/api/teams` to `/api/threads`
+- **Terminology Clarification**: Threads = clusters of related data nodes
+- Updated all terminology to use "threads" throughout system
+- Thread IDs (tid) from external work items now map to specific threads  
+- API endpoints use `/api/threads` structure
 
 ### Enhanced
 - Thread names are now generated UIDs instead of descriptive names
@@ -190,7 +190,7 @@ GET    /api/chat/ai-status               # AI system status and configuration
 
 ### Enhanced
 - Professional debugging workflow with launch.json configurations
-- Complete documentation suite for enterprise development teams
+- Complete documentation suite for enterprise development
 - IDE-specific optimization and configuration guides
 
 ## [1.2.0] - Frontend Architecture & Component System

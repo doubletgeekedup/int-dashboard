@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { configManager, type OpenAIConfig } from '../config.js';
+import { SimilarityService } from "./similarity-service";
+import { JanusGraphSimilarityService } from "./janusgraph-similarity";
 import type { IStorage } from "../storage";
 
 export interface ChatMessage {
@@ -23,12 +25,20 @@ export interface AnalysisResult {
 export class OpenAIService {
   private client: OpenAI;
   private config: OpenAIConfig;
+  private similarityService: SimilarityService | null = null;
+  private janusGraphSimilarityService: JanusGraphSimilarityService | null = null;
 
   constructor() {
     this.config = configManager.getOpenAIConfig();
     this.client = new OpenAI({
       apiKey: this.config.api_key
     });
+  }
+
+  // Initialize similarity services with storage
+  initializeSimilarityServices(storage: IStorage) {
+    this.similarityService = new SimilarityService(storage);
+    this.janusGraphSimilarityService = new JanusGraphSimilarityService(storage);
   }
 
   async chatCompletion(messages: ChatMessage[], storage?: IStorage): Promise<string> {

@@ -14,20 +14,6 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
-**July 31, 2025 - Code Cleanup and Teams/Divisions Terminology Removal**
-- Removed unused services: similarity-service.ts, janusgraph-similarity.ts, graphql-storage.ts, graphql-client.ts, health.ts
-- Deleted unused frontend component: mini-assistant.tsx
-- Simplified non-ai-chat.ts to basic system information only (removed complex similarity analysis)
-- Cleaned up OpenAI service imports and removed unused similarity service references
-- Removed all references to "teams" and "divisions" terminology throughout codebase
-- Updated schema: divisionType → operationType, teamCount → threadCount, teams → threads
-- Updated source descriptions to use "threads" instead of "teams" and "source" instead of "division team"
-- Fixed frontend references to teamCount and division team terminology
-- Updated documentation to use Sources → Threads → Data Nodes hierarchy
-- Resolved most TypeScript LSP diagnostics across the codebase
-- All knowledge page functionality confirmed working: add entry, search, node relationships, analytics
-- System now returns proper number data types instead of strings for all statistics
-
 **July 29, 2025 - Configuration Cleanup**
 - Removed unused sources configuration from config.yaml and server/config.ts
 - Sources are now dynamically generated from JanusGraph qname patterns rather than static configuration
