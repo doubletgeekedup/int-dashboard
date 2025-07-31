@@ -23,17 +23,24 @@ Preferred communication style: Simple, everyday language.
 - Enhanced error messages to show available node types and sources when search fails
 - System now properly responds "Found X SCR nodes" when querying for SCR nodes
 
-**July 31, 2025 - Sample Data Update: STC to SCR**
-- Updated all sample data references from "STC" to "SCR" throughout the entire codebase
-- Changed schema.ts: TQName examples now use "SCR_yy.SCR_yy" instead of "STC_yy.STC_yy"
-- Updated server/storage.ts: Thread sample data changed from STC Thread to SCR Thread
-- Fixed frontend display: Knowledge base and source pages now show "SCR - Source Code Repository"
-- Updated server routes: Mock work items now use SCR_yy.SCR_yy qName pattern
-- Changed GraphQL service: All mock data now uses SCR instead of STC
-- Updated non-AI chat service: Random source selection uses SCR instead of STC
-- Fixed documentation: All guides and changelogs now reference SCR consistently
-- System now uses proper SCR terminology matching the actual source naming convention
-- Complete consistency achieved: SCR, CPT, SLC, TMC, CAS, NVL throughout all files
+**July 31, 2025 - Production-Ready Documentation Suite**
+- Created comprehensive production deployment guide with platform-agnostic instructions
+- Developed complete system overview documentation for enterprise environments
+- Built detailed installation guide covering multiple deployment methods (standard, Docker, Kubernetes)
+- Removed all platform-specific references to ensure confidentiality and portability
+- Enhanced configuration management documentation with security best practices
+- Added comprehensive monitoring, maintenance, and troubleshooting procedures
+- Created load balancer configurations (Nginx) and service management (systemd/Windows)
+- Included performance testing procedures and security validation steps
+
+**July 31, 2025 - SCR Node Counting Bug Fix**
+- Fixed critical chat system bug where SCR node queries returned zero results despite nodes existing
+- Enhanced node counting logic to properly detect both node types AND source codes in user queries
+- Improved source detection with comprehensive tqName pattern matching (SCR, PAExchange, Teamcenter, etc.)
+- Added source count tracking alongside node type counting for better user feedback
+- Updated chat responses to show both "By Node Type" and "By Source" breakdowns when no matches found
+- Enhanced node description function with more robust source code identification
+- System now correctly identifies and counts SCR nodes when users ask "how many SCR nodes"
 
 ## Recent Changes (Latest)
 
