@@ -458,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             csWorkItemDetails: {
               csWorkItemType: "IMPORT",
-              qName: "STC_yy.STC_yy",
+              qName: "SCR_yy.SCR_yy",
               tid: "b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e"
             },
             csWorkItemProcessInfo: {

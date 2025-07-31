@@ -168,10 +168,10 @@ export class MemStorage implements IStorage {
     // Initialize default threads with the new structure
     const currentTime = [2025, 7, 24, 7, 30, 0, 0];
     const defaultThreads: InsertThread[] = [
-      // STC Thread
+      // SCR Thread
       {
         nodekey: "Thread@id@b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e",
-        tqName: "STC_yy.STC_yy",
+        tqName: "SCR_yy.SCR_yy",
         class: "Thread",
         threadId: "b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e",
         componentNode: [{

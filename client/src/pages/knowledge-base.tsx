@@ -449,7 +449,7 @@ export default function KnowledgeBasePage() {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="">None</SelectItem>
-                                <SelectItem value="STC">STC - System Truth Cache</SelectItem>
+                                <SelectItem value="SCR">SCR - Source Code Repository</SelectItem>
                                 <SelectItem value="CPT">CPT - Configuration Processing Tool</SelectItem>
                                 <SelectItem value="SLC">SLC - Service Layer Coordinator</SelectItem>
                                 <SelectItem value="TMC">TMC - Transaction Management Center</SelectItem>

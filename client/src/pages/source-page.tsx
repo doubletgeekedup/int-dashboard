@@ -403,7 +403,7 @@ export default function SourcePage() {
                                           // Determine source from TQName pattern
                                           const threadId = item.csWorkItemDetails.tid;
                                           const sourceMapping = {
-                                            'b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e': 'STC Thread (STC_yy.STC_yy)',
+                                            'b7a9c4e2-8f3d-4b1a-9e5c-2d7f8a1b3c6e': 'SCR Thread (SCR_yy.SCR_yy)',
                                             'a1d4f7b9-3e8c-4b2a-7f9d-1c5e8a4b7f2c': 'CPT Thread (CPT_config.CPT_config)',
                                             'f6c9d2a8-4b7e-4a1f-9d2c-8e5a1b4f7c9d': 'TMC Thread (TMC_transaction.TMC_transaction)',
                                             'e7f4a9b2-1d8c-4e5a-9f2b-7c4d1a8e5f9c': 'SLC Thread (SLC_service.SLC_service)',

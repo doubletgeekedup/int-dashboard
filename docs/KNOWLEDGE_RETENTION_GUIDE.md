@@ -66,7 +66,7 @@ curl -X POST http://localhost:5000/api/knowledge \
     "category": "system",
     "priority": "high",
     "tags": ["database", "performance", "configuration"],
-    "sourceCode": "STC",
+    "sourceCode": "SCR",
     "isConfidential": true,
     "retentionPolicy": "permanent"
   }'
@@ -280,7 +280,7 @@ const response = await fetch('/api/chat/analyze-and-store', {
     message: userMessage,
     response: aiResponse,
     sessionId: currentSession,
-    sourceCode: 'STC'
+    sourceCode: 'SCR'
   })
 });
 ```

@@ -223,7 +223,7 @@ GET    /api/chat/ai-status               # AI system status and configuration
 ## [1.0.0] - Initial Release
 
 ### Core System
-- **Six Sources of Truth**: STC, CPT, SLC, TMC, CAS, NVL monitoring
+- **Six Sources of Truth**: SCR, CPT, SLC, TMC, CAS, NVL monitoring
 - **Dashboard**: Real-time metrics and performance visualization
 - **Transaction Monitoring**: Live transaction tracking and analysis
 - **Bulletin System**: Announcements and system updates

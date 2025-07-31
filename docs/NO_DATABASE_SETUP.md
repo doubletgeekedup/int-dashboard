@@ -53,7 +53,7 @@ The application will start with:
 
 ### ✅ Full Functionality
 - **Dashboard**: Complete with metrics and charts
-- **6 Sources of Truth**: STC, CPT, SLC, TMC, CAS, NVL
+- **6 Sources of Truth**: SCR, CPT, SLC, TMC, CAS, NVL
 - **Real-time Updates**: WebSocket communication  
 - **Bulletins**: System announcements and updates
 - **Transactions**: Monitoring and logging

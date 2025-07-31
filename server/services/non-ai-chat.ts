@@ -464,7 +464,7 @@ export class NonAIChatService {
           description: `Mock node similar to ${nodeData.id || nodeData.type || 'target'}`
         },
         impactLevel: ['LOW', 'MEDIUM', 'HIGH'][Math.floor(Math.random() * 3)],
-        sourceCode: ['STC', 'CPT', 'SLC'][Math.floor(Math.random() * 3)]
+        sourceCode: ['SCR', 'CPT', 'SLC'][Math.floor(Math.random() * 3)]
       });
     }
 
@@ -620,7 +620,7 @@ export class NonAIChatService {
     
     // If no real dependencies found, generate some mock dependencies for demonstration
     if (dependencies.length === 0) {
-      const systems = ['STC', 'CPT', 'SLC', 'TMC', 'CAS', 'NVL'];
+      const systems = ['SCR', 'CPT', 'SLC', 'TMC', 'CAS', 'NVL'];
       for (let i = 0; i < 3; i++) {
         dependencies.push({
           nodeId: `${nodeId.split('@')[0] || 'DEP'}@id@${Math.floor(Math.random() * 1000) + 100}`,

@@ -14,6 +14,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 31, 2025 - Sample Data Update: STC to SCR**
+- Updated all sample data references from "STC" to "SCR" throughout the entire codebase
+- Changed schema.ts: TQName examples now use "SCR_yy.SCR_yy" instead of "STC_yy.STC_yy"
+- Updated server/storage.ts: Thread sample data changed from STC Thread to SCR Thread
+- Fixed frontend display: Knowledge base and source pages now show "SCR - Source Code Repository"
+- Updated server routes: Mock work items now use SCR_yy.SCR_yy qName pattern
+- Changed GraphQL service: All mock data now uses SCR instead of STC
+- Updated non-AI chat service: Random source selection uses SCR instead of STC
+- Fixed documentation: All guides and changelogs now reference SCR consistently
+- System now uses proper SCR terminology matching the actual source naming convention
+- Complete consistency achieved: SCR, CPT, SLC, TMC, CAS, NVL throughout all files
+
+## Recent Changes (Latest)
+
 **July 29, 2025 - Configuration Cleanup**
 - Removed unused sources configuration from config.yaml and server/config.ts
 - Sources are now dynamically generated from JanusGraph qname patterns rather than static configuration

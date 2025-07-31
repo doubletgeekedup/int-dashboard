@@ -441,7 +441,7 @@ export class GraphQLJanusClient {
           {
             id: "1",
             properties: {
-              code: "STC",
+              code: "SCR",
               name: "System Truth Cache",
               description: "Primary data repository and caching layer for system state management",
               status: "active",
@@ -478,7 +478,7 @@ export class GraphQLJanusClient {
       return {
         vertex: {
           id: "1",
-          properties: { code: "STC", name: "System Truth Cache", status: "active" },
+          properties: { code: "SCR", name: "Source Code Repository", status: "active" },
           similarNodes: [
             {
               id: "4",
@@ -500,7 +500,7 @@ export class GraphQLJanusClient {
         vertices: [
           {
             id: "1",
-            properties: { code: "STC", status: "active", recordCount: 1200000 },
+            properties: { code: "SCR", status: "active", recordCount: 1200000 },
             similarByAttributes: [
               {
                 node: { id: "4", properties: { code: "TMC", status: "active", recordCount: 2100000 } },
@@ -526,7 +526,7 @@ export class GraphQLJanusClient {
             count: 5,
             avgMetrics: { recordCount: 1038000, avgResponseTime: 135, uptime: "99.2%" },
             nodes: [
-              { id: "1", properties: { code: "STC", name: "System Truth Cache", status: "active" } },
+              { id: "1", properties: { code: "SCR", name: "Source Code Repository", status: "active" } },
               { id: "2", properties: { code: "CPT", name: "Configuration Processing Tool", status: "active" } }
             ]
           },

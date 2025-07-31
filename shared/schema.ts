@@ -6,7 +6,7 @@ import { z } from "zod";
 // Each source contains multiple threads that cluster data nodes by type
 export const sources = pgTable("sources", {
   id: serial("id").primaryKey(),
-  code: text("code").notNull().unique(), // STC, CPT, SLC, TMC, CAS, NVL
+  code: text("code").notNull().unique(), // SCR, CPT, SLC, TMC, CAS, NVL
   name: text("name").notNull(),
   description: text("description").notNull(),
   status: text("status").notNull().default("active"), // active, inactive, syncing, error
@@ -30,7 +30,7 @@ export const sources = pgTable("sources", {
 export const threads = pgTable("threads", {
   id: serial("id").primaryKey(),
   nodekey: text("nodekey").notNull(), // Thread@id@{threadId}
-  tqName: text("tq_name").notNull(), // TQName like "STC_yy.STC_yy"
+  tqName: text("tq_name").notNull(), // TQName like "SCR_yy.SCR_yy"
   class: text("class").notNull().default("Thread"),
   threadId: text("thread_id").notNull(), // this corresponds to the 'tid' field from external work items
   componentNode: jsonb("component_node").notNull(), // Array of component nodes
@@ -185,7 +185,7 @@ export const knowledgeEntries = pgTable("knowledge_entries", {
   category: text("category").notNull().default("general"), // system, analysis, insights, procedures
   priority: text("priority").notNull().default("medium"), // low, medium, high, critical
   tags: text("tags").array().default([]),
-  sourceCode: text("source_code"), // STC, CPT, SLC, TMC, CAS, NVL
+  sourceCode: text("source_code"), // SCR, CPT, SLC, TMC, CAS, NVL
   sessionId: text("session_id"),
   isConfidential: boolean("is_confidential").default(false),
   retentionPolicy: text("retention_policy").default("permanent"), // temporary, standard, permanent
