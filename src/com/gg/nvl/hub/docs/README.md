@@ -1,36 +1,75 @@
-# Documentation
+# Documentation - Integration Dashboard Hub
+## Package: com.gg.nvl.hub.docs
 
-This folder contains all the documentation for the Integration Dashboard System.
+Complete documentation for the Integration Dashboard Hub system.
 
-## Setup Guides
+## Quick Navigation
 
-### IDE Setup
-- **[VS Code Setup Guide](SETUP_GUIDE_VSCODE.md)** - Complete VS Code configuration with debugging
-- **[IntelliJ IDEA Setup Guide](SETUP_GUIDE_INTELLIJ.md)** - Professional IntelliJ setup with tools
-- **[Eclipse Setup Guide](SETUP_GUIDE_ECLIPSE.md)** - Eclipse configuration for JavaScript/TypeScript
+### Setup & Installation
+- [Setup Guide](SETUP_GUIDE.md) - Complete installation and configuration guide
+- [IDE Setup Guides](guides/) - VS Code, IntelliJ IDEA, and Eclipse configuration
 
-### Installation & Configuration
-- **[No-Database Setup Guide](NO_DATABASE_SETUP.md)** - Quick start without database requirements
-- **[Windows Setup Guide](WINDOWS_SETUP.md)** - Windows-specific setup instructions
-- **[Quick Setup Guide](QUICK_SETUP.md)** - Rapid deployment instructions
+### Deployment
+- [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md) - Complete production deployment instructions
+- [Deployment Checklist](DEPLOYMENT_CHECKLIST.md) - Step-by-step deployment verification
+- [Debug Guide](DEBUG_GUIDE.md) - Troubleshooting and debugging procedures
 
-## Feature Documentation
+### Architecture & Development
+- [Package Structure](../PACKAGE_STRUCTURE.md) - Java package organization guide
+- [Directory Structure](../DIRECTORY_STRUCTURE.md) - Complete directory layout
+- [API Documentation](api/) - REST API and WebSocket documentation
 
-### Core Features
-- **[External API Integration Guide](EXTERNAL_API_INTEGRATION_GUIDE.md)** - Complete external API configuration
-- **[Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)** - Secure knowledge management system
+### External Integrations
+- [JanusGraph Setup](REAL_JANUSGRAPH_SETUP.md) - Graph database configuration
+- [External APIs](guides/EXTERNAL_API_INTEGRATION.md) - WorkItem and external service integration
 
-### Project Information
-- **[Current Project Status](CURRENT_PROJECT_STATUS.md)** - Latest system status and functionality
-- **[Change Log](CHANGELOG.md)** - Historical changes and updates
+### Features & Usage
+- [Chat System](guides/CHAT_SYSTEM.md) - AI and non-AI chat functionality
+- [Knowledge Retention](guides/KNOWLEDGE_RETENTION.md) - Government-level data storage
+- [Similarity Analysis](guides/SIMILARITY_ANALYSIS.md) - Cross-source analysis capabilities
+
+## Document Organization
+
+```
+docs/
+├── README.md                           # This file - documentation index
+├── PRODUCTION_DEPLOYMENT_GUIDE.md     # Production deployment instructions
+├── DEPLOYMENT_CHECKLIST.md            # Deployment verification checklist
+├── SETUP_GUIDE.md                     # Development environment setup
+├── DEBUG_GUIDE.md                     # Troubleshooting and debugging
+├── REAL_JANUSGRAPH_SETUP.md          # JanusGraph database configuration
+├── guides/                            # Detailed feature guides
+│   ├── IDE_SETUP_GUIDES/             # IDE-specific setup instructions
+│   ├── CHAT_SYSTEM.md                # Chat functionality documentation
+│   ├── KNOWLEDGE_RETENTION.md        # Knowledge storage system
+│   ├── SIMILARITY_ANALYSIS.md        # Analysis capabilities
+│   └── EXTERNAL_API_INTEGRATION.md   # External service integration
+└── api/                              # API documentation
+    ├── REST_API.md                   # REST endpoint documentation
+    ├── WEBSOCKET_API.md             # WebSocket event documentation
+    └── GRAPHQL_API.md               # GraphQL schema documentation
+```
 
 ## Getting Started
 
-1. **Quick Start**: Follow the [No-Database Setup Guide](NO_DATABASE_SETUP.md) for immediate setup
-2. **IDE Setup**: Choose your preferred IDE guide for detailed development environment configuration
-3. **External APIs**: Configure external integrations using the [External API Integration Guide](EXTERNAL_API_INTEGRATION_GUIDE.md)
-4. **Knowledge System**: Set up secure data retention with the [Government Knowledge Retention Guide](KNOWLEDGE_RETENTION_GUIDE.md)
+1. **New to the project?** Start with the [Setup Guide](SETUP_GUIDE.md)
+2. **Ready to deploy?** Follow the [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)
+3. **Need to debug?** Check the [Debug Guide](DEBUG_GUIDE.md)
+4. **Want to understand architecture?** Review the [Package Structure](../PACKAGE_STRUCTURE.md)
 
-## Documentation Updates
+## Contributing to Documentation
 
-All documentation is regularly updated to reflect the current system state. Last updated: July 29, 2025.
+When adding new documentation:
+
+1. Follow the established structure and naming conventions
+2. Update this index file with new document references
+3. Use clear, concise language suitable for technical and non-technical users
+4. Include practical examples and code snippets where relevant
+5. Cross-reference related documents for easy navigation
+
+## Support
+
+For questions about documentation or system usage:
+- Check the relevant guide first
+- Review troubleshooting sections
+- Consult API documentation for technical integration details
