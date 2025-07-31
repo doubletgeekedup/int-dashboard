@@ -787,9 +787,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Fallback to memory storage only if JanusGraph has no data
         console.log('No bulletin data found in JanusGraph, using memory storage fallback');
         const bulletins = await storage.getBulletins(
-          limit ? parseInt(limit as string) : undefined,
-          priority as string,
-          category as string
+          req.query.limit ? parseInt(req.query.limit as string) : undefined,
+          req.query.priority as string,
+          req.query.category as string
         );
         res.json(bulletins);
       }
@@ -798,9 +798,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fallback to memory storage on JanusGraph error
       try {
         const bulletins = await storage.getBulletins(
-          limit ? parseInt(limit as string) : undefined,
-          priority as string,
-          category as string
+          req.query.limit ? parseInt(req.query.limit as string) : undefined,
+          req.query.priority as string,
+          req.query.category as string
         );
         res.json(bulletins);
       } catch (fallbackError) {
@@ -1193,6 +1193,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const knowledgeData = insertKnowledgeEntrySchema.parse(req.body);
       const entry = await knowledgeRetentionService.storeKnowledge({
         ...knowledgeData,
+        tags: knowledgeData.tags || undefined,
+        sourceCode: knowledgeData.sourceCode || undefined,
+        sessionId: knowledgeData.sessionId || undefined,
+        isConfidential: knowledgeData.isConfidential || false,
+        retentionPolicy: knowledgeData.retentionPolicy || undefined,
         metadata: {
           ipAddress: req.ip,
           userAgent: req.get('User-Agent')

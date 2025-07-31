@@ -173,7 +173,7 @@ export class KnowledgeRetentionService {
 
     return {
       entries,
-      total: total[0].count
+      total: Number(total[0].count)
     };
   }
 
@@ -312,20 +312,26 @@ export class KnowledgeRetentionService {
     // Build response object
     const byCategory: Record<string, number> = {};
     categoryStats.forEach(stat => {
-      byCategory[stat.category] = stat.count;
+      byCategory[stat.category] = Number(stat.count);
     });
 
     const byPriority: Record<string, number> = {};
     priorityStats.forEach(stat => {
-      byPriority[stat.priority] = stat.count;
+      byPriority[stat.priority] = Number(stat.count);
     });
 
+    // Convert activity counts to numbers
+    const convertedActivity = recentActivity.map(activity => ({
+      date: activity.date,
+      count: Number(activity.count)
+    }));
+
     return {
-      total: totalResult[0]?.count || 0,
-      confidential: confidentialResult[0]?.count || 0,
+      total: Number(totalResult[0]?.count || 0),
+      confidential: Number(confidentialResult[0]?.count || 0),
       byCategory,
       byPriority,
-      recentActivity
+      recentActivity: convertedActivity
     };
   }
 
@@ -662,7 +668,6 @@ export class KnowledgeRetentionService {
     const results = await this.searchKnowledge({
       searchText: searchText.trim(),
       category: "analysis",
-      tags: searchTags,
       limit: query.limit || 50
     });
     
@@ -670,7 +675,7 @@ export class KnowledgeRetentionService {
     if (query.minConfidence) {
       const confidenceThreshold = query.minConfidence * 100;
       results.entries = results.entries.filter(entry => {
-        const confidenceTag = entry.tags.find(tag => tag.startsWith('confidence-'));
+        const confidenceTag = (entry.tags || []).find(tag => tag.startsWith('confidence-'));
         if (confidenceTag) {
           const confidence = parseInt(confidenceTag.split('-')[1]);
           return confidence >= confidenceThreshold;
