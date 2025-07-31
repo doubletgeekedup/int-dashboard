@@ -14,6 +14,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest)
 
+**July 31, 2025 - Fixed SCR Node Detection in Chat System**
+- Fixed node counting logic in non-AI chat service to properly detect SCR nodes
+- Enhanced source detection to handle various tqName patterns (SCR_yy, PAExchange_mb, etc.)
+- Added comprehensive source code mapping for all thread types
+- Chat now correctly identifies and counts nodes by both type (HH, CF, TX) and source (SCR, CPT, TMC)
+- Fixed node description responses to show accurate source information
+- Enhanced error messages to show available node types and sources when search fails
+- System now properly responds "Found X SCR nodes" when querying for SCR nodes
+
 **July 31, 2025 - Sample Data Update: STC to SCR**
 - Updated all sample data references from "STC" to "SCR" throughout the entire codebase
 - Changed schema.ts: TQName examples now use "SCR_yy.SCR_yy" instead of "STC_yy.STC_yy"

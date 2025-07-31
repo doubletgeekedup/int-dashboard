@@ -650,6 +650,7 @@ export class NonAIChatService {
       let totalCount = 0;
       let typeCount = 0;
       const typeCounts: { [key: string]: number } = {};
+      const sourceCounts: { [key: string]: number } = {};
       
       // Count nodes in threads
       for (const thread of threads) {
@@ -659,11 +660,26 @@ export class NonAIChatService {
               for (const node of cNode.node) {
                 totalCount++;
                 
-                // Extract type from node ID (e.g., HH@id@934 -> HH)
-                const nodeType = node.id?.split('@')[0] || node.nodeKey?.split('@')[0] || 'Unknown';
-                typeCounts[nodeType] = (typeCounts[nodeType] || 0) + 1;
+                // Extract node type and source information
+                const nodeType = node.type || node.class || node.id?.split('@')[0] || node.nodeKey?.split('@')[0] || 'Unknown';
                 
-                if (requestedType && nodeType === requestedType) {
+                // More comprehensive source detection
+                let sourceCode = 'Unknown';
+                if (thread.tqName) {
+                  if (thread.tqName.includes('SCR')) sourceCode = 'SCR';
+                  else if (thread.tqName.includes('PAExchange')) sourceCode = 'CPT';
+                  else if (thread.tqName.includes('Teamcenter')) sourceCode = 'TMC';
+                  else if (thread.tqName.includes('SLC')) sourceCode = 'SLC';
+                  else if (thread.tqName.includes('CAS')) sourceCode = 'CAS';
+                  else if (thread.tqName.includes('NVL')) sourceCode = 'NVL';
+                  else sourceCode = thread.tqName.split('_')[0];
+                }
+                
+                typeCounts[nodeType] = (typeCounts[nodeType] || 0) + 1;
+                sourceCounts[sourceCode] = (sourceCounts[sourceCode] || 0) + 1;
+                
+                // Check if user is asking for nodes by type OR by source
+                if (requestedType && (nodeType === requestedType || sourceCode === requestedType)) {
                   typeCount++;
                 }
               }
@@ -680,17 +696,38 @@ export class NonAIChatService {
           response += "• No thread data is configured\n";
           response += "• JanusGraph database is not connected\n";
           response += "• Using in-memory storage without sample data\n";
+        } else if (typeCount === 0) {
+          response += `No ${requestedType} nodes found. Available options:\n\n`;
+          response += "By Node Type:\n";
+          Object.entries(typeCounts)
+            .sort(([,a], [,b]) => b - a)
+            .forEach(([type, count]) => {
+              response += `• ${type}: ${count} nodes\n`;
+            });
+          response += "\nBy Source:\n";
+          Object.entries(sourceCounts)
+            .sort(([,a], [,b]) => b - a)
+            .forEach(([source, count]) => {
+              response += `• ${source}: ${count} nodes\n`;
+            });
         }
       } else {
         response = `Node count summary:\n\n`;
         response += `Total nodes: ${totalCount}\n\n`;
         
         if (Object.keys(typeCounts).length > 0) {
-          response += "Breakdown by type:\n";
+          response += "Breakdown by node type:\n";
           Object.entries(typeCounts)
             .sort(([,a], [,b]) => b - a)
             .forEach(([type, count]) => {
               response += `• ${type}: ${count} nodes\n`;
+            });
+          
+          response += "\nBreakdown by source:\n";
+          Object.entries(sourceCounts)
+            .sort(([,a], [,b]) => b - a)
+            .forEach(([source, count]) => {
+              response += `• ${source}: ${count} nodes\n`;
             });
         } else {
           response += "No nodes currently loaded. Try connecting to JanusGraph or loading thread data.\n";
@@ -699,7 +736,7 @@ export class NonAIChatService {
       
       return {
         response,
-        data: { totalCount, typeCount, typeCounts, requestedType },
+        data: { totalCount, typeCount, typeCounts, sourceCounts, requestedType },
         analysisType: 'node_count'
       };
     } catch (error) {
@@ -765,7 +802,18 @@ export class NonAIChatService {
       
       if (threadInfo) {
         response += `• Thread: ${threadInfo.tqName || 'Unknown'}\n`;
-        response += `• Source: ${threadInfo.tqName?.split('_')[0] || 'Unknown'}\n`;
+        // More comprehensive source detection
+        let sourceCode = 'Unknown';
+        if (threadInfo.tqName) {
+          if (threadInfo.tqName.includes('SCR')) sourceCode = 'SCR';
+          else if (threadInfo.tqName.includes('PAExchange')) sourceCode = 'CPT';
+          else if (threadInfo.tqName.includes('Teamcenter')) sourceCode = 'TMC';
+          else if (threadInfo.tqName.includes('SLC')) sourceCode = 'SLC';
+          else if (threadInfo.tqName.includes('CAS')) sourceCode = 'CAS';
+          else if (threadInfo.tqName.includes('NVL')) sourceCode = 'NVL';
+          else sourceCode = threadInfo.tqName.split('_')[0];
+        }
+        response += `• Source: ${sourceCode}\n`;
       }
       
       // Add any other available properties
