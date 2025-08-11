@@ -8,7 +8,7 @@ import { configManager } from "./config";
 import { NonAIChatService } from "./services/non-ai-chat";
 import { 
   insertBulletinSchema, insertChatMessageSchema, 
-  insertTransactionSchema, insertKnowledgeLinkSchema 
+  insertTransactionSchema, insertKnowledgeLinkSchema, insertWorkItemSchema 
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -58,7 +58,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
       // Get dashboard stats from JanusGraph using qname-based filtering
-      const qnamePatterns = ["SCR_mb", "PAExchange_mb", "SLC_", "Teamcenter", "CAS_", "NVL_"];
+      const qnamePatterns = ["SCR_mb", "PAExchange_mb", "SLC_", "Teamcenter", "GTS_", "IA_"];
       const [sourceCounts, transactionsQuery, threadsQuery] = await Promise.all([
         Promise.all(qnamePatterns.map(pattern => 
           janusGraphService.executeQuery({ query: `g.V().has('qname', containing('${pattern}')).count()` })
@@ -116,11 +116,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Define the Sources of Truth with their qname patterns
       const sourcesOfTruth = [
         { code: "SCR", name: "Source Code Repository", qnamePattern: "SCR_mb" },
-        { code: "Capital", name: "Capital Management Tool", qnamePattern: "PAExchange_mb" },
-        { code: "Slicwave", name: "Slicwave", qnamePattern: "SLC_" },
-        { code: "Teamcenter", name: "Teamcenter", qnamePattern: "Teamcenter" },
-        { code: "CAAS", name: "CAAS", qnamePattern: "CAS_" },
-        { code: "Navrel", name: "Navrel", qnamePattern: "NVL_" }
+        { code: "Capital", name: "Capital", qnamePattern: "PAExchange_mb" },
+        { code: "Slicwave", name: "Service Layer Coordinator", qnamePattern: "SLC_" },
+        { code: "Teamcenter", name: "Transaction Management Center", qnamePattern: "Teamcenter" },
+        { code: "GTS", name: "Global Transaction System", qnamePattern: "GTS_" },
+        { code: "IA", name: "Impact Assessment", qnamePattern: "IA_" }
       ];
 
       const sources = [];
@@ -238,8 +238,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "CAPITAL": "PAExchange_mb", 
         "SLICWAVE": "SLC_",
         "TEAMCENTER": "Teamcenter",
-        "CAAS": "CAS_",
-        "NAVREL": "NVL_"
+        "GTS": "GTS_",
+        "IA": "IA_"
       };
       
       const pattern = qnamePatterns[sourceCode as keyof typeof qnamePatterns];
@@ -604,6 +604,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching transaction details:", error);
       res.status(500).json({ error: "Failed to fetch transaction details" });
+    }
+  });
+
+  // WorkItems API Routes - Get recent work items for a source
+  app.get("/api/workitems/:sourceCode", async (req, res) => {
+    try {
+      const sourceCode = req.params.sourceCode.toUpperCase();
+      const limit = parseInt(req.query.limit as string) || 5;
+      
+      // Only allow the 4 sources that have work items sections
+      const allowedSources = ['GTS', 'PAEXCHANGE', 'TEAMCENTER', 'SCR'];
+      
+      if (!allowedSources.includes(sourceCode)) {
+        return res.status(404).json({ error: "Work items not available for this source" });
+      }
+
+      // Get work items from storage
+      const workItems = await storage.getWorkItems(sourceCode === 'PAEXCHANGE' ? 'PAExchange' : sourceCode, limit);
+      
+      // Transform to the required structure
+      const formattedWorkItems = workItems.map(item => ({
+        description: item.description,
+        threadId: item.threadId,
+        status: item.status,
+        type: item.type,
+        results: item.results,
+        startTime: item.startTime,
+        endTime: item.endTime
+      }));
+      
+      res.json(formattedWorkItems);
+    } catch (error) {
+      console.error("Error fetching work items:", error);
+      res.status(500).json({ error: "Failed to fetch work items" });
     }
   });
 

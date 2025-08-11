@@ -464,7 +464,7 @@ export class NonAIChatService {
           description: `Mock node similar to ${nodeData.id || nodeData.type || 'target'}`
         },
         impactLevel: ['LOW', 'MEDIUM', 'HIGH'][Math.floor(Math.random() * 3)],
-        sourceCode: ['SCR', 'CPT', 'SLC'][Math.floor(Math.random() * 3)]
+        sourceCode: ['SCR', 'Capital', 'Slicwave', 'Teamcenter', 'GTS', 'IA'][Math.floor(Math.random() * 6)]
       });
     }
 
@@ -620,7 +620,7 @@ export class NonAIChatService {
     
     // If no real dependencies found, generate some mock dependencies for demonstration
     if (dependencies.length === 0) {
-      const systems = ['SCR', 'CPT', 'SLC', 'TMC', 'CAS', 'NVL'];
+      const systems = ['SCR', 'Capital', 'Slicwave', 'Teamcenter', 'GTS', 'IA'];
       for (let i = 0; i < 3; i++) {
         dependencies.push({
           nodeId: `${nodeId.split('@')[0] || 'DEP'}@id@${Math.floor(Math.random() * 1000) + 100}`,
@@ -667,11 +667,11 @@ export class NonAIChatService {
                 let sourceCode = 'Unknown';
                 if (thread.tqName) {
                   if (thread.tqName.includes('SCR')) sourceCode = 'SCR';
-                  else if (thread.tqName.includes('PAExchange')) sourceCode = 'CPT';
-                  else if (thread.tqName.includes('Teamcenter')) sourceCode = 'TMC';
-                  else if (thread.tqName.includes('SLC')) sourceCode = 'SLC';
-                  else if (thread.tqName.includes('CAS')) sourceCode = 'CAS';
-                  else if (thread.tqName.includes('NVL')) sourceCode = 'NVL';
+                  else if (thread.tqName.includes('PAExchange')) sourceCode = 'Capital';
+                  else if (thread.tqName.includes('Teamcenter')) sourceCode = 'Teamcenter';
+                  else if (thread.tqName.includes('SLC')) sourceCode = 'Slicwave';
+                  else if (thread.tqName.includes('GTS')) sourceCode = 'GTS';
+                  else if (thread.tqName.includes('IA_')) sourceCode = 'IA';
                   else sourceCode = thread.tqName.split('_')[0];
                 }
                 
@@ -806,11 +806,11 @@ export class NonAIChatService {
         let sourceCode = 'Unknown';
         if (threadInfo.tqName) {
           if (threadInfo.tqName.includes('SCR')) sourceCode = 'SCR';
-          else if (threadInfo.tqName.includes('PAExchange')) sourceCode = 'CPT';
-          else if (threadInfo.tqName.includes('Teamcenter')) sourceCode = 'TMC';
-          else if (threadInfo.tqName.includes('SLC')) sourceCode = 'SLC';
-          else if (threadInfo.tqName.includes('CAS')) sourceCode = 'CAS';
-          else if (threadInfo.tqName.includes('NVL')) sourceCode = 'NVL';
+          else if (threadInfo.tqName.includes('PAExchange')) sourceCode = 'Capital';
+          else if (threadInfo.tqName.includes('Teamcenter')) sourceCode = 'Teamcenter';
+          else if (threadInfo.tqName.includes('SLC')) sourceCode = 'Slicwave';
+          else if (threadInfo.tqName.includes('GTS')) sourceCode = 'GTS';
+          else if (threadInfo.tqName.includes('IA_')) sourceCode = 'IA';
           else sourceCode = threadInfo.tqName.split('_')[0];
         }
         response += `• Source: ${sourceCode}\n`;
