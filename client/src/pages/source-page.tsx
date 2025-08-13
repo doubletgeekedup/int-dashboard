@@ -158,22 +158,16 @@ export default function SourcePage() {
   const filteredWorkItems = useMemo(() => {
     if (!workItems) return [];
     return workItems.filter((item: WorkItem) => {
-      // If thread ID is provided, search by thread ID only
-      if (workItemsThreadId) {
-        return item.id.toLowerCase().includes(workItemsThreadId.toLowerCase()) ||
-               item.csWorkItemDetails.tid.toLowerCase().includes(workItemsThreadId.toLowerCase());
-      }
+      // Filter by thread ID if specified
+      const threadIdMatch = !workItemsThreadId || 
+        item.id.toLowerCase().includes(workItemsThreadId.toLowerCase()) ||
+        item.csWorkItemDetails.tid.toLowerCase().includes(workItemsThreadId.toLowerCase());
       
-      // If date is provided (and no thread ID), search by date on endTime or lastModified
-      if (workItemsDate) {
-        const targetDate = format(workItemsDate, 'yyyy-MM-dd');
-        const endTimeMatch = item.endTime && format(new Date(item.endTime), 'yyyy-MM-dd') === targetDate;
-        const lastModifiedMatch = item.lastModified && format(new Date(item.lastModified), 'yyyy-MM-dd') === targetDate;
-        return endTimeMatch || lastModifiedMatch;
-      }
+      // Filter by date if specified
+      const dateMatch = !workItemsDate || 
+        format(new Date(item.createDate), 'yyyy-MM-dd') === format(workItemsDate, 'yyyy-MM-dd');
       
-      // If no filters, show all
-      return true;
+      return threadIdMatch && dateMatch;
     });
   }, [workItems, workItemsThreadId, workItemsDate]);
 
