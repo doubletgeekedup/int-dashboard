@@ -1,12 +1,13 @@
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { LLMChat } from "@/components/chat/llm-chat";
 import { PerformanceChart } from "@/components/charts/performance-chart";
 import { DataTable } from "@/components/data/data-table";
@@ -23,7 +24,10 @@ import {
   Clock,
   Server,
   Eye,
-  Plus
+  Plus,
+  Search,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import type { Source, KnowledgeLink, PerformanceMetric } from "@shared/schema";
 
@@ -80,6 +84,13 @@ export default function SourcePage() {
   // Create WorkItem dialog state
   const [isCreateWorkItemOpen, setIsCreateWorkItemOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>("");
+  
+  // Pagination and search states
+  const [workItemsPage, setWorkItemsPage] = useState(1);
+  const [workItemsSearch, setWorkItemsSearch] = useState("");
+  const [asotPage, setAsotPage] = useState(1);
+  const [asotSearch, setAsotSearch] = useState("");
+  const itemsPerPage = 5;
 
   const { data: source, isLoading: sourceLoading } = useQuery<Source & { stats: any }>({
     queryKey: ["/api/sources", code],
@@ -136,6 +147,40 @@ export default function SourcePage() {
     },
     enabled: Boolean(code && supportsAsotWorkList),
   });
+
+  // Filtered and paginated work items
+  const filteredWorkItems = useMemo(() => {
+    if (!workItems) return [];
+    return workItems.filter((item: WorkItem) => 
+      item.id.toLowerCase().includes(workItemsSearch.toLowerCase()) ||
+      item.csWorkItemDetails.tid.toLowerCase().includes(workItemsSearch.toLowerCase()) ||
+      new Date(item.createDate).toLocaleDateString().includes(workItemsSearch.toLowerCase())
+    );
+  }, [workItems, workItemsSearch]);
+
+  const paginatedWorkItems = useMemo(() => {
+    const startIndex = (workItemsPage - 1) * itemsPerPage;
+    return filteredWorkItems.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredWorkItems, workItemsPage, itemsPerPage]);
+
+  const workItemsPageCount = Math.ceil(filteredWorkItems.length / itemsPerPage);
+
+  // Filtered and paginated ASOT work items
+  const filteredAsotItems = useMemo(() => {
+    if (!asotWorkItems) return [];
+    return asotWorkItems.filter((item: AsotWorkItem) => 
+      item.threadId.toLowerCase().includes(asotSearch.toLowerCase()) ||
+      item.description.toLowerCase().includes(asotSearch.toLowerCase()) ||
+      (item.startTime && new Date(item.startTime).toLocaleDateString().includes(asotSearch.toLowerCase()))
+    );
+  }, [asotWorkItems, asotSearch]);
+
+  const paginatedAsotItems = useMemo(() => {
+    const startIndex = (asotPage - 1) * itemsPerPage;
+    return filteredAsotItems.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredAsotItems, asotPage, itemsPerPage]);
+
+  const asotPageCount = Math.ceil(filteredAsotItems.length / itemsPerPage);
 
   const handleRefresh = async () => {
     if (!code) return;
@@ -383,21 +428,35 @@ export default function SourcePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Work Items</CardTitle>
-                <Button variant="link" size="sm" onClick={handleExport}>
-                  Export CSV
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search by ID or date..."
+                      value={workItemsSearch}
+                      onChange={(e) => setWorkItemsSearch(e.target.value)}
+                      className="pl-10 w-48"
+                    />
+                  </div>
+                  <Button variant="link" size="sm" onClick={handleExport}>
+                    Export CSV
+                  </Button>
+                </div>
               </div>
             </CardHeader>
-            <CardContent>
-              {workItems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No recent transactions found</p>
-                  <p className="text-sm">There haven't been any transactions in a while</p>
+            <CardContent className="h-96 flex flex-col">
+              {filteredWorkItems.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>{workItemsSearch ? 'No matching work items found' : 'No recent transactions found'}</p>
+                    <p className="text-sm">{workItemsSearch ? 'Try adjusting your search terms' : "There haven't been any transactions in a while"}</p>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {workItems.map((item: WorkItem) => (
+                <>
+                  <div className="flex-1 space-y-3 overflow-y-auto">
+                    {paginatedWorkItems.map((item: WorkItem) => (
                     <div
                       key={item.id}
                       className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
@@ -477,12 +536,43 @@ export default function SourcePage() {
                             <p className="text-xs text-muted-foreground mt-1">
                               {Math.round((item.lastModified - item.createDate) / 1000)}s duration
                             </p>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                  
+                  {/* Pagination for Work Items */}
+                  {workItemsPageCount > 1 && (
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <p className="text-sm text-muted-foreground">
+                        Showing {((workItemsPage - 1) * itemsPerPage) + 1} to {Math.min(workItemsPage * itemsPerPage, filteredWorkItems.length)} of {filteredWorkItems.length} items
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setWorkItemsPage(p => Math.max(1, p - 1))}
+                          disabled={workItemsPage === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </Button>
+                        <span className="text-sm">
+                          Page {workItemsPage} of {workItemsPageCount}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setWorkItemsPage(p => Math.min(workItemsPageCount, p + 1))}
+                          disabled={workItemsPage === workItemsPageCount}
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -490,25 +580,46 @@ export default function SourcePage() {
 
         {/* ASOT Work List (for supported sources) */}
         {supportsAsotWorkList && (
-          <Card>
-            <CardHeader>
-              <CardTitle>ASOT Work List</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Active Source of Truth work items and thread extractions
-              </p>
-            </CardHeader>
-            <CardContent>
-              {asotLoading ? (
-                <div className="text-center py-4">Loading ASOT work items...</div>
-              ) : !asotWorkItems || asotWorkItems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No ASOT work items found</p>
-                  <p className="text-sm">No recent thread extractions or work items</p>
+          <div className="grid gap-6">{/* Move to same grid area as Recent Work Items */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>ASOT Work List</CardTitle>
+                  <div className="flex items-center space-x-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="Search by thread ID or date..."
+                        value={asotSearch}
+                        onChange={(e) => setAsotSearch(e.target.value)}
+                        className="pl-10 w-48"
+                      />
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {asotWorkItems.map((item: AsotWorkItem, index: number) => (
+                <p className="text-sm text-muted-foreground">
+                  Active Source of Truth work items and thread extractions
+                </p>
+              </CardHeader>
+              <CardContent className="h-96 flex flex-col">
+                {asotLoading ? (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      Loading ASOT work items...
+                    </div>
+                  </div>
+                ) : filteredAsotItems.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>{asotSearch ? 'No matching ASOT work items found' : 'No ASOT work items found'}</p>
+                      <p className="text-sm">{asotSearch ? 'Try adjusting your search terms' : 'No recent thread extractions or work items'}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex-1 space-y-3 overflow-y-auto">
+                      {paginatedAsotItems.map((item: AsotWorkItem, index: number) => (
                     <div
                       key={`${item.threadId}-${index}`}
                       className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
@@ -553,11 +664,43 @@ export default function SourcePage() {
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      ))}
+                    </div>
+                    
+                    {/* Pagination for ASOT Work Items */}
+                    {asotPageCount > 1 && (
+                      <div className="flex items-center justify-between pt-4 border-t">
+                        <p className="text-sm text-muted-foreground">
+                          Showing {((asotPage - 1) * itemsPerPage) + 1} to {Math.min(asotPage * itemsPerPage, filteredAsotItems.length)} of {filteredAsotItems.length} items
+                        </p>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAsotPage(p => Math.max(1, p - 1))}
+                            disabled={asotPage === 1}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </Button>
+                          <span className="text-sm">
+                            Page {asotPage} of {asotPageCount}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAsotPage(p => Math.min(asotPageCount, p + 1))}
+                            disabled={asotPage === asotPageCount}
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Sidebar */}
