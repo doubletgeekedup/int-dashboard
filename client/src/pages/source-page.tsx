@@ -576,11 +576,9 @@ export default function SourcePage() {
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* ASOT Work List (for supported sources) */}
-        {supportsAsotWorkList && (
-          <div className="grid gap-6">{/* Move to same grid area as Recent Work Items */}
+          {/* ASOT Work List (for supported sources) */}
+          {supportsAsotWorkList && (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -700,8 +698,8 @@ export default function SourcePage() {
                 )}
               </CardContent>
             </Card>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
