@@ -157,6 +157,9 @@ export type InsertKnowledgeLink = z.infer<typeof insertKnowledgeLinkSchema>;
 export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = z.infer<typeof insertPerformanceMetricSchema>;
 
+export type AsotWorkItem = typeof asotWorkItems.$inferSelect;
+export type InsertAsotWorkItem = z.infer<typeof insertAsotWorkItemSchema>;
+
 // API Response Types
 export type DashboardStats = {
   totalIntegrations: number;
@@ -177,6 +180,20 @@ export type SourceStats = {
 
 export type SelectKnowledgeLink = typeof knowledgeLinks.$inferSelect;
 
+// ASOT Work List for specific sources (GTS, Capital, TeamCenter, SCR)
+export const asotWorkItems = pgTable("asot_work_items", {
+  id: serial("id").primaryKey(),
+  description: text("description").notNull(),
+  threadId: text("thread_id").notNull(),
+  status: text("status").notNull(), // COMPLETED, PROCESSING, FAILED
+  type: text("type").notNull(), // THREAD_EXTRACT
+  results: text("results"),
+  startTime: integer("start_time"), // Unix timestamp in milliseconds
+  endTime: integer("end_time"), // Unix timestamp in milliseconds
+  sourceCode: text("source_code").notNull(), // GTS, Capital, Teamcenter, SCR
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Knowledge Retention Tables for Government-Level Security
 export const knowledgeEntries = pgTable("knowledge_entries", {
   id: serial("id").primaryKey(),
@@ -185,7 +202,7 @@ export const knowledgeEntries = pgTable("knowledge_entries", {
   category: text("category").notNull().default("general"), // system, analysis, insights, procedures
   priority: text("priority").notNull().default("medium"), // low, medium, high, critical
   tags: text("tags").array().default([]),
-  sourceCode: text("source_code"), // SCR, CPT, SLC, TMC, CAS, NVL
+  sourceCode: text("source_code"), // SCR, PAExchange, SLC, TMC, GTS, Impact Assessment
   sessionId: text("session_id"),
   isConfidential: boolean("is_confidential").default(false),
   retentionPolicy: text("retention_policy").default("permanent"), // temporary, standard, permanent
@@ -216,6 +233,11 @@ export const knowledgeAccess = pgTable("knowledge_access", {
 });
 
 // Zod schemas for knowledge entries
+export const insertAsotWorkItemSchema = createInsertSchema(asotWorkItems).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertKnowledgeEntrySchema = createInsertSchema(knowledgeEntries).omit({
   id: true,
   createdAt: true,

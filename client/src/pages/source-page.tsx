@@ -43,22 +43,33 @@ interface WorkItem {
   lastModified: number;
 }
 
+// ASOT Work Item interface
+interface AsotWorkItem {
+  description: string;
+  threadId: string;
+  status: string;
+  type: string;
+  results: string;
+  startTime: number | null;
+  endTime: number | null;
+}
+
 const sourceIcons = {
   SCR: Database,
-  CAPITAL: Server,
+  PAEXCHANGE: Server,
   SLICWAVE: Activity,
   TEAMCENTER: TrendingUp,
-  CAAS: Server,
-  NAVREL: Activity,
+  GTS: Server,
+  "IMPACT ASSESSMENT": Activity,
 };
 
 const sourceColors = {
   SCR: "bg-blue-500",
-  CAPITAL: "bg-green-500", 
+  PAEXCHANGE: "bg-green-500", 
   SLICWAVE: "bg-purple-500",
   TEAMCENTER: "bg-orange-500",
-  CAAS: "bg-red-500",
-  NAVREL: "bg-indigo-500",
+  GTS: "bg-red-500",
+  "IMPACT ASSESSMENT": "bg-indigo-500",
 };
 
 export default function SourcePage() {
@@ -111,6 +122,19 @@ export default function SourcePage() {
       return response.json();
     },
     enabled: !!code,
+  });
+
+  // Check if this source supports ASOT Work List
+  const supportsAsotWorkList = code && ['GTS', 'PAEXCHANGE', 'TEAMCENTER', 'SCR'].includes(code.toUpperCase());
+
+  // ASOT Work List query
+  const { data: asotWorkItems = [], isLoading: asotLoading } = useQuery<AsotWorkItem[]>({
+    queryKey: ["/api/asot-worklist", code],
+    queryFn: async () => {
+      const response = await fetch(`/api/asot-worklist/${code}?limit=10`);
+      return response.json();
+    },
+    enabled: Boolean(code && supportsAsotWorkList),
   });
 
   const handleRefresh = async () => {
@@ -180,7 +204,7 @@ export default function SourcePage() {
   // Create WorkItem mutation
   const createWorkItemMutation = useMutation({
     mutationFn: async (projectName: string) => {
-      return apiRequest('/api/workitems', {
+      const response = await fetch('/api/workitems', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,6 +216,7 @@ export default function SourcePage() {
           priority: 'medium'
         }),
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -462,6 +487,78 @@ export default function SourcePage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* ASOT Work List (for supported sources) */}
+        {supportsAsotWorkList && (
+          <Card>
+            <CardHeader>
+              <CardTitle>ASOT Work List</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Active Source of Truth work items and thread extractions
+              </p>
+            </CardHeader>
+            <CardContent>
+              {asotLoading ? (
+                <div className="text-center py-4">Loading ASOT work items...</div>
+              ) : !asotWorkItems || asotWorkItems.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No ASOT work items found</p>
+                  <p className="text-sm">No recent thread extractions or work items</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {asotWorkItems.map((item: AsotWorkItem, index: number) => (
+                    <div
+                      key={`${item.threadId}-${index}`}
+                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-mono text-sm text-brand-orange">{item.threadId}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {item.type}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {item.description}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {item.results}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <Badge 
+                              variant={
+                                item.status === 'COMPLETED' ? 'default' :
+                                item.status === 'FAILED' ? 'destructive' :
+                                'secondary'
+                              }
+                            >
+                              {item.status}
+                            </Badge>
+                            {item.startTime && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(item.startTime).toLocaleString()}
+                              </p>
+                            )}
+                            {item.startTime && item.endTime && (
+                              <p className="text-xs text-muted-foreground">
+                                {Math.round((item.endTime - item.startTime) / 1000)}s duration
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Sidebar */}
         <div className="space-y-6">

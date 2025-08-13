@@ -221,7 +221,7 @@ export class SimilarityService {
     }
 
     // Source-specific recommendations
-    const affectedSources = [...new Set(similarNodes.map(n => n.sourceCode))];
+    const affectedSources = Array.from(new Set(similarNodes.map(n => n.sourceCode)));
     if (affectedSources.length > 2) {
       recommendations.push(`🌐 Multi-system impact detected across ${affectedSources.join(', ')} - coordinate with all systems`);
     }
@@ -443,11 +443,11 @@ export class SimilarityService {
    */
   private extractSourceFromTQName(tqName: string): string {
     if (tqName.startsWith('SCR_')) return 'SCR';
-    if (tqName.startsWith('PAExchange_')) return 'CAPITAL';
+    if (tqName.startsWith('PAExchange_')) return 'PAEXCHANGE';
     if (tqName.startsWith('Teamcenter')) return 'TEAMCENTER';
     if (tqName.startsWith('SLC_')) return 'SLICWAVE';
-    if (tqName.startsWith('CAS_')) return 'CAAS';
-    if (tqName.startsWith('NVL_')) return 'NAVREL';
+    if (tqName.startsWith('CAS_')) return 'GTS';
+    if (tqName.startsWith('NVL_')) return 'IMPACT ASSESSMENT';
     return 'UNKNOWN';
   }
 }

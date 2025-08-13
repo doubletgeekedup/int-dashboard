@@ -1,9 +1,9 @@
 import { 
-  sources, threads, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics,
+  sources, threads, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics, asotWorkItems,
   type Source, type InsertSource, type Thread, type InsertThread, type Bulletin, type InsertBulletin,
   type ChatMessage, type InsertChatMessage, type Transaction, type InsertTransaction,
   type KnowledgeLink, type InsertKnowledgeLink, type PerformanceMetric, type InsertPerformanceMetric,
-  type DashboardStats, type SourceStats
+  type AsotWorkItem, type InsertAsotWorkItem, type DashboardStats, type SourceStats
 } from "@shared/schema";
 
 export interface IStorage {
@@ -45,6 +45,10 @@ export interface IStorage {
   // Dashboard Stats
   getDashboardStats(): Promise<DashboardStats>;
   getSourceStats(sourceCode: string): Promise<SourceStats>;
+  
+  // ASOT Work Items (for GTS, Capital, Teamcenter, SCR)
+  getAsotWorkItems(sourceCode: string, limit?: number): Promise<AsotWorkItem[]>;
+  createAsotWorkItem(workItem: InsertAsotWorkItem): Promise<AsotWorkItem>;
 }
 
 export class MemStorage implements IStorage {
@@ -55,6 +59,7 @@ export class MemStorage implements IStorage {
   private knowledgeLinks: Map<number, KnowledgeLink> = new Map();
   private performanceMetrics: Map<number, PerformanceMetric> = new Map();
   private threads: Map<number, Thread> = new Map();
+  private asotWorkItems: Map<number, AsotWorkItem> = new Map();
   
   private currentSourceId = 1;
   private currentBulletinId = 1;
@@ -63,6 +68,7 @@ export class MemStorage implements IStorage {
   private currentKnowledgeLinkId = 1;
   private currentMetricId = 1;
   private currentThreadId = 1;
+  private currentAsotWorkItemId = 1;
 
   constructor() {
     this.initializeDefaultData();
@@ -87,8 +93,8 @@ export class MemStorage implements IStorage {
         config: { database: "janusgraph", traversal: "g", threads: ["cache_mgmt", "sys_records", "data_repos"] }
       },
       {
-        code: "Capital",
-        name: "Capital Management Tool",
+        code: "PAExchange",
+        name: "Capital",
         description: "Source managing configuration operations through file management, settings, and policy threads",
         status: "active",
         version: "1.8.3",
@@ -132,8 +138,8 @@ export class MemStorage implements IStorage {
         config: { database: "transactions", traversal: "tx", threads: ["processing", "monitoring", "audit", "work_items"] }
       },
       {
-        code: "CAAS",
-        name: "Central Authentication Service",
+        code: "GTS",
+        name: "Global Transaction Service",
         description: "Source managing authentication operations through credential, permission, and token threads",
         status: "active",
         version: "4.2.1",
@@ -147,8 +153,8 @@ export class MemStorage implements IStorage {
         config: { tokenExpiry: 3600, refreshEnabled: true, threads: ["credentials", "permissions", "roles", "tokens"] }
       },
       {
-        code: "Navrel",
-        name: "Network Validation Layer",
+        code: "Impact Assessment",
+        name: "Impact Assessment",
         description: "Source managing network operations through validation, connectivity, and monitoring threads",
         status: "active",
         version: "1.9.4",
@@ -574,6 +580,26 @@ export class MemStorage implements IStorage {
       responseTime: `${source.avgResponseTime}ms`,
       uptime: source.uptime
     };
+  }
+
+  // ASOT Work Items (for GTS, Capital, Teamcenter, SCR)
+  async getAsotWorkItems(sourceCode: string, limit: number = 10): Promise<AsotWorkItem[]> {
+    const items = Array.from(this.asotWorkItems.values())
+      .filter(item => item.sourceCode === sourceCode)
+      .sort((a, b) => (b.startTime || 0) - (a.startTime || 0))
+      .slice(0, limit);
+    return items;
+  }
+
+  async createAsotWorkItem(insertAsotWorkItem: InsertAsotWorkItem): Promise<AsotWorkItem> {
+    const id = this.currentAsotWorkItemId++;
+    const asotWorkItem: AsotWorkItem = {
+      ...insertAsotWorkItem,
+      id,
+      createdAt: new Date()
+    };
+    this.asotWorkItems.set(id, asotWorkItem);
+    return asotWorkItem;
   }
 }
 

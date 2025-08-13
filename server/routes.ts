@@ -116,11 +116,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Define the Sources of Truth with their qname patterns
       const sourcesOfTruth = [
         { code: "SCR", name: "Source Code Repository", qnamePattern: "SCR_mb" },
-        { code: "Capital", name: "Capital Management Tool", qnamePattern: "PAExchange_mb" },
+        { code: "PAExchange", name: "Capital", qnamePattern: "PAExchange_mb" },
         { code: "Slicwave", name: "Slicwave", qnamePattern: "SLC_" },
         { code: "Teamcenter", name: "Teamcenter", qnamePattern: "Teamcenter" },
-        { code: "CAAS", name: "CAAS", qnamePattern: "CAS_" },
-        { code: "Navrel", name: "Navrel", qnamePattern: "NVL_" }
+        { code: "GTS", name: "Global Transaction Service", qnamePattern: "CAS_" },
+        { code: "Impact Assessment", name: "Impact Assessment", qnamePattern: "NVL_" }
       ];
 
       const sources = [];
@@ -235,11 +235,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the corresponding qname pattern for this source
       const qnamePatterns = {
         "SCR": "SCR_mb",
-        "CAPITAL": "PAExchange_mb", 
+        "PAEXCHANGE": "PAExchange_mb", 
         "SLICWAVE": "SLC_",
         "TEAMCENTER": "Teamcenter",
-        "CAAS": "CAS_",
-        "NAVREL": "NVL_"
+        "GTS": "CAS_",
+        "IMPACT ASSESSMENT": "NVL_"
       };
       
       const pattern = qnamePatterns[sourceCode as keyof typeof qnamePatterns];
@@ -604,6 +604,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching transaction details:", error);
       res.status(500).json({ error: "Failed to fetch transaction details" });
+    }
+  });
+
+  // ASOT Work List endpoint for GTS, Capital, TeamCenter, SCR
+  app.get("/api/asot-worklist/:sourceCode", async (req, res) => {
+    try {
+      const { sourceCode } = req.params;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      // Validate that source code supports ASOT Work List
+      const supportedSources = ['GTS', 'CAPITAL', 'PAEXCHANGE', 'TEAMCENTER', 'SCR'];
+      if (!supportedSources.includes(sourceCode.toUpperCase())) {
+        return res.status(404).json({ 
+          error: "ASOT Work List not available", 
+          message: `Source ${sourceCode} does not support ASOT Work List feature` 
+        });
+      }
+
+      // Get external endpoint URL from config
+      const externalConfig = configManager.getExternalConfig();
+      const externalAsotUrl = externalConfig.asot?.url;
+      
+      if (!externalAsotUrl) {
+        console.warn("External ASOT URL not configured in config.yaml, using mock data");
+        
+        // Mock ASOT Work List data when external endpoint is not available
+        const mockAsotItems = [
+          {
+            description: `${sourceCode} thread extract`,
+            threadId: "f4g5g-ty4g5-gy45g",
+            status: "COMPLETED",
+            type: "THREAD_EXTRACT",
+            results: "Created the thread",
+            startTime: Date.now() - 360000,
+            endTime: Date.now() - 300000
+          },
+          {
+            description: `${sourceCode} data synchronization`,
+            threadId: "h7j8k-mn9p0-qr2st",
+            status: "COMPLETED", 
+            type: "THREAD_EXTRACT",
+            results: "Successfully synchronized data nodes",
+            startTime: Date.now() - 720000,
+            endTime: Date.now() - 600000
+          },
+          {
+            description: `${sourceCode} component validation`,
+            threadId: "u4v5w-xy6z7-ab8cd",
+            status: "PROCESSING",
+            type: "THREAD_EXTRACT", 
+            results: "Validation in progress",
+            startTime: Date.now() - 180000,
+            endTime: null
+          }
+        ].slice(0, limit);
+
+        // Store in memory storage for consistency
+        for (const item of mockAsotItems) {
+          await storage.createAsotWorkItem({
+            ...item,
+            sourceCode: sourceCode.toUpperCase(),
+            startTime: item.startTime,
+            endTime: item.endTime
+          });
+        }
+        
+        return res.json(mockAsotItems);
+      }
+
+      // Call external ASOT API
+      const response = await fetch(`${externalAsotUrl}/${sourceCode}?limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.error(`External ASOT API error (${response.status}): ${response.statusText}`);
+        // Return mock data on external API failure
+        const fallbackItems = [
+          {
+            description: `${sourceCode} thread extract (fallback)`,
+            threadId: "fallback-thread-id",
+            status: "COMPLETED",
+            type: "THREAD_EXTRACT",
+            results: "External API unavailable - fallback data",
+            startTime: Date.now() - 300000,
+            endTime: Date.now() - 240000
+          }
+        ];
+        return res.json(fallbackItems);
+      }
+
+      const asotData = await response.json();
+      
+      // Store successful responses in storage
+      if (Array.isArray(asotData)) {
+        for (const item of asotData) {
+          await storage.createAsotWorkItem({
+            ...item,
+            sourceCode: sourceCode.toUpperCase()
+          });
+        }
+      }
+      
+      res.json(asotData);
+      
+    } catch (error) {
+      console.error("Error fetching ASOT Work List:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch ASOT Work List",
+        message: "External service unavailable"
+      });
     }
   });
 
