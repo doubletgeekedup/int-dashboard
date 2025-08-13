@@ -435,7 +435,7 @@ export default function SourcePage() {
                       placeholder="Search by ID or date..."
                       value={workItemsSearch}
                       onChange={(e) => setWorkItemsSearch(e.target.value)}
-                      className="pl-10 w-48"
+                      className="pl-10 w-64"
                     />
                   </div>
                   <Button variant="link" size="sm" onClick={handleExport}>
@@ -590,7 +590,7 @@ export default function SourcePage() {
                         placeholder="Search by thread ID or date..."
                         value={asotSearch}
                         onChange={(e) => setAsotSearch(e.target.value)}
-                        className="pl-10 w-48"
+                        className="pl-10 w-64"
                       />
                     </div>
                   </div>
