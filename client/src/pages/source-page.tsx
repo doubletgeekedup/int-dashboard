@@ -8,6 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { LLMChat } from "@/components/chat/llm-chat";
 import { PerformanceChart } from "@/components/charts/performance-chart";
 import { DataTable } from "@/components/data/data-table";
@@ -87,9 +91,11 @@ export default function SourcePage() {
   
   // Pagination and search states
   const [workItemsPage, setWorkItemsPage] = useState(1);
-  const [workItemsSearch, setWorkItemsSearch] = useState("");
+  const [workItemsThreadId, setWorkItemsThreadId] = useState("");
+  const [workItemsDate, setWorkItemsDate] = useState<Date | undefined>();
   const [asotPage, setAsotPage] = useState(1);
-  const [asotSearch, setAsotSearch] = useState("");
+  const [asotThreadId, setAsotThreadId] = useState("");
+  const [asotDate, setAsotDate] = useState<Date | undefined>();
   const itemsPerPage = 5;
 
   const { data: source, isLoading: sourceLoading } = useQuery<Source & { stats: any }>({
@@ -151,12 +157,19 @@ export default function SourcePage() {
   // Filtered and paginated work items
   const filteredWorkItems = useMemo(() => {
     if (!workItems) return [];
-    return workItems.filter((item: WorkItem) => 
-      item.id.toLowerCase().includes(workItemsSearch.toLowerCase()) ||
-      item.csWorkItemDetails.tid.toLowerCase().includes(workItemsSearch.toLowerCase()) ||
-      new Date(item.createDate).toLocaleDateString().includes(workItemsSearch.toLowerCase())
-    );
-  }, [workItems, workItemsSearch]);
+    return workItems.filter((item: WorkItem) => {
+      // Filter by thread ID if specified
+      const threadIdMatch = !workItemsThreadId || 
+        item.id.toLowerCase().includes(workItemsThreadId.toLowerCase()) ||
+        item.csWorkItemDetails.tid.toLowerCase().includes(workItemsThreadId.toLowerCase());
+      
+      // Filter by date if specified
+      const dateMatch = !workItemsDate || 
+        format(new Date(item.createDate), 'yyyy-MM-dd') === format(workItemsDate, 'yyyy-MM-dd');
+      
+      return threadIdMatch && dateMatch;
+    });
+  }, [workItems, workItemsThreadId, workItemsDate]);
 
   const paginatedWorkItems = useMemo(() => {
     const startIndex = (workItemsPage - 1) * itemsPerPage;
@@ -168,12 +181,19 @@ export default function SourcePage() {
   // Filtered and paginated ASOT work items
   const filteredAsotItems = useMemo(() => {
     if (!asotWorkItems) return [];
-    return asotWorkItems.filter((item: AsotWorkItem) => 
-      item.threadId.toLowerCase().includes(asotSearch.toLowerCase()) ||
-      item.description.toLowerCase().includes(asotSearch.toLowerCase()) ||
-      (item.startTime && new Date(item.startTime).toLocaleDateString().includes(asotSearch.toLowerCase()))
-    );
-  }, [asotWorkItems, asotSearch]);
+    return asotWorkItems.filter((item: AsotWorkItem) => {
+      // Filter by thread ID if specified
+      const threadIdMatch = !asotThreadId || 
+        item.threadId.toLowerCase().includes(asotThreadId.toLowerCase()) ||
+        item.description.toLowerCase().includes(asotThreadId.toLowerCase());
+      
+      // Filter by date if specified
+      const dateMatch = !asotDate || 
+        (item.startTime && format(new Date(item.startTime), 'yyyy-MM-dd') === format(asotDate, 'yyyy-MM-dd'));
+      
+      return threadIdMatch && dateMatch;
+    });
+  }, [asotWorkItems, asotThreadId, asotDate]);
 
   const paginatedAsotItems = useMemo(() => {
     const startIndex = (asotPage - 1) * itemsPerPage;
@@ -429,14 +449,47 @@ export default function SourcePage() {
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Work Items</CardTitle>
                 <div className="flex items-center space-x-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Search by ID or date..."
-                      value={workItemsSearch}
-                      onChange={(e) => setWorkItemsSearch(e.target.value)}
-                      className="pl-10 w-64"
-                    />
+                  <div className="flex items-center space-x-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="Thread ID..."
+                        value={workItemsThreadId}
+                        onChange={(e) => setWorkItemsThreadId(e.target.value)}
+                        className="pl-10 w-32"
+                      />
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={`w-40 justify-start text-left font-normal ${!workItemsDate && "text-muted-foreground"}`}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {workItemsDate ? format(workItemsDate, "PPP") : "Pick date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={workItemsDate}
+                          onSelect={setWorkItemsDate}
+                          initialFocus
+                        />
+                        {workItemsDate && (
+                          <div className="p-3 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setWorkItemsDate(undefined)}
+                              className="w-full"
+                            >
+                              Clear Date
+                            </Button>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <Button variant="link" size="sm" onClick={handleExport}>
                     Export CSV
@@ -449,8 +502,8 @@ export default function SourcePage() {
                 <div className="flex-1 flex items-center justify-center text-muted-foreground">
                   <div className="text-center">
                     <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>{workItemsSearch ? 'No matching work items found' : 'No recent transactions found'}</p>
-                    <p className="text-sm">{workItemsSearch ? 'Try adjusting your search terms' : "There haven't been any transactions in a while"}</p>
+                    <p>{workItemsThreadId || workItemsDate ? 'No matching work items found' : 'No recent transactions found'}</p>
+                    <p className="text-sm">{workItemsThreadId || workItemsDate ? 'Try adjusting your search filters' : "There haven't been any transactions in a while"}</p>
                   </div>
                 </div>
               ) : (
@@ -587,12 +640,43 @@ export default function SourcePage() {
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
-                        placeholder="Search by thread ID or date..."
-                        value={asotSearch}
-                        onChange={(e) => setAsotSearch(e.target.value)}
-                        className="pl-10 w-64"
+                        placeholder="Thread ID..."
+                        value={asotThreadId}
+                        onChange={(e) => setAsotThreadId(e.target.value)}
+                        className="pl-10 w-32"
                       />
                     </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={`w-40 justify-start text-left font-normal ${!asotDate && "text-muted-foreground"}`}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {asotDate ? format(asotDate, "PPP") : "Pick date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={asotDate}
+                          onSelect={setAsotDate}
+                          initialFocus
+                        />
+                        {asotDate && (
+                          <div className="p-3 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setAsotDate(undefined)}
+                              className="w-full"
+                            >
+                              Clear Date
+                            </Button>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -610,8 +694,8 @@ export default function SourcePage() {
                   <div className="flex-1 flex items-center justify-center text-muted-foreground">
                     <div className="text-center">
                       <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>{asotSearch ? 'No matching ASOT work items found' : 'No ASOT work items found'}</p>
-                      <p className="text-sm">{asotSearch ? 'Try adjusting your search terms' : 'No recent thread extractions or work items'}</p>
+                      <p>{asotThreadId || asotDate ? 'No matching ASOT work items found' : 'No ASOT work items found'}</p>
+                      <p className="text-sm">{asotThreadId || asotDate ? 'Try adjusting your search filters' : 'No recent thread extractions or work items'}</p>
                     </div>
                   </div>
                 ) : (
