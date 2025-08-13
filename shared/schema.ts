@@ -6,7 +6,7 @@ import { z } from "zod";
 // Each source contains multiple threads that cluster data nodes by type
 export const sources = pgTable("sources", {
   id: serial("id").primaryKey(),
-  code: text("code").notNull().unique(), // SCR, PAExchange, SLC, TMC, GTS, IA
+  code: text("code").notNull().unique(), // SCR, CPT, SLC, TMC, CAS, NVL
   name: text("name").notNull(),
   description: text("description").notNull(),
   status: text("status").notNull().default("active"), // active, inactive, syncing, error
@@ -99,20 +99,6 @@ export const performanceMetrics = pgTable("performance_metrics", {
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
-// Work Items for Recent Activities
-export const workItems = pgTable("work_items", {
-  id: serial("id").primaryKey(),
-  description: text("description").notNull(),
-  threadId: text("thread_id").notNull(),
-  status: text("status").notNull().default("COMPLETED"), // COMPLETED, PROCESSING, FAILED
-  type: text("type").notNull().default("THREAD_EXTRACT"), // THREAD_EXTRACT, DATA_SYNC, etc.
-  results: text("results").notNull(),
-  startTime: integer("start_time").notNull(), // Unix timestamp in milliseconds
-  endTime: integer("end_time").notNull(), // Unix timestamp in milliseconds
-  sourceCode: text("source_code").notNull(), // GTS, Capital, Teamcenter, SCR
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 // Insert Schemas
 export const insertSourceSchema = createInsertSchema(sources).omit({
   id: true,
@@ -149,11 +135,6 @@ export const insertThreadSchema = createInsertSchema(threads).omit({
   id: true,
 });
 
-export const insertWorkItemSchema = createInsertSchema(workItems).omit({
-  id: true,
-  createdAt: true,
-});
-
 // Types
 export type Source = typeof sources.$inferSelect;
 export type InsertSource = z.infer<typeof insertSourceSchema>;
@@ -175,9 +156,6 @@ export type InsertKnowledgeLink = z.infer<typeof insertKnowledgeLinkSchema>;
 
 export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = z.infer<typeof insertPerformanceMetricSchema>;
-
-export type WorkItem = typeof workItems.$inferSelect;
-export type InsertWorkItem = z.infer<typeof insertWorkItemSchema>;
 
 // API Response Types
 export type DashboardStats = {

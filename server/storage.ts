@@ -1,9 +1,9 @@
 import { 
-  sources, threads, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics, workItems,
+  sources, threads, bulletins, chatMessages, transactions, knowledgeLinks, performanceMetrics,
   type Source, type InsertSource, type Thread, type InsertThread, type Bulletin, type InsertBulletin,
   type ChatMessage, type InsertChatMessage, type Transaction, type InsertTransaction,
   type KnowledgeLink, type InsertKnowledgeLink, type PerformanceMetric, type InsertPerformanceMetric,
-  type WorkItem, type InsertWorkItem, type DashboardStats, type SourceStats
+  type DashboardStats, type SourceStats
 } from "@shared/schema";
 
 export interface IStorage {
@@ -42,10 +42,6 @@ export interface IStorage {
   getPerformanceMetrics(sourceCode: string, metricType?: string, limit?: number): Promise<PerformanceMetric[]>;
   createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric>;
   
-  // Work Items
-  getWorkItems(sourceCode?: string, limit?: number): Promise<WorkItem[]>;
-  createWorkItem(workItem: InsertWorkItem): Promise<WorkItem>;
-  
   // Dashboard Stats
   getDashboardStats(): Promise<DashboardStats>;
   getSourceStats(sourceCode: string): Promise<SourceStats>;
@@ -59,7 +55,6 @@ export class MemStorage implements IStorage {
   private knowledgeLinks: Map<number, KnowledgeLink> = new Map();
   private performanceMetrics: Map<number, PerformanceMetric> = new Map();
   private threads: Map<number, Thread> = new Map();
-  private workItems: Map<number, WorkItem> = new Map();
   
   private currentSourceId = 1;
   private currentBulletinId = 1;
@@ -68,7 +63,6 @@ export class MemStorage implements IStorage {
   private currentKnowledgeLinkId = 1;
   private currentMetricId = 1;
   private currentThreadId = 1;
-  private currentWorkItemId = 1;
 
   constructor() {
     this.initializeDefaultData();
@@ -93,8 +87,8 @@ export class MemStorage implements IStorage {
         config: { database: "janusgraph", traversal: "g", threads: ["cache_mgmt", "sys_records", "data_repos"] }
       },
       {
-        code: "PAExchange",
-        name: "Capital",
+        code: "Capital",
+        name: "Capital Management Tool",
         description: "Source managing configuration operations through file management, settings, and policy threads",
         status: "active",
         version: "1.8.3",
@@ -138,8 +132,8 @@ export class MemStorage implements IStorage {
         config: { database: "transactions", traversal: "tx", threads: ["processing", "monitoring", "audit", "work_items"] }
       },
       {
-        code: "GTS",
-        name: "Global Transaction System",
+        code: "CAAS",
+        name: "Central Authentication Service",
         description: "Source managing authentication operations through credential, permission, and token threads",
         status: "active",
         version: "4.2.1",
@@ -153,8 +147,8 @@ export class MemStorage implements IStorage {
         config: { tokenExpiry: 3600, refreshEnabled: true, threads: ["credentials", "permissions", "roles", "tokens"] }
       },
       {
-        code: "IA",
-        name: "Impact Assessment",
+        code: "Navrel",
+        name: "Network Validation Layer",
         description: "Source managing network operations through validation, connectivity, and monitoring threads",
         status: "active",
         version: "1.9.4",
@@ -170,52 +164,6 @@ export class MemStorage implements IStorage {
     ];
 
     defaultSources.forEach(source => this.createSource(source));
-
-    // Initialize default work items for the 4 sources
-    const defaultWorkItems: InsertWorkItem[] = [
-      {
-        description: "SCR thread extract",
-        threadId: "f4g5g-ty4g5-gy45g",
-        status: "COMPLETED",
-        type: "THREAD_EXTRACT",
-        results: "Created the thread",
-        startTime: 1754923983981,
-        endTime: 1754926080836,
-        sourceCode: "SCR"
-      },
-      {
-        description: "Capital configuration sync",
-        threadId: "a2b3c-d4e5f-g6h7i",
-        status: "COMPLETED",
-        type: "CONFIG_SYNC",
-        results: "Configuration updated successfully",
-        startTime: 1754920000000,
-        endTime: 1754921000000,
-        sourceCode: "PAExchange"
-      },
-      {
-        description: "Teamcenter transaction processing",
-        threadId: "x1y2z-w3v4u-t5s6r",
-        status: "COMPLETED",
-        type: "THREAD_EXTRACT",
-        results: "Processed 245 transactions",
-        startTime: 1754918000000,
-        endTime: 1754920500000,
-        sourceCode: "Teamcenter"
-      },
-      {
-        description: "GTS token validation",
-        threadId: "m9n8o-p7q6r-s5t4u",
-        status: "COMPLETED",
-        type: "TOKEN_VALIDATE",
-        results: "Validated 1,234 tokens",
-        startTime: 1754915000000,
-        endTime: 1754916800000,
-        sourceCode: "GTS"
-      }
-    ];
-
-    defaultWorkItems.forEach(workItem => this.createWorkItem(workItem));
 
     // Initialize default threads with the new structure
     const currentTime = [2025, 7, 24, 7, 30, 0, 0];
@@ -437,7 +385,6 @@ export class MemStorage implements IStorage {
     const thread: Thread = {
       id: this.currentThreadId++,
       ...insertThread,
-      class: insertThread.class || "nr_core_schema.thread.Thread"
     };
     this.threads.set(thread.id, thread);
     return thread;
@@ -465,7 +412,7 @@ export class MemStorage implements IStorage {
     }
     
     return bulletins
-      .sort((a, b) => (b.publishedAt?.getTime() || 0) - (a.publishedAt?.getTime() || 0))
+      .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
       .slice(0, limit);
   }
 
@@ -479,9 +426,7 @@ export class MemStorage implements IStorage {
       ...insertBulletin, 
       id, 
       createdAt: new Date(),
-      publishedAt: insertBulletin.publishedAt || new Date(),
-      priority: insertBulletin.priority || "medium",
-      isRead: insertBulletin.isRead || null
+      publishedAt: insertBulletin.publishedAt || new Date()
     };
     this.bulletins.set(id, bulletin);
     return bulletin;
@@ -508,7 +453,7 @@ export class MemStorage implements IStorage {
       messages = messages.filter(m => m.sessionId === sessionId);
     }
     
-    return messages.sort((a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0));
+    return messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
 
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
@@ -516,8 +461,7 @@ export class MemStorage implements IStorage {
     const message: ChatMessage = { 
       ...insertMessage, 
       id, 
-      timestamp: new Date(),
-      sourceCode: insertMessage.sourceCode || null
+      timestamp: new Date()
     };
     this.chatMessages.set(id, message);
     return message;
@@ -532,7 +476,7 @@ export class MemStorage implements IStorage {
     }
     
     return transactions
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
   }
 
@@ -541,9 +485,7 @@ export class MemStorage implements IStorage {
     const transaction: Transaction = { 
       ...insertTransaction, 
       id, 
-      createdAt: new Date(),
-      duration: insertTransaction.duration || null,
-      errorMessage: insertTransaction.errorMessage || null
+      createdAt: new Date()
     };
     this.transactions.set(id, transaction);
     return transaction;
@@ -566,7 +508,7 @@ export class MemStorage implements IStorage {
       links = links.filter(l => l.sourceCode === sourceCode);
     }
     
-    return links.sort((a, b) => (a.order || 0) - (b.order || 0));
+    return links.sort((a, b) => a.order - b.order);
   }
 
   async createKnowledgeLink(insertLink: InsertKnowledgeLink): Promise<KnowledgeLink> {
@@ -574,11 +516,7 @@ export class MemStorage implements IStorage {
     const link: KnowledgeLink = { 
       ...insertLink, 
       id, 
-      createdAt: new Date(),
-      sourceCode: insertLink.sourceCode || null,
-      icon: insertLink.icon || "fas fa-info",
-      order: insertLink.order || null,
-      isActive: insertLink.isActive !== undefined ? insertLink.isActive : true
+      createdAt: new Date()
     };
     this.knowledgeLinks.set(id, link);
     return link;
@@ -606,33 +544,6 @@ export class MemStorage implements IStorage {
     };
     this.performanceMetrics.set(id, metric);
     return metric;
-  }
-
-  // Work Items
-  async getWorkItems(sourceCode?: string, limit: number = 10): Promise<WorkItem[]> {
-    let workItems = Array.from(this.workItems.values());
-    
-    if (sourceCode) {
-      workItems = workItems.filter(item => item.sourceCode === sourceCode);
-    }
-    
-    // Sort by creation date (newest first)
-    workItems.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
-    
-    return workItems.slice(0, limit);
-  }
-
-  async createWorkItem(insertWorkItem: InsertWorkItem): Promise<WorkItem> {
-    const id = this.currentWorkItemId++;
-    const workItem: WorkItem = { 
-      ...insertWorkItem, 
-      id, 
-      createdAt: new Date(),
-      status: insertWorkItem.status || "PENDING",
-      type: insertWorkItem.type || "TASK"
-    };
-    this.workItems.set(id, workItem);
-    return workItem;
   }
 
   // Dashboard Stats
