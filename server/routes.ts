@@ -626,7 +626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const externalConfig = configManager.getExternalConfig();
       const asotWorklistUrls = externalConfig.asot_worklist || {};
       const sourceKey = sourceCode.toUpperCase() === 'CAPITAL' ? 'PAExchange' : sourceCode.toUpperCase();
-      const externalAsotUrl = asotWorklistUrls[sourceKey];
+      const externalAsotUrl = asotWorklistUrls[sourceKey as keyof typeof asotWorklistUrls];
       
       if (!externalAsotUrl || externalAsotUrl.trim() === '') {
         console.warn(`External ASOT URL for ${sourceCode} not configured in config.yaml (current value: "${externalAsotUrl}"), using mock data`);
