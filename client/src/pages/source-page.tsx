@@ -149,7 +149,15 @@ export default function SourcePage() {
     queryKey: ["/api/asot-worklist", code],
     queryFn: async () => {
       const response = await fetch(`/api/asot-worklist/${code}?limit=10`);
-      return response.json();
+      const data = await response.json();
+      
+      // Ensure we always return an array, even if API call fails
+      if (!response.ok || !Array.isArray(data)) {
+        console.warn(`ASOT Work List API error for ${code}:`, data);
+        return [];
+      }
+      
+      return data;
     },
     enabled: Boolean(code && supportsAsotWorkList),
   });
@@ -180,7 +188,7 @@ export default function SourcePage() {
 
   // Filtered and paginated ASOT work items
   const filteredAsotItems = useMemo(() => {
-    if (!asotWorkItems) return [];
+    if (!asotWorkItems || !Array.isArray(asotWorkItems)) return [];
     return asotWorkItems.filter((item: AsotWorkItem) => {
       // Filter by thread ID if specified
       const threadIdMatch = !asotThreadId || 
