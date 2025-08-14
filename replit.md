@@ -38,6 +38,7 @@ Preferred communication style: Simple, everyday language.
 - **AI Chat System**: Environment-controlled, supporting dual modes (AI/non-AI). Non-AI mode includes node counting, descriptions, and system status. AI integration uses OpenAI GPT-4o for context-aware responses and structured analysis.
 - **Similarity Analysis & Impact Assessment**: Comprehensive service for cross-source analysis, node similarity detection, and impact assessment using multi-factor algorithms. Includes severity-based impact scoring and actionable recommendations. Integrated into the chat interface.
 - **External Work Items Integration**: Supports external API calls for WorkItem creation and fetching list items, with error handling and fallback to mock data.
+- **Configurable ASOT Work List URLs**: Source-specific ASOT Work List URLs configured in config.yaml for GTS, PAExchange, TeamCenter, and SCR sources, enabling independent external API endpoints per source.
 - **Gremlin Visualizer**: Interactive visualization of node relationships for each Source of Truth, allowing one-click exploration and property viewing.
 
 ## External Dependencies

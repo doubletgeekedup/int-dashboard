@@ -622,12 +622,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Get external endpoint URL from config
+      // Get source-specific external endpoint URL from config
       const externalConfig = configManager.getExternalConfig();
-      const externalAsotUrl = externalConfig.asot?.url;
+      const asotWorklistUrls = externalConfig.asot_worklist || {};
+      const sourceKey = sourceCode.toUpperCase() === 'CAPITAL' ? 'PAExchange' : sourceCode.toUpperCase();
+      const externalAsotUrl = asotWorklistUrls[sourceKey];
       
       if (!externalAsotUrl) {
-        console.warn("External ASOT URL not configured in config.yaml, using mock data");
+        console.warn(`External ASOT URL for ${sourceCode} not configured in config.yaml, using mock data`);
         
         // Mock ASOT Work List data when external endpoint is not available
         const mockAsotItems = [
@@ -673,12 +675,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(mockAsotItems);
       }
 
-      // Call external ASOT API
-      const response = await fetch(`${externalAsotUrl}/${sourceCode}?limit=${limit}`, {
+      // Call external source-specific ASOT API
+      const response = await fetch(`${externalAsotUrl}?limit=${limit}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
-        }
+        },
+        ...(externalConfig.ssl_insecure && { 
+          agent: new (await import('https')).Agent({ rejectUnauthorized: false })
+        })
       });
 
       if (!response.ok) {

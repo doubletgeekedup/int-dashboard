@@ -67,6 +67,12 @@ external:
     url: ""  # Set to your WorkItem creation API endpoint, e.g., "https://your-api.com/workitems"
   janusgraph_schema:
     url: ""  # Set to your JanusGraph schema endpoint, e.g., "https://your-api.com/janusgraph/schema"
+  # ASOT Work List URLs per source (only for sources that support ASOT: GTS, PAExchange, TeamCenter, SCR)
+  asot_worklist:
+    GTS: ""  # Set to your GTS ASOT Work List API endpoint
+    PAExchange: ""  # Set to your PAExchange ASOT Work List API endpoint  
+    TeamCenter: ""  # Set to your TeamCenter ASOT Work List API endpoint
+    SCR: ""  # Set to your SCR ASOT Work List API endpoint
   ssl_insecure: true  # Disable SSL certificate verification for external APIs
 
 # AI Chat Configuration

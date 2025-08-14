@@ -80,6 +80,12 @@ interface ExternalConfig {
   janusgraph_schema: {
     url: string;
   };
+  asot_worklist?: {
+    GTS?: string;
+    PAExchange?: string;
+    TeamCenter?: string;
+    SCR?: string;
+  };
   ssl_insecure?: boolean;
 }
 
