@@ -450,8 +450,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const externalConfig = configManager.getExternalConfig();
       const externalEndpoint = externalConfig.listitems.url;
       
-      if (!externalEndpoint) {
-        console.warn("External listitems URL not configured in config.yaml, using mock data");
+      if (!externalEndpoint || externalEndpoint.trim() === '') {
+        console.warn(`External listitems URL not configured in config.yaml (current value: "${externalEndpoint}"), using mock data`);
         
         // Fallback mock data when external endpoint is not available
         const mockWorkItems = [
@@ -628,8 +628,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sourceKey = sourceCode.toUpperCase() === 'CAPITAL' ? 'PAExchange' : sourceCode.toUpperCase();
       const externalAsotUrl = asotWorklistUrls[sourceKey];
       
-      if (!externalAsotUrl) {
-        console.warn(`External ASOT URL for ${sourceCode} not configured in config.yaml, using mock data`);
+      if (!externalAsotUrl || externalAsotUrl.trim() === '') {
+        console.warn(`External ASOT URL for ${sourceCode} not configured in config.yaml (current value: "${externalAsotUrl}"), using mock data`);
         
         // Mock ASOT Work List data when external endpoint is not available
         const mockAsotItems = [
@@ -739,8 +739,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const externalConfig = configManager.getExternalConfig();
       const externalWorkItemsUrl = externalConfig.workitems.url;
       
-      if (!externalWorkItemsUrl) {
-        console.error("External WorkItems API URL not configured in config.yaml");
+      if (!externalWorkItemsUrl || externalWorkItemsUrl.trim() === '') {
+        console.error(`External WorkItems API URL not configured in config.yaml (current value: "${externalWorkItemsUrl}")`);
         return res.status(500).json({ 
           error: "WorkItem creation service not configured",
           message: "External API endpoint not available" 
@@ -1483,6 +1483,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to retrieve graph data"
       });
     }
+  });
+
+  // Configuration debug endpoint to help troubleshoot external URLs
+  app.get("/api/debug/config", (req, res) => {
+    const externalConfig = configManager.getExternalConfig();
+    res.json({
+      external_services: {
+        listitems: {
+          url: externalConfig.listitems?.url || null,
+          configured: !!(externalConfig.listitems?.url && externalConfig.listitems.url.trim() !== '')
+        },
+        workitems: {
+          url: externalConfig.workitems?.url || null,
+          configured: !!(externalConfig.workitems?.url && externalConfig.workitems.url.trim() !== '')
+        },
+        asot_worklist: {
+          GTS: {
+            url: externalConfig.asot_worklist?.GTS || null,
+            configured: !!(externalConfig.asot_worklist?.GTS && externalConfig.asot_worklist.GTS.trim() !== '')
+          },
+          PAExchange: {
+            url: externalConfig.asot_worklist?.PAExchange || null,
+            configured: !!(externalConfig.asot_worklist?.PAExchange && externalConfig.asot_worklist.PAExchange.trim() !== '')
+          },
+          TeamCenter: {
+            url: externalConfig.asot_worklist?.TeamCenter || null,
+            configured: !!(externalConfig.asot_worklist?.TeamCenter && externalConfig.asot_worklist.TeamCenter.trim() !== '')
+          },
+          SCR: {
+            url: externalConfig.asot_worklist?.SCR || null,
+            configured: !!(externalConfig.asot_worklist?.SCR && externalConfig.asot_worklist.SCR.trim() !== '')
+          }
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
   });
 
   return httpServer;
