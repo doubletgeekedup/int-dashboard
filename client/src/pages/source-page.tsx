@@ -92,6 +92,7 @@ export default function SourcePage() {
   // Pagination and search states
   const [workItemsPage, setWorkItemsPage] = useState(1);
   const [workItemsThreadId, setWorkItemsThreadId] = useState("");
+  const [workItemsQname, setWorkItemsQname] = useState("");
   const [workItemsDate, setWorkItemsDate] = useState<Date | undefined>();
   const [asotPage, setAsotPage] = useState(1);
   const [asotThreadId, setAsotThreadId] = useState("");
@@ -103,24 +104,14 @@ export default function SourcePage() {
     enabled: !!code,
   });
 
-  // New work items endpoint that fetches the latest 100 items and filters by source
-  const { data: workItems = [] } = useQuery({
-    queryKey: ["/api/listitems", code],
+  // New work items endpoint that fetches the latest 100 items
+  const { data: allWorkItems = [] } = useQuery({
+    queryKey: ["/api/listitems", "100"],
     queryFn: async () => {
       const response = await fetch("/api/listitems/100");
       const allItems = await response.json();
-      
-      if (!code) return [];
-      
-      // Filter items by source based on qName prefix
-      const sourceItems = allItems.filter((item: any) => 
-        item.csWorkItemDetails.qName.startsWith(`${code}_`)
-      );
-      
-      // Return only last 10 items
-      return sourceItems.slice(-10);
+      return allItems || [];
     },
-    enabled: !!code,
   });
 
   const { data: knowledgeLinks = [] } = useQuery<KnowledgeLink[]>({
@@ -164,8 +155,12 @@ export default function SourcePage() {
 
   // Filtered and paginated work items
   const filteredWorkItems = useMemo(() => {
-    if (!workItems) return [];
-    return workItems.filter((item: WorkItem) => {
+    if (!allWorkItems) return [];
+    return allWorkItems.filter((item: WorkItem) => {
+      // Filter by qName if specified
+      const qnameMatch = !workItemsQname || 
+        item.csWorkItemDetails.qName.toLowerCase().includes(workItemsQname.toLowerCase());
+      
       // Filter by thread ID if specified
       const threadIdMatch = !workItemsThreadId || 
         item.id.toLowerCase().includes(workItemsThreadId.toLowerCase()) ||
@@ -175,9 +170,9 @@ export default function SourcePage() {
       const dateMatch = !workItemsDate || 
         format(new Date(item.createDate), 'yyyy-MM-dd') === format(workItemsDate, 'yyyy-MM-dd');
       
-      return threadIdMatch && dateMatch;
+      return qnameMatch && threadIdMatch && dateMatch;
     });
-  }, [workItems, workItemsThreadId, workItemsDate]);
+  }, [allWorkItems, workItemsQname, workItemsThreadId, workItemsDate]);
 
   const paginatedWorkItems = useMemo(() => {
     const startIndex = (workItemsPage - 1) * itemsPerPage;
@@ -237,7 +232,7 @@ export default function SourcePage() {
     // Generate CSV export of work items
     const csv = [
       ['Transaction ID', 'Type', 'Status', 'Timestamp', 'Duration'].join(','),
-      ...workItems.map((item: WorkItem) => [
+      ...filteredWorkItems.map((item: WorkItem) => [
         item.id,
         item.csWorkItemDetails.csWorkItemType,
         item.csWorkItemProcessInfo.csWorkItemProcessSatus,
@@ -458,6 +453,15 @@ export default function SourcePage() {
                 <CardTitle>Recent Work Items</CardTitle>
                 <div className="flex items-center space-x-2">
                   <div className="flex items-center space-x-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="QName..."
+                        value={workItemsQname}
+                        onChange={(e) => setWorkItemsQname(e.target.value)}
+                        className="pl-10 w-40"
+                      />
+                    </div>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
