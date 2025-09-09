@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: integration-dashboard-db
+    environment:
+      POSTGRES_DB: integration_dashboard
+      POSTGRES_USER: dashboard_user
+      POSTGRES_PASSWORD: dashboard_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dashboard_user -d integration_dashboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Integration Dashboard Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: integration-dashboard-app
+    ports:
+      - "5000:5000"
+    environment:
+      # Database Configuration
+      DATABASE_URL: "postgresql://dashboard_user:dashboard_password@db:5432/integration_dashboard"
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: dashboard_user
+      PGPASSWORD: dashboard_password
+      PGDATABASE: integration_dashboard
+      
+      # Application Configuration
+      NODE_ENV: production
+      AI_CHAT_ENABLED: "false"  # Set to "true" if you have OpenAI API key
+      
+      # Optional: OpenAI API Configuration (uncomment if needed)
+      # OPENAI_API_KEY: "your-openai-api-key-here"
+      
+      # Optional: Azure OpenAI Configuration (uncomment if needed)
+      # AZURE_OPENAI_ENDPOINT: "your-azure-endpoint"
+      # AZURE_OPENAI_API_KEY: "your-azure-api-key"
+      # AZURE_OPENAI_DEPLOYMENT: "your-deployment-name"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: integration-dashboard-network
