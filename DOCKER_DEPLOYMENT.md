@@ -171,6 +171,7 @@ ports:
 ├── Dockerfile              # Multi-stage application build
 ├── docker-compose.yml      # Complete stack definition
 ├── .dockerignore          # Optimize build context
+├── esbuild.config.js       # Backend build configuration with module resolution
 ├── init-db.sql            # Database initialization
 ├── .env.template          # Environment configuration template
 ├── config.yaml            # Application configuration

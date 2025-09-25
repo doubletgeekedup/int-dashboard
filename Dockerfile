@@ -12,11 +12,14 @@ COPY package*.json ./
 # Install all dependencies (including devDependencies for building)
 RUN npm ci
 
-# Copy source code
+# Copy source code and build configuration
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the frontend
+RUN npm run check && npx vite build
+
+# Build the backend with proper alias resolution
+RUN node esbuild.config.js
 
 # Stage 2: Production runtime
 FROM node:20-alpine AS runtime
