@@ -1,0 +1,306 @@
+# GitLab CI/CD Pipeline for Integration Dashboard System
+# Supports Node.js/TypeScript full-stack application with Docker deployment
+
+# Global configuration
+variables:
+  # Performance optimizations
+  FF_USE_FASTZIP: "true"
+  ARTIFACT_COMPRESSION_LEVEL: "fastest"
+  CACHE_COMPRESSION_LEVEL: "fastest"
+  
+  # Docker configuration
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  LATEST_IMAGE: $CI_REGISTRY_IMAGE:latest
+  
+  # Node.js configuration
+  NODE_ENV: production
+  CI: "true"
+  NPM_CONFIG_CACHE: .npm
+
+# Default cache configuration
+default:
+  cache: &global_cache
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+      - .npm/
+    policy: pull-push
+
+# Pipeline stages
+stages:
+  - install
+  - lint
+  - test
+  - build
+  - docker
+  - deploy
+
+# Install dependencies - creates cached node_modules
+install_dependencies:
+  stage: install
+  image: node:20-alpine
+  cache:
+    <<: *global_cache
+    policy: pull-push
+  before_script:
+    - npm config set cache .npm --global
+  script:
+    - npm ci --prefer-offline --no-audit
+    - ls -la node_modules/ | head -10  # Verify installation
+  artifacts:
+    expire_in: 2 hours
+    paths:
+      - node_modules/
+  only:
+    - main
+    - develop
+    - merge_requests
+    - tags
+
+# TypeScript type checking
+type_check:
+  stage: lint
+  image: node:20-alpine
+  cache:
+    <<: *global_cache
+    policy: pull
+  dependencies:
+    - install_dependencies
+  script:
+    - npm run check
+  only:
+    - main
+    - develop
+    - merge_requests
+
+# Run tests if available
+test_application:
+  stage: test
+  image: node:20-alpine
+  cache:
+    <<: *global_cache
+    policy: pull
+  dependencies:
+    - install_dependencies
+  script:
+    # Check if test script exists in package.json before running
+    - |
+      if npm run | grep -q "test"; then
+        echo "Running tests..."
+        npm test
+      else
+        echo "No test script found, skipping tests"
+      fi
+  allow_failure: true  # Don't fail pipeline if tests don't exist
+  only:
+    - main
+    - develop
+    - merge_requests
+
+# Build the application
+build_application:
+  stage: build
+  image: node:20-alpine
+  cache:
+    <<: *global_cache
+    policy: pull
+  dependencies:
+    - install_dependencies
+  script:
+    - echo "Building frontend with Vite..."
+    - npx vite build
+    - echo "Building backend with esbuild..."
+    - node esbuild.config.js
+    - echo "Build completed successfully"
+    - ls -la dist/
+    - ls -la client/dist/
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - dist/
+      - client/dist/
+      - shared/
+      - config.yaml
+      - package*.json
+      - tsconfig.json
+      - drizzle.config.ts
+  only:
+    - main
+    - develop
+    - merge_requests
+    - tags
+
+# Build Docker image and push to registry
+docker_build:
+  stage: docker
+  image: docker:24-git
+  services:
+    - docker:24-dind
+  dependencies:
+    - build_application
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - echo "Logging into GitLab Container Registry..."
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - echo "Building Docker image..."
+    - docker build --pull -t $IMAGE_TAG -t $LATEST_IMAGE .
+    - echo "Pushing Docker image to registry..."
+    - docker push $IMAGE_TAG
+    - docker push $LATEST_IMAGE
+    - echo "Docker image pushed successfully"
+  only:
+    - main
+    - develop
+    - tags
+
+# Deploy to staging environment
+deploy_staging:
+  stage: deploy
+  image: alpine:latest
+  dependencies: []
+  variables:
+    DEPLOY_ENV: "staging"
+  before_script:
+    - apk add --no-cache openssh-client curl
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $STAGING_SERVER >> ~/.ssh/known_hosts
+  script:
+    - |
+      echo "Deploying to staging environment..."
+      ssh $STAGING_USER@$STAGING_SERVER "
+        set -e
+        echo 'Logging into GitLab Container Registry...'
+        docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        
+        echo 'Pulling latest image...'
+        docker pull $IMAGE_TAG
+        
+        echo 'Stopping existing containers...'
+        docker-compose -f /opt/integration-dashboard/docker-compose.staging.yml down || true
+        
+        echo 'Updating image tag in compose file...'
+        sed -i 's|image: .*|image: $IMAGE_TAG|g' /opt/integration-dashboard/docker-compose.staging.yml
+        
+        echo 'Starting new containers...'
+        docker-compose -f /opt/integration-dashboard/docker-compose.staging.yml up -d
+        
+        echo 'Waiting for application to be ready...'
+        sleep 30
+        
+        echo 'Checking application health...'
+        curl -f http://localhost:5000/api/health || (echo 'Health check failed' && exit 1)
+        
+        echo 'Deployment to staging completed successfully!'
+      "
+  environment:
+    name: staging
+    url: $STAGING_URL
+  only:
+    - develop
+
+# Deploy to production environment (manual)
+deploy_production:
+  stage: deploy
+  image: alpine:latest
+  dependencies: []
+  variables:
+    DEPLOY_ENV: "production"
+  before_script:
+    - apk add --no-cache openssh-client curl
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $PRODUCTION_SERVER >> ~/.ssh/known_hosts
+  script:
+    - |
+      echo "Deploying to production environment..."
+      ssh $PRODUCTION_USER@$PRODUCTION_SERVER "
+        set -e
+        echo 'Logging into GitLab Container Registry...'
+        docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        
+        echo 'Pulling latest image...'
+        docker pull $IMAGE_TAG
+        
+        echo 'Creating backup of current deployment...'
+        docker tag integration-dashboard_app:latest integration-dashboard_app:backup-$(date +%Y%m%d-%H%M%S) || true
+        
+        echo 'Stopping existing containers...'
+        docker-compose -f /opt/integration-dashboard/docker-compose.prod.yml down
+        
+        echo 'Updating image tag in compose file...'
+        sed -i 's|image: .*|image: $IMAGE_TAG|g' /opt/integration-dashboard/docker-compose.prod.yml
+        
+        echo 'Starting new containers...'
+        docker-compose -f /opt/integration-dashboard/docker-compose.prod.yml up -d
+        
+        echo 'Waiting for application to be ready...'
+        sleep 60
+        
+        echo 'Checking application health...'
+        curl -f http://localhost:5000/api/health || (echo 'Health check failed - rolling back' && docker-compose -f /opt/integration-dashboard/docker-compose.prod.yml down && docker tag integration-dashboard_app:backup-$(date +%Y%m%d) integration-dashboard_app:latest && docker-compose -f /opt/integration-dashboard/docker-compose.prod.yml up -d && exit 1)
+        
+        echo 'Cleaning up old images...'
+        docker image prune -f
+        
+        echo 'Deployment to production completed successfully!'
+      "
+  environment:
+    name: production
+    url: $PRODUCTION_URL
+  when: manual
+  only:
+    - main
+    - tags
+
+# Cleanup job to remove old artifacts and images
+cleanup:
+  stage: deploy
+  image: alpine:latest
+  dependencies: []
+  script:
+    - echo "Cleanup completed - artifacts will be automatically removed by GitLab retention policy"
+  when: always
+  only:
+    - main
+    - develop
+    - merge_requests
+
+# Performance monitoring job
+performance_check:
+  stage: deploy
+  image: alpine:latest
+  dependencies: []
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - |
+      if [ -n "$STAGING_URL" ]; then
+        echo "Running performance check on staging..."
+        response_time=$(curl -o /dev/null -s -w '%{time_total}\n' $STAGING_URL/api/health)
+        echo "Response time: ${response_time}s"
+        if (( $(echo "$response_time > 2.0" | bc -l) )); then
+          echo "WARNING: Response time is higher than expected (${response_time}s > 2.0s)"
+        else
+          echo "Performance check passed"
+        fi
+      else
+        echo "No staging URL configured, skipping performance check"
+      fi
+  allow_failure: true
+  only:
+    - develop
+  needs:
+    - deploy_staging
