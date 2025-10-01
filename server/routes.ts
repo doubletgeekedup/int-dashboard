@@ -1485,6 +1485,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Log URLs endpoint - returns configured log URLs for each page
+  app.get("/api/logs/url", (req, res) => {
+    const { page } = req.query;
+    const logsConfig = configManager.getLogsConfig();
+    
+    if (!page || typeof page !== 'string') {
+      return res.status(400).json({ error: "Page parameter is required" });
+    }
+    
+    if (page === 'dashboard') {
+      const url = logsConfig.dashboard || '';
+      return res.json({ 
+        page: 'dashboard',
+        url,
+        configured: url.trim() !== ''
+      });
+    }
+    
+    // For source pages
+    const sourceKey = page as keyof typeof logsConfig.sources;
+    if (logsConfig.sources[sourceKey] !== undefined) {
+      const url = logsConfig.sources[sourceKey] || '';
+      return res.json({ 
+        page: sourceKey,
+        url,
+        configured: url.trim() !== ''
+      });
+    }
+    
+    res.status(404).json({ error: "Page not found in logs configuration" });
+  });
+
   // Configuration debug endpoint to help troubleshoot external URLs
   app.get("/api/debug/config", (req, res) => {
     const externalConfig = configManager.getExternalConfig();

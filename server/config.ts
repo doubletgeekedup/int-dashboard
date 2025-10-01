@@ -93,6 +93,18 @@ interface AIConfig {
   chat_enabled: string;
 }
 
+interface LogsConfig {
+  dashboard: string;
+  sources: {
+    SCR: string;
+    PAExchange: string;
+    Slicwave: string;
+    Teamcenter: string;
+    GTS: string;
+    ImpactAssessment: string;
+  };
+}
+
 interface Config {
   app: AppConfig;
   openai: OpenAIConfig;
@@ -101,6 +113,7 @@ interface Config {
   database: DatabaseConfig;
   external: ExternalConfig;
   ai: AIConfig;
+  logs: LogsConfig;
   websocket: WebSocketConfig;
   logging: {
     level: string;
@@ -203,6 +216,10 @@ class ConfigManager {
 
   public getAIConfig(): AIConfig {
     return this.config.ai;
+  }
+
+  public getLogsConfig(): LogsConfig {
+    return this.config.logs;
   }
 
   public getPort(): number {

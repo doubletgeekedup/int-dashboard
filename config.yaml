@@ -75,6 +75,17 @@ external:
     SCR: ""  # Set to your SCR ASOT Work List API endpoint
   ssl_insecure: true  # Disable SSL certificate verification for external APIs
 
+# Log URLs Configuration - External logging system URLs for each page
+logs:
+  dashboard: ""  # Set to your dashboard logs URL, e.g., "https://logs.example.com/dashboard"
+  sources:
+    SCR: ""  # Set to your SCR logs URL, e.g., "https://logs.example.com/scr"
+    PAExchange: ""  # Set to your Capital/PAExchange logs URL
+    Slicwave: ""  # Set to your Slicwave logs URL
+    Teamcenter: ""  # Set to your Teamcenter logs URL
+    GTS: ""  # Set to your GTS logs URL
+    ImpactAssessment: ""  # Set to your Impact Assessment logs URL
+
 # AI Chat Configuration
 ai:
   chat_enabled: "${AI_CHAT_ENABLED}"

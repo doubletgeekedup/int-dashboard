@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LLMChat } from "@/components/chat/llm-chat";
 import { PerformanceChart } from "@/components/charts/performance-chart";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Activity, 
   Database, 
@@ -44,6 +45,8 @@ function MyAssistantStatusIndicator() {
 }
 
 export default function Dashboard() {
+  const { toast } = useToast();
+  
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
@@ -65,9 +68,32 @@ export default function Dashboard() {
     window.location.reload();
   };
 
-  const handleQuickAction = (action: string) => {
-    console.log("Quick action:", action);
-    // Implement specific actions
+  const handleQuickAction = async (action: string) => {
+    if (action === 'logs') {
+      try {
+        const response = await fetch('/api/logs/url?page=dashboard');
+        const data = await response.json();
+        
+        if (data.configured && data.url) {
+          window.open(data.url, '_blank', 'noopener,noreferrer');
+        } else {
+          toast({
+            title: "Logs URL not configured",
+            description: "Please configure the dashboard logs URL in config.yaml",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching log URL:", error);
+        toast({
+          title: "Error",
+          description: "Failed to open logs",
+          variant: "destructive"
+        });
+      }
+    } else {
+      console.log("Quick action:", action);
+    }
   };
 
   if (statsLoading || sourcesLoading) {
