@@ -46,18 +46,18 @@ const sources = [
 
 export default function GremlinVisualizer() {
   const [selectedSource, setSelectedSource] = useState<string>("");
-  const [nodeId, setNodeId] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<{ sourceCode: string; nodeId: string } | null>(null);
-  const [explorationHistory, setExplorationHistory] = useState<Array<{ sourceCode: string; nodeId: string; label: string }>>([]);
+  const [endpointId, setEndpointId] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<{ sourceCode: string; endpointId: string } | null>(null);
+  const [explorationHistory, setExplorationHistory] = useState<Array<{ sourceCode: string; endpointId: string; label: string }>>([]);
 
   const { data: graphData, isLoading, error } = useQuery<GraphData>({
-    queryKey: ['/api/gremlin/visualize', searchQuery?.sourceCode, searchQuery?.nodeId],
-    enabled: !!searchQuery?.sourceCode && !!searchQuery?.nodeId,
+    queryKey: ['/api/gremlin/visualize', searchQuery?.sourceCode, searchQuery?.endpointId],
+    enabled: !!searchQuery?.sourceCode && !!searchQuery?.endpointId,
   });
 
   const handleSearch = () => {
-    if (!selectedSource || !nodeId.trim()) return;
-    setSearchQuery({ sourceCode: selectedSource, nodeId: nodeId.trim() });
+    if (!selectedSource || !endpointId.trim()) return;
+    setSearchQuery({ sourceCode: selectedSource, endpointId: endpointId.trim() });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -71,15 +71,15 @@ export default function GremlinVisualizer() {
     if (searchQuery) {
       const currentEntry = {
         sourceCode: searchQuery.sourceCode,
-        nodeId: searchQuery.nodeId,
-        label: graphData?.centerNode.label || searchQuery.nodeId
+        endpointId: searchQuery.endpointId,
+        label: graphData?.centerNode.label || searchQuery.endpointId
       };
       
       setExplorationHistory(prev => {
         // Avoid duplicates
         const exists = prev.some(entry => 
           entry.sourceCode === currentEntry.sourceCode && 
-          entry.nodeId === currentEntry.nodeId
+          entry.endpointId === currentEntry.endpointId
         );
         return exists ? prev : [...prev, currentEntry];
       });
@@ -87,14 +87,14 @@ export default function GremlinVisualizer() {
 
     // Set new search query to the clicked node
     setSelectedSource(node.sourceCode);
-    setNodeId(node.id);
-    setSearchQuery({ sourceCode: node.sourceCode, nodeId: node.id });
+    setEndpointId(node.id);
+    setSearchQuery({ sourceCode: node.sourceCode, endpointId: node.id });
   };
 
-  const handleHistoryNavigation = (historyItem: { sourceCode: string; nodeId: string; label: string }) => {
+  const handleHistoryNavigation = (historyItem: { sourceCode: string; endpointId: string; label: string }) => {
     setSelectedSource(historyItem.sourceCode);
-    setNodeId(historyItem.nodeId);
-    setSearchQuery({ sourceCode: historyItem.sourceCode, nodeId: historyItem.nodeId });
+    setEndpointId(historyItem.endpointId);
+    setSearchQuery({ sourceCode: historyItem.sourceCode, endpointId: historyItem.endpointId });
   };
 
   const clearHistory = () => {
@@ -249,15 +249,15 @@ export default function GremlinVisualizer() {
               </Select>
             </div>
             <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Node ID</label>
+              <label className="text-sm font-medium mb-2 block">Endpoint ID</label>
               <Input
-                value={nodeId}
-                onChange={(e) => setNodeId(e.target.value)}
+                value={endpointId}
+                onChange={(e) => setEndpointId(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Enter node ID..."
+                placeholder="Enter endpoint ID..."
               />
             </div>
-            <Button onClick={handleSearch} disabled={!selectedSource || !nodeId.trim() || isLoading}>
+            <Button onClick={handleSearch} disabled={!selectedSource || !endpointId.trim() || isLoading}>
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -292,7 +292,7 @@ export default function GremlinVisualizer() {
             <div className="flex gap-2 flex-wrap">
               {explorationHistory.map((item, index) => (
                 <Button
-                  key={`${item.sourceCode}-${item.nodeId}-${index}`}
+                  key={`${item.sourceCode}-${item.endpointId}-${index}`}
                   variant="outline"
                   size="sm"
                   onClick={() => handleHistoryNavigation(item)}

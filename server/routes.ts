@@ -1457,20 +1457,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Gremlin visualizer endpoint
-  app.get("/api/gremlin/visualize/:sourceCode/:nodeId", async (req, res) => {
+  // Gremlin visualizer endpoint - search by endpoint ID
+  app.get("/api/gremlin/visualize/:sourceCode/:endpointId", async (req, res) => {
     try {
-      const { sourceCode, nodeId } = req.params;
+      const { sourceCode, endpointId } = req.params;
       
-      console.log(`Visualizing node ${nodeId} in source ${sourceCode}`);
+      console.log(`Visualizing endpoint ${endpointId} in source ${sourceCode}`);
       
       // Simulate Gremlin query to get node and its connections
-      const graphData = await simulateGremlinTraversal(sourceCode, nodeId);
+      const graphData = await simulateGremlinTraversal(sourceCode, endpointId);
       
       if (!graphData) {
         return res.status(404).json({ 
-          error: "Node not found",
-          message: `Node ${nodeId} not found in source ${sourceCode}`
+          error: "Endpoint not found",
+          message: `Endpoint ${endpointId} not found in source ${sourceCode}`
         });
       }
       
@@ -1557,13 +1557,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 }
 
 // Simulate Gremlin traversal for visualization
-async function simulateGremlinTraversal(sourceCode: string, nodeId: string) {
-  // Generate realistic graph data based on source and node ID
+async function simulateGremlinTraversal(sourceCode: string, endpointId: string) {
+  // Generate realistic graph data based on source and endpoint ID
   const centerNode = {
-    id: nodeId,
-    label: `${sourceCode}_${nodeId}`,
+    id: endpointId,
+    label: `${sourceCode}_${endpointId}`,
     properties: {
-      name: `Node_${nodeId}`,
+      name: `Endpoint_${endpointId}`,
       type: getNodeTypeBySource(sourceCode),
       created: Date.now() - 86400000,
       status: "active"
@@ -1574,7 +1574,7 @@ async function simulateGremlinTraversal(sourceCode: string, nodeId: string) {
 
   // Generate connected nodes (level up - parents)
   const upNodes = Array.from({ length: Math.floor(Math.random() * 4) + 1 }, (_, i) => ({
-    id: `${nodeId}_parent_${i + 1}`,
+    id: `${endpointId}_parent_${i + 1}`,
     label: `${sourceCode}_parent_${i + 1}`,
     properties: {
       name: `Parent_${i + 1}`,
@@ -1588,7 +1588,7 @@ async function simulateGremlinTraversal(sourceCode: string, nodeId: string) {
 
   // Generate connected nodes (level down - children)
   const downNodes = Array.from({ length: Math.floor(Math.random() * 5) + 2 }, (_, i) => ({
-    id: `${nodeId}_child_${i + 1}`,
+    id: `${endpointId}_child_${i + 1}`,
     label: `${sourceCode}_child_${i + 1}`,
     properties: {
       name: `Child_${i + 1}`,
@@ -1603,15 +1603,15 @@ async function simulateGremlinTraversal(sourceCode: string, nodeId: string) {
   // Generate edges
   const edges = [
     ...upNodes.map(node => ({
-      id: `edge_${node.id}_to_${nodeId}`,
+      id: `edge_${node.id}_to_${endpointId}`,
       source: node.id,
-      target: nodeId,
+      target: endpointId,
       label: "parent_of",
       properties: { weight: 1.0 }
     })),
     ...downNodes.map(node => ({
-      id: `edge_${nodeId}_to_${node.id}`,
-      source: nodeId,
+      id: `edge_${endpointId}_to_${node.id}`,
+      source: endpointId,
       target: node.id,
       label: "child_of",
       properties: { weight: 1.0 }
