@@ -27,6 +27,7 @@ Preferred communication style: Simple, everyday language.
 ### Data Storage Solutions
 - **Hybrid Storage Architecture**: JanusGraph for read-only data queries and relationships, combined with in-memory storage for application data.
 - **JanusGraph**: Used for node queries, relationships, and similarity analysis, with real or simulation modes and automatic fallback. Supports Gremlin queries and GraphQL integration.
+- **JanusGraph Property Naming**: Property names are case-sensitive. Use constants from `JANUSGRAPH_PROPERTIES` in `server/services/janusgraph.ts` when building Gremlin queries to ensure correct property names (e.g., `PRIMARY_ID` = 'nodeId', not 'nodeid' or 'endpointId').
 - **Memory Storage**: Stores chat messages (never in JanusGraph), integration dashboard data, sources, transactions, and bulletins.
 - **ORM**: Drizzle ORM available for PostgreSQL integration.
 - **Session Storage**: In-memory session management.

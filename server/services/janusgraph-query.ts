@@ -1,4 +1,4 @@
-import { janusGraphService } from './janusgraph.js';
+import { janusGraphService, JANUSGRAPH_PROPERTIES } from './janusgraph.js';
 
 /**
  * JanusGraph Query Service
@@ -25,11 +25,13 @@ export class JanusGraphQueryService {
 
   /**
    * Get node relationships and connections
+   * Uses the correct case-sensitive property name from JANUSGRAPH_PROPERTIES
    */
   async getNodeRelationships(nodeId: string, depth: number = 2): Promise<any> {
     try {
+      const primaryIdProp = JANUSGRAPH_PROPERTIES.PRIMARY_ID;
       const result = await janusGraphService.executeQuery({
-        query: `g.V('${nodeId}').repeat(__.both().simplePath()).times(${depth}).path()`
+        query: `g.V().has('${primaryIdProp}', '${nodeId}').repeat(__.both().simplePath()).times(${depth}).path()`
       });
       
       return result.data || [];

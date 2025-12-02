@@ -1,4 +1,4 @@
-import { janusGraphService } from "./janusgraph";
+import { janusGraphService, JANUSGRAPH_PROPERTIES } from "./janusgraph";
 import type { IStorage } from "../storage";
 
 export interface JanusGraphSimilarity {
@@ -29,14 +29,16 @@ export class JanusGraphSimilarityService {
   async findSimilarNodesByStructure(nodeId: string, maxHops: number = 2): Promise<JanusGraphSimilarity[]> {
     try {
       // Gremlin query to find nodes with similar connection patterns
+      // Use JANUSGRAPH_PROPERTIES.PRIMARY_ID for case-sensitive property matching
+      const primaryIdProp = JANUSGRAPH_PROPERTIES.PRIMARY_ID;
       const query = `
-        g.V().has('nodeId', '${nodeId}').as('target')
+        g.V().has('${primaryIdProp}', '${nodeId}').as('target')
          .both().aggregate('targetNeighbors')
          .V().where(neq('target'))
          .local(both().aggregate('candidateNeighbors'))
          .where('candidateNeighbors', intersect('targetNeighbors'))
          .project('nodeId', 'sharedConnections', 'totalConnections', 'properties')
-         .by(values('nodeId'))
+         .by(values('${primaryIdProp}'))
          .by(local(both().where(within('targetNeighbors')).count()))
          .by(local(both().count()))
          .by(valueMap())
@@ -72,13 +74,14 @@ export class JanusGraphSimilarityService {
   async findSimilarNodesByProperties(nodeProperties: any): Promise<JanusGraphSimilarity[]> {
     try {
       const { type, class: nodeClass, functionName } = nodeProperties;
+      const { PRIMARY_ID, TYPE, NODE_CLASS, FUNCTION_NAME } = JANUSGRAPH_PROPERTIES;
       
       let query = `g.V()`;
       const conditions = [];
 
-      if (type) conditions.push(`has('type', '${type}')`);
-      if (nodeClass) conditions.push(`has('class', '${nodeClass}')`);
-      if (functionName) conditions.push(`has('functionName', textContains('${functionName}'))`);
+      if (type) conditions.push(`has('${TYPE}', '${type}')`);
+      if (nodeClass) conditions.push(`has('${NODE_CLASS}', '${nodeClass}')`);
+      if (functionName) conditions.push(`has('${FUNCTION_NAME}', textContains('${functionName}'))`);
 
       if (conditions.length > 0) {
         query += `.${conditions.join('.')}`;
@@ -86,10 +89,10 @@ export class JanusGraphSimilarityService {
 
       query += `
         .project('nodeId', 'type', 'class', 'functionName', 'connections', 'properties')
-        .by(values('nodeId'))
-        .by(values('type'))
-        .by(values('class'))
-        .by(values('functionName'))
+        .by(values('${PRIMARY_ID}'))
+        .by(values('${TYPE}'))
+        .by(values('${NODE_CLASS}'))
+        .by(values('${FUNCTION_NAME}'))
         .by(local(both().count()))
         .by(valueMap())
         .limit(50)
@@ -122,13 +125,15 @@ export class JanusGraphSimilarityService {
   async performGraphImpactAssessment(nodeId: string): Promise<JanusGraphImpactAssessment> {
     try {
       // Query for direct and indirect connections
+      const primaryIdProp = JANUSGRAPH_PROPERTIES.PRIMARY_ID;
+      const systemProp = JANUSGRAPH_PROPERTIES.SYSTEM;
       const connectionsQuery = `
-        g.V().has('nodeId', '${nodeId}').as('target')
+        g.V().has('${primaryIdProp}', '${nodeId}').as('target')
          .project('direct', 'indirect', 'criticalPaths', 'systems')
          .by(local(both().count()))
          .by(local(both().both().dedup().count()))
          .by(local(both().hasLabel('CRITICAL').path().limit(10)))
-         .by(local(both().both().values('system').dedup().fold()))
+         .by(local(both().both().values('${systemProp}').dedup().fold()))
       `;
 
       const result = await janusGraphService.executeQuery({ query: connectionsQuery });
@@ -162,17 +167,18 @@ export class JanusGraphSimilarityService {
    */
   async findDependentNodes(nodeId: string, maxDepth: number = 3): Promise<any[]> {
     try {
+      const { PRIMARY_ID, TYPE, SYSTEM } = JANUSGRAPH_PROPERTIES;
       const query = `
-        g.V().has('nodeId', '${nodeId}')
+        g.V().has('${PRIMARY_ID}', '${nodeId}')
          .repeat(out().simplePath())
          .times(${maxDepth})
          .emit()
          .project('nodeId', 'distance', 'path', 'type', 'system')
-         .by(values('nodeId'))
+         .by(values('${PRIMARY_ID}'))
          .by(loops())
-         .by(path().by(values('nodeId')))
-         .by(values('type'))
-         .by(values('system'))
+         .by(path().by(values('${PRIMARY_ID}')))
+         .by(values('${TYPE}'))
+         .by(values('${SYSTEM}'))
          .order().by(select('distance'))
       `;
 
@@ -225,11 +231,14 @@ export class JanusGraphSimilarityService {
    * Simple string similarity using Jaccard coefficient
    */
   private stringSimilarity(str1: string, str2: string): number {
-    const set1 = new Set(str1.toLowerCase().split(''));
-    const set2 = new Set(str2.toLowerCase().split(''));
+    const arr1 = str1.toLowerCase().split('');
+    const arr2 = str2.toLowerCase().split('');
+    const set1 = new Set(arr1);
+    const set2 = new Set(arr2);
     
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
-    const union = new Set([...set1, ...set2]);
+    const intersectionArr = arr1.filter(x => set2.has(x));
+    const intersection = new Set(intersectionArr);
+    const union = new Set([...arr1, ...arr2]);
     
     return intersection.size / union.size;
   }

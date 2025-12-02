@@ -4,6 +4,24 @@ const require = createRequire(import.meta.url);
 // @ts-ignore - gremlin types may not be fully compatible
 const gremlin = require('gremlin');
 
+/**
+ * JanusGraph property name constants
+ * Use these constants when building Gremlin queries to ensure case-sensitive property names are correct
+ * The actual JanusGraph schema uses 'nodeId' as the primary identifier property
+ */
+export const JANUSGRAPH_PROPERTIES = {
+  PRIMARY_ID: 'nodeId',
+  QNAME: 'qname',
+  TYPE: 'type',
+  SOURCE_CODE: 'sourceCode',
+  TQNAME: 'tqName',
+  PRIORITY: 'priority',
+  CATEGORY: 'category',
+  FUNCTION_NAME: 'functionName',
+  NODE_CLASS: 'class',
+  SYSTEM: 'system'
+} as const;
+
 export interface JanusGraphQuery {
   query: string;
   bindings?: Record<string, any>;
