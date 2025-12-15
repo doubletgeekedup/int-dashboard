@@ -17,7 +17,6 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
   const [endpointId, setEndpointId] = useState("");
   const [additionalProperties, setAdditionalProperties] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isExecuting, setIsExecuting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,55 +74,6 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
     }
   };
 
-  const handleExecuteEndpoint = async () => {
-    if (!endpointId.trim()) {
-      toast({
-        title: "Missing Endpoint ID",
-        description: "Please enter an Endpoint ID",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsExecuting(true);
-
-    try {
-      const response = await fetch("/api/impact-assessment/execute-endpoint", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          endpointId: endpointId.trim(),
-          additionalProperties: additionalProperties.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to execute endpoint");
-      }
-
-      const data = await response.json();
-
-      toast({
-        title: "Endpoint Executed",
-        description: `Successfully executed endpoint ${endpointId}`,
-      });
-
-      // Keep the modal open so user can see results
-    } catch (error: any) {
-      console.error("Execute endpoint error:", error);
-      toast({
-        title: "Execution Failed",
-        description: error.message || "Failed to execute external endpoint. Please check the endpoint URL format.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExecuting(false);
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -155,16 +105,16 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
             <Label htmlFor="additional-properties">Additional Properties</Label>
             <Textarea
               id="additional-properties"
-              placeholder={`Enter additional properties as comma-delimited values (optional)\n\nExample:\nprop1, prop2, prop3`}
+              placeholder={`Enter additional properties as JSON or key=value pairs (optional)\n\nExample:\n{\n  "environment": "production",\n  "includeMetrics": true\n}`}
               value={additionalProperties}
               onChange={(e) => setAdditionalProperties(e.target.value)}
-              disabled={isLoading || isExecuting}
-              rows={4}
+              disabled={isLoading}
+              rows={5}
               className="font-mono text-sm"
               data-testid="textarea-additional-properties"
             />
             <p className="text-xs text-muted-foreground">
-              Optional: Comma-delimited properties (spaces will be trimmed). Used in external endpoint format: /api/v1/&lt;endpointId&gt;/&lt;properties&gt;
+              Optional: Include additional properties to filter or configure the export
             </p>
           </div>
 
@@ -180,33 +130,14 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isLoading || isExecuting}
+              disabled={isLoading}
               data-testid="button-cancel"
             >
               Cancel
             </Button>
             <Button
-              type="button"
-              variant="outline"
-              onClick={handleExecuteEndpoint}
-              disabled={isLoading || isExecuting || !endpointId.trim()}
-              data-testid="button-execute-endpoint"
-            >
-              {isExecuting ? (
-                <>
-                  <div className="animate-spin h-4 w-4 mr-2 border border-current border-t-transparent rounded-full" />
-                  Executing...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Execute Endpoint
-                </>
-              )}
-            </Button>
-            <Button
               type="submit"
-              disabled={isLoading || isExecuting || !endpointId.trim()}
+              disabled={isLoading || !endpointId.trim()}
               className="bg-brand-accent hover:bg-brand-accent/90"
               data-testid="button-export"
             >

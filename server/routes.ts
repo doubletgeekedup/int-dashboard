@@ -1487,13 +1487,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           endpointId
         };
 
-        // Add additional properties if provided (comma-delimited)
+        // Add additional properties if provided
         if (additionalProperties && additionalProperties.trim()) {
-          // Split by comma and trim each property
-          requestBody.properties = additionalProperties
-            .split(',')
-            .map((prop: string) => prop.trim())
-            .filter((prop: string) => prop.length > 0);
+          try {
+            // Try to parse as JSON first
+            requestBody.properties = JSON.parse(additionalProperties);
+          } catch {
+            // If not JSON, treat as raw string
+            requestBody.properties = additionalProperties;
+          }
         }
 
         // Add source code if provided
@@ -1545,109 +1547,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         error: "Internal server error",
         message: "Failed to process export logs request"
-      });
-    }
-  });
-
-  // Execute External Endpoint - format: /api/v1/<endpointId>/<additionalProperties>
-  app.post("/api/impact-assessment/execute-endpoint", async (req, res) => {
-    try {
-      const { endpointId, additionalProperties } = req.body;
-
-      if (!endpointId) {
-        return res.status(400).json({
-          error: "Missing required field",
-          message: "endpointId is required"
-        });
-      }
-
-      // Construct the URL with format: /api/v1/<endpointId>/<additionalProperties>
-      let externalUrl = `/api/v1/${encodeURIComponent(endpointId)}`;
-      
-      if (additionalProperties && additionalProperties.trim()) {
-        // Trim spaces and replace commas with slashes for URL format
-        const cleanProps = additionalProperties
-          .split(',')
-          .map((prop: string) => prop.trim())
-          .filter((prop: string) => prop.length > 0)
-          .map((prop: string) => encodeURIComponent(prop))
-          .join('/');
-        
-        if (cleanProps) {
-          externalUrl += `/${cleanProps}`;
-        }
-      }
-
-      // Note: This is a relative URL. In production, you'd need to construct the full URL
-      // For now, we're assuming the endpoint is called from the client or backend knows the base URL
-      console.log(`Executing external endpoint with URL format: ${externalUrl}`);
-
-      // Try to fetch from the relative URL
-      // In a real scenario, you'd need to construct a full URL with a configured base
-      const fullUrl = `http://wydny.com/api/v1/${encodeURIComponent(endpointId)}${
-        additionalProperties && additionalProperties.trim()
-          ? '/' + additionalProperties
-              .split(',')
-              .map((prop: string) => encodeURIComponent(prop.trim()))
-              .filter((prop: string) => prop.length > 0)
-              .join('/')
-          : ''
-      }`;
-
-      console.log(`Executing endpoint: ${fullUrl}`);
-
-      try {
-        const externalResponse = await fetch(fullUrl, {
-          method: "GET",
-          headers: {
-            "Accept": "application/json",
-          },
-        });
-
-        if (!externalResponse.ok) {
-          const errorData = await externalResponse.text();
-          console.error(`External endpoint error: ${externalResponse.status} - ${errorData}`);
-          return res.status(502).json({
-            error: "External service error",
-            message: `Failed to execute endpoint: ${externalResponse.statusText}`,
-            statusCode: externalResponse.status,
-            url: fullUrl
-          });
-        }
-
-        let responseData;
-        try {
-          responseData = await externalResponse.json();
-        } catch {
-          responseData = await externalResponse.text();
-        }
-
-        console.log(`Successfully executed endpoint: ${endpointId}`);
-
-        res.json({
-          success: true,
-          message: "Endpoint executed successfully",
-          endpointId,
-          url: fullUrl,
-          data: responseData,
-          timestamp: new Date().toISOString()
-        });
-
-      } catch (externalError: any) {
-        console.error("Error executing external endpoint:", externalError);
-        return res.status(502).json({
-          error: "External API error",
-          message: externalError.message || "Failed to execute external endpoint",
-          url: fullUrl,
-          hint: "Check that the endpoint URL is accessible and properly formatted"
-        });
-      }
-
-    } catch (error) {
-      console.error("Error in execute endpoint handler:", error);
-      res.status(500).json({
-        error: "Internal server error",
-        message: "Failed to execute external endpoint request"
       });
     }
   });
