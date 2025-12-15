@@ -86,6 +86,9 @@ interface ExternalConfig {
     TeamCenter?: string;
     SCR?: string;
   };
+  impact_assessment_export?: {
+    url: string;
+  };
   ssl_insecure?: boolean;
 }
 

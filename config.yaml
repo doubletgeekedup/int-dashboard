@@ -73,6 +73,9 @@ external:
     PAExchange: ""  # Set to your PAExchange ASOT Work List API endpoint  
     TeamCenter: ""  # Set to your TeamCenter ASOT Work List API endpoint
     SCR: ""  # Set to your SCR ASOT Work List API endpoint
+  # Impact Assessment Export Logs Endpoint
+  impact_assessment_export:
+    url: ""  # Set to your impact assessment export logs API endpoint, e.g., "https://your-api.com/impact/export"
   ssl_insecure: true  # Disable SSL certificate verification for external APIs
 
 # Log URLs Configuration - External logging system URLs for each page

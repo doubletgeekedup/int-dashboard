@@ -1457,6 +1457,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Impact Assessment Export Logs endpoint
+  app.post("/api/impact-assessment/export-logs", async (req, res) => {
+    try {
+      const { endpointId, additionalProperties, sourceCode } = req.body;
+
+      if (!endpointId) {
+        return res.status(400).json({
+          error: "Missing required field",
+          message: "endpointId is required"
+        });
+      }
+
+      const externalConfig = configManager.getExternalConfig();
+      const exportEndpointUrl = externalConfig.impact_assessment_export?.url;
+
+      if (!exportEndpointUrl || !exportEndpointUrl.trim()) {
+        return res.status(503).json({
+          error: "External endpoint not configured",
+          message: "Impact assessment export endpoint is not configured in config.yaml",
+          hint: "Please configure 'external.impact_assessment_export.url' in config.yaml"
+        });
+      }
+
+      console.log(`Exporting impact assessment logs for endpoint: ${endpointId}`);
+
+      try {
+        const requestBody: any = {
+          endpointId
+        };
+
+        // Add additional properties if provided
+        if (additionalProperties && additionalProperties.trim()) {
+          try {
+            // Try to parse as JSON first
+            requestBody.properties = JSON.parse(additionalProperties);
+          } catch {
+            // If not JSON, treat as raw string
+            requestBody.properties = additionalProperties;
+          }
+        }
+
+        // Add source code if provided
+        if (sourceCode) {
+          requestBody.sourceCode = sourceCode;
+        }
+
+        const externalResponse = await fetch(exportEndpointUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!externalResponse.ok) {
+          const errorData = await externalResponse.text();
+          console.error(`External API error: ${externalResponse.status} - ${errorData}`);
+          return res.status(502).json({
+            error: "External service error",
+            message: `Failed to export logs: ${externalResponse.statusText}`,
+            statusCode: externalResponse.status
+          });
+        }
+
+        const responseData = await externalResponse.json();
+
+        console.log(`Successfully exported logs for endpoint: ${endpointId}`);
+
+        res.json({
+          success: true,
+          message: "Logs exported successfully",
+          endpointId,
+          data: responseData,
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (externalError: any) {
+        console.error("Error calling external export API:", externalError);
+        return res.status(502).json({
+          error: "External API error",
+          message: externalError.message || "Failed to call external export endpoint",
+          hint: `Check that the endpoint URL is correct: ${exportEndpointUrl}`
+        });
+      }
+
+    } catch (error) {
+      console.error("Error in export logs endpoint:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to process export logs request"
+      });
+    }
+  });
+
   // Gremlin visualizer endpoint - search by endpoint ID
   app.get("/api/gremlin/visualize/:sourceCode/:endpointId", async (req, res) => {
     try {

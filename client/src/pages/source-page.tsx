@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { LLMChat } from "@/components/chat/llm-chat";
 import { PerformanceChart } from "@/components/charts/performance-chart";
 import { DataTable } from "@/components/data/data-table";
+import { ExportLogsModal } from "@/components/modals/export-logs-modal";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -88,6 +89,9 @@ export default function SourcePage() {
   // Create WorkItem dialog state
   const [isCreateWorkItemOpen, setIsCreateWorkItemOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>("");
+  
+  // Export Logs modal state
+  const [isExportLogsOpen, setIsExportLogsOpen] = useState(false);
   
   // Pagination and search states
   const [workItemsPage, setWorkItemsPage] = useState(1);
@@ -952,11 +956,27 @@ export default function SourcePage() {
                   <Download className="w-4 h-4 mr-2" />
                   Export Report
                 </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => setIsExportLogsOpen(true)}
+                  data-testid="button-export-logs"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Logs
+                </Button>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Export Logs Modal */}
+      <ExportLogsModal
+        open={isExportLogsOpen}
+        onOpenChange={setIsExportLogsOpen}
+        sourceCode={code}
+      />
     </div>
   );
 }
