@@ -138,7 +138,7 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
             <Button
               type="submit"
               disabled={isLoading || !endpointId.trim()}
-              className="bg-brand-accent hover:bg-brand-accent/90"
+              className="bg-amber-600 hover:bg-amber-700 text-white"
               data-testid="button-export"
             >
               {isLoading ? (
