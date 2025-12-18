@@ -61,11 +61,22 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
         throw new Error(error.message || "Failed to export logs");
       }
 
-      const data = await response.json();
+      // Get the CSV file blob
+      const blob = await response.blob();
+
+      // Create a download link and trigger download
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const downloadLink = document.createElement("a");
+      downloadLink.href = downloadUrl;
+      downloadLink.download = `export-logs-${endpointId}-${new Date().getTime()}.csv`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      window.URL.revokeObjectURL(downloadUrl);
 
       toast({
         title: "Export Successful",
-        description: `Logs exported for endpoint ${endpointId}`,
+        description: `CSV file downloaded for endpoint ${endpointId}`,
       });
 
       // Reset form and close modal

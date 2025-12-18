@@ -1506,17 +1506,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        const responseData = await externalResponse.json();
+        // Get the CSV file as a buffer
+        const arrayBuffer = await externalResponse.arrayBuffer();
+        const fileBuffer = Buffer.from(arrayBuffer);
 
         console.log(`Successfully exported logs for endpoint: ${endpointId}`);
 
-        res.json({
-          success: true,
-          message: "Logs exported successfully",
-          endpointId,
-          data: responseData,
-          timestamp: new Date().toISOString()
-        });
+        // Set headers for file download
+        res.set("Content-Type", "text/csv");
+        res.set("Content-Disposition", `attachment; filename="export-logs-${endpointId}.csv"`);
+        
+        // Send the CSV file
+        res.send(fileBuffer);
 
       } catch (externalError: any) {
         console.error("Error calling external export API:", externalError);
