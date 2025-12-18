@@ -45,8 +45,9 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
     try {
       // URL encode the comma-delimited properties with %2C between them
       const encodedProperties = additionalProperties.trim().replace(/,/g, "%2C");
+      const encodedEndpointId = encodeURIComponent(endpointId.trim());
       
-      const url = `/api/impact-assessment/export-logs?endpointId=${encodeURIComponent(endpointId.trim())}&additionalProperties=${encodedProperties}`;
+      const url = `/api/impact-assessment/export-logs/${encodedEndpointId}/${encodedProperties}`;
       
       const response = await fetch(url, {
         method: "GET",

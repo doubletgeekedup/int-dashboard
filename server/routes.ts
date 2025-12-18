@@ -1458,9 +1458,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Impact Assessment Export Logs endpoint
-  app.get("/api/impact-assessment/export-logs", async (req, res) => {
+  app.get("/api/impact-assessment/export-logs/:endpointId/:additionalProperties", async (req, res) => {
     try {
-      const { endpointId, additionalProperties } = req.query;
+      const { endpointId, additionalProperties } = req.params;
 
       if (!endpointId) {
         return res.status(400).json({
