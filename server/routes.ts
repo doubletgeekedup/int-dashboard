@@ -1458,21 +1458,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Impact Assessment Export Logs endpoint
-  app.post("/api/impact-assessment/export-logs", async (req, res) => {
+  app.get("/api/impact-assessment/export-logs", async (req, res) => {
     try {
-      const { endpointId, additionalProperties, sourceCode } = req.body;
+      const { endpointId, additionalProperties } = req.query;
 
       if (!endpointId) {
         return res.status(400).json({
-          error: "Missing required field",
+          error: "Missing required parameter",
           message: "endpointId is required"
         });
       }
 
-      const externalConfig = configManager.getExternalConfig();
-      const exportEndpointUrl = externalConfig.impact_assessment_export?.url;
+      if (!additionalProperties) {
+        return res.status(400).json({
+          error: "Missing required parameter",
+          message: "additionalProperties is required"
+        });
+      }
 
-      if (!exportEndpointUrl || !exportEndpointUrl.trim()) {
+      const externalConfig = configManager.getExternalConfig();
+      const baseExportUrl = externalConfig.impact_assessment_export?.url;
+
+      if (!baseExportUrl || !baseExportUrl.trim()) {
         return res.status(503).json({
           error: "External endpoint not configured",
           message: "Impact assessment export endpoint is not configured in config.yaml",
@@ -1480,36 +1487,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log(`Exporting impact assessment logs for endpoint: ${endpointId}`);
+      // Construct the URL with endpointId and comma-delimited additionalProperties
+      // additionalProperties should already be URL-encoded with %2C for commas
+      const exportUrl = `${baseExportUrl}/${endpointId}/${additionalProperties}`;
+
+      console.log(`Exporting impact assessment logs from: ${exportUrl}`);
 
       try {
-        const requestBody: any = {
-          endpointId
-        };
-
-        // Add additional properties if provided
-        if (additionalProperties && additionalProperties.trim()) {
-          try {
-            // Try to parse as JSON first
-            requestBody.properties = JSON.parse(additionalProperties);
-          } catch {
-            // If not JSON, treat as raw string
-            requestBody.properties = additionalProperties;
-          }
-        }
-
-        // Add source code if provided
-        if (sourceCode) {
-          requestBody.sourceCode = sourceCode;
-        }
-
-        const externalResponse = await fetch(exportEndpointUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        });
+        const externalResponse = await fetch(exportUrl);
 
         if (!externalResponse.ok) {
           const errorData = await externalResponse.text();
@@ -1538,7 +1523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(502).json({
           error: "External API error",
           message: externalError.message || "Failed to call external export endpoint",
-          hint: `Check that the endpoint URL is correct: ${exportEndpointUrl}`
+          hint: `Check that the endpoint URL is correct: ${baseExportUrl}`
         });
       }
 

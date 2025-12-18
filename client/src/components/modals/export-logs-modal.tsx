@@ -31,19 +31,28 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
       return;
     }
 
+    if (!additionalProperties.trim()) {
+      toast({
+        title: "Missing Additional Properties",
+        description: "Please enter comma-delimited properties",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/impact-assessment/export-logs", {
-        method: "POST",
+      // URL encode the comma-delimited properties with %2C between them
+      const encodedProperties = additionalProperties.trim().replace(/,/g, "%2C");
+      
+      const url = `/api/impact-assessment/export-logs?endpointId=${encodeURIComponent(endpointId.trim())}&additionalProperties=${encodedProperties}`;
+      
+      const response = await fetch(url, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          endpointId: endpointId.trim(),
-          additionalProperties: additionalProperties.trim(),
-          sourceCode,
-        }),
       });
 
       if (!response.ok) {
@@ -102,10 +111,10 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="additional-properties">Additional Properties</Label>
+            <Label htmlFor="additional-properties">Additional Properties *</Label>
             <Textarea
               id="additional-properties"
-              placeholder={`Enter additional properties as JSON or key=value pairs (optional)\n\nExample:\n{\n  "environment": "production",\n  "includeMetrics": true\n}`}
+              placeholder={`Enter comma-delimited properties (e.g., property1,property2,property3)\n\nExample:\nenvironment,includeMetrics,format`}
               value={additionalProperties}
               onChange={(e) => setAdditionalProperties(e.target.value)}
               disabled={isLoading}
@@ -114,7 +123,7 @@ export function ExportLogsModal({ open, onOpenChange, sourceCode }: ExportLogsMo
               data-testid="textarea-additional-properties"
             />
             <p className="text-xs text-muted-foreground">
-              Optional: Include additional properties to filter or configure the export
+              Required: Comma-delimited list of properties to include in the export
             </p>
           </div>
 
